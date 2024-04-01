@@ -10,11 +10,11 @@ Have a try at the level ~~τo βe ίncluded~~ in `Aerials` :
 
 ### Setup
 
-1. Download the whole project ;
+1. Download the whole project.
 
 2. Download `OPlusSans3-Regular.ttf` from [**ColorOS Official**](http://static01.coloros.com/www/public/img/topic7/font-opposans.zip) , and then put it into the `Reference` folder of the project.
 
-3. Open `game.project` in the root of the project, with `Defold Editor` **v1.7.0 or Upper** ;
+3. Open `game.project` in the root of the project, with `Defold Editor` **v1.7.0 or Upper**.
 
 4. Use the menu choice `Project -> Bundle` to build the Demo.
    
