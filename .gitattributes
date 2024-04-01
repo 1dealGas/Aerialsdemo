@@ -1,0 +1,27 @@
+*.script linguist-language=Lua
+*.render_script linguist-language=Lua
+AcArf2/src/p_singleton.h linguist-language=C++
+
+ext.manifest linguist-language=YAML
+*.script_api linguist-language=YAML
+*.appmanifest linguist-language=YAML
+
+*.go linguist-language=text proto
+*.font linguist-language=text proto
+*.atlas linguist-language=text proto
+*.render linguist-language=text proto
+*.gamepads linguist-language=text proto
+*.collection linguist-language=text proto
+*.input_binding linguist-language=text proto
+*.texture_profiles linguist-language=text proto
+
+game.project linguist-language=editor-config
+AcArf2/include/arf2_generated.h linguist-generated
+AcArf2/include/ease_constants.h linguist-generated
+AcArf2/include/flatbuffers/** linguist-vendored
+
+AcAudio/include/miniaudio.h linguist-vendored
+AcAudio/src/miniaudio.cpp linguist-vendored
+AcAudio/src/miniaudio.mm linguist-vendored
+
+AcClipboard/** linguist-vendored
