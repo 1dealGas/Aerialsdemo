@@ -1,0 +1,42 @@
+- name: AcUtil
+  type: table
+  members:
+
+  - name: StrToSha1
+    type: function
+    parameters:
+    - name: input
+      type: string
+    returns:
+    - name: output
+      type: string
+
+  - name: StrToSha256
+    type: function
+    parameters:
+    - name: input
+      type: string
+    returns:
+    - name: output
+      type: string
+
+  - name: StrToSha512
+    type: function
+    parameters:
+    - name: input
+      type: string
+    returns:
+    - name: output
+      type: string
+
+  - name: StrToMd5
+    type: function
+    parameters:
+    - name: input
+      type: string
+    returns:
+    - name: output
+      type: string
+
+  - name: DoHapticFeedback
+    type: function

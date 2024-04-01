@@ -1,0 +1,133 @@
+- name: Arf2
+  type: table
+  members:
+
+
+  - name: InitArf
+    type: function
+    parameters:
+    - name: buf
+      type: table
+    - name: is_auto
+      type: boolean
+    returns:
+    - name: before
+      type: number
+    - name: total_hints
+      type: number
+    - name: wgo_required
+      type: number
+    - name: hgo_required
+      type: number
+
+  - name: FinalArf
+    type: function
+
+
+  - name: UpdateArf
+    type: function
+    parameters:
+    - name: mstime
+      type: number
+    - name: table_wgo
+      type: table
+    - name: table_hgo
+      type: table
+    - name: table_agol
+      type: table
+    - name: table_agor
+      type: table
+    - name: table_wtint
+      type: table
+    - name: table_htint
+      type: table
+    - name: table_atint
+      type: table
+    returns:
+    - name: hint_lost
+      type: number
+    - name: wgo_used
+      type: number
+    - name: hgo_used
+      type: number
+    - name: ago_used
+      type: number
+
+
+  - name: SetIDelta
+    type: function
+    parameters:
+    - name: idelta
+      type: number
+
+  - name: JudgeArf
+    type: function
+    parameters:
+    - name: mstime
+      type: number
+    - name: table_touch
+      type: table
+    returns:
+    - name: hint_hit
+      type: number
+    - name: hint_early
+      type: number
+    - name: hint_late
+      type: number
+    - name: special_hint_judged
+      type: boolean
+
+
+  - name: SetXScale
+    type: function
+    parameters:
+    - name: xscale
+      type: number
+
+  - name: SetYScale
+    type: function
+    parameters:
+    - name: yscale
+      type: number
+
+  - name: SetXDelta
+    type: function
+    parameters:
+    - name: xdelta
+      type: number
+
+  - name: SetYDelta
+    type: function
+    parameters:
+    - name: ydelta
+      type: number
+
+  - name: SetRotDeg
+    type: function
+    parameters:
+    - name: rotdeg
+      type: number
+
+  - name: SetDaymode
+    type: function
+    parameters:
+    - name: is_daymode
+      type: boolean
+
+  - name: SetJudgeRange
+    type: function
+    parameters:
+    - name: range
+      type: number
+
+
+  - name: NewTable
+    type: function
+    parameters:
+    - name: narr
+      type: number
+    - name: nrec
+      type: number
+    returns:
+    - name: new_table
+      type: table

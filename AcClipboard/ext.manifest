@@ -1,0 +1,52 @@
+name: "clipboard"
+
+platforms:
+    x86-win32:
+        context:
+            flags: ["-Ofast", "-ffunction-sections", "-fdata-sections"]
+            linkFlags: ["-flto"]
+
+    x86_64-win32:
+        context:
+            flags: ["-Ofast", "-ffunction-sections", "-fdata-sections"]
+            linkFlags: ["-flto"]
+
+    x86_64-osx:
+        context:
+            frameworks: ["AppKit"]
+            flags: ["-O3", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    arm64-osx:
+        context:
+            frameworks: ["AppKit"]
+            flags: ["-O3", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    armv7-android:
+        context:
+            flags: ["-Ofast", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    arm64-android:
+        context:
+            flags: ["-Ofast", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    armv7-ios:
+        context:
+            frameworks: ["UIKit"]
+            flags: ["-O3", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    arm64-ios:
+        context:
+            frameworks: ["UIKit"]
+            flags: ["-O3", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
+
+    x86_64-ios:
+        context:
+            frameworks: ["UIKit"]
+            flags: ["-O3", "-ffunction-sections", "-fdata-sections", "-flto"]
+            linkFlags: ["-flto"]
