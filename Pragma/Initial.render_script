@@ -94,7 +94,7 @@ local EMPTY_SAVE = {
 	}
 }
 
-function CopyCredit() clipboard.copy( sys.load_resource("/Ar.License") ) end
+function CopyCredit() clipboard.copy( sys.load_resource("/Ar.license") ) end
 function ExportSave() clipboard.copy( B64.encode( sys.serialize(Save) ) ) end
 function ImportSave()
 	local OK, SaveStr = pcall( B64.decode, clipboard.paste() )
