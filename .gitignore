@@ -1,0 +1,16 @@
+/.internal
+/.vscode
+/.idea
+
+/build
+Thumbs.db
+.DS_Store
+
+debug.keystore
+debug.keystore.pass.txt
+manifest.private.der
+manifest.public.der
+
+LICENSE
+README.md
+OPlusSans3-Regular.ttf
