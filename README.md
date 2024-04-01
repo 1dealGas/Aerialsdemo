@@ -71,8 +71,8 @@ Aerials Demo
 
 - You may also copy the licenses into your clipboard:
   
-  1. Bundle, install and open the demo ;
+  1. Bundle, install and open the demo.
   
-  2. Tap the `Options ◎` button to expand the option panel ;
+  2. Tap the `Options ◎` button to expand the option panel.
   
   3. Tap the `Copy Credits To Clipboard` button.
