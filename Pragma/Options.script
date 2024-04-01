@@ -1,0 +1,616 @@
+go.property("current_canvas", msg.url())
+
+-- Function Caches
+--
+local hash = hash
+local go_set = go.set
+local msg_url = msg.url
+local msg_post = msg.post
+local math_floor = math.floor
+local string_format = string.format
+local label_set_text = label.set_text
+
+
+-- Local Variables
+--
+local Phase = 0   -- (0)NotLoaded (1)Hidden (2)Expanding (3)Expanded (4)Hidding
+local ButtonPressed = false
+local OptionsInsertIndex = 0
+
+local ShowFps, LastFps, LastFpsStr = false, 0, ""
+local FpsSamples, FpsSampleTick = Arf2.NewTable(30, 0), 0
+
+
+-- Constants
+--
+local Ar = hash("Ar")
+local TINTW, COLOR, COLORW = hash("tint.w"), hash("color"), hash("color.w")
+local SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = hash("ar_show_options"), hash("ar_hide_options"), hash("ar_process_gui")
+local ENABLE, DISABLE, AR_FINAL = hash("enable"), hash("disable"), hash("ar_final")
+
+local FMT_MS, FMT_FPS = "%d ms", "%d fps"
+local STR_SHOW, STR_HIDE = "Options  ◎", "Apply  ○"
+local SAVE_IMPORTED, SAVE_IMPORT_FAILED = "Save Imported. Previous Save is in Your Clipboard.", "Failed to Import Save."
+local SAVE_EXPORTED, CREDIT_COPIED = "Save Exported.", "Credit Copied."
+
+local TEXT_WHITE = vmath.vector4(1, 1, 1, 0.937)
+local TEXT_BLUE = vmath.vector4(0, 0.48828125, 0.6328125, 0.937)
+
+
+-- Atlas Caches
+--
+local Direct, DirectPressed = hash("OptionDirect"), hash("OptionDirectPressed")
+local Stream, StreamPressed = hash("OptionStream"), hash("OptionStreamPressed")
+local Wireless, WirelessPressed = hash("OptionWireless"), hash("OptionWirelessPressed")
+local Offset, Decrease, Increase = hash("OptionOffset"), hash("OptionOffsetDecrease"), hash("OptionOffsetIncrease")
+local Haptic, HapticOn, HapticPressed = hash("OptionHaptic"), hash("OptionHapticOn"), hash("OptionHapticPressed")
+local HitSound, HitSoundOn, HitSoundPressed = hash("OptionHitSound"), hash("OptionHitSoundOn"), hash("OptionHitSoundPressed")
+local Import, ImportPressed = hash("OptionImport"), hash("OptionImportPressed")
+local Export, ExportPressed = hash("OptionExport"), hash("OptionExportPressed")
+local Credit, CreditPressed = hash("OptionCredit"), hash("OptionCreditPressed")
+
+
+-- Component Caches
+--
+local Exit
+local ShowHide = msg_url(Ar, "/Texts", "SouthEast")
+local OffsetTypeButton, AudioLatencyButton, AudioLatencyText, InputDeltaButton, InputDeltaText
+local ImportButton, ExportButton, CreditButton
+local HapticToggle, HitSoundToggle
+local Panel, Titles, Message
+
+
+-- Help Functions: Button Picker
+--
+local function ExpandedOnWhich()
+	local x, y = CurrentGuiX, CurrentGuiY
+
+	if x >= 1655 and x <= 1800 and y >= 1007 and y <= 1080 then
+		return 0                                                  -- 0.Exit
+	elseif x >= 1655 and x <= 1800 and y >= 0 and y <= 73 then
+		return 11                                                 -- 11.HideOptions
+
+	elseif y >= 501.5 and y <= 686.5 then
+		if x >= 1222.5 and x <= 1372.5 then
+			return 1                                              -- 1.OffsetType
+		elseif x >= 1477.5 and x <= 1593.5 then
+			if y >= 603 and y <= 686.5 then
+				return 2                                          -- 2.DecreaseAudioLatency
+			elseif y >= 501.5 and y <= 585 then
+				return 4                                          -- 4.DecreaseInputDelta
+			end
+		elseif x >= 1593.5 and x <= 1709.5 then
+			if y >= 603 and y <= 686.5 then
+				return 3                                          -- 3.IncreaseAudioLatency
+			elseif y >= 501.5 and y <= 585 then
+				return 5                                          -- 5.IncreaseInputDelta
+			end
+		else
+			return nil
+		end
+
+	elseif y >= 325.5 and y <= 415.5 then
+		if x >= 1222.5 and x <= 1457 then
+			return 6                                              -- 6.HapticFeedback
+		elseif x >= 1475 and x <= 1709.5 then
+			return 7                                              -- 7.HitSound
+		else
+			return nil
+		end
+
+	elseif y >= 104.5 and y <= 239.5 then
+		if x >= 1222.5 and x <= 1372.5 then
+			return 8                                              -- 8.ImportSave
+		elseif x >= 1391 and x <= 1541 then
+			return 9                                              -- 9.ExportSave
+		elseif x >= 1559.5 and x <= 1709.5 then
+			return 10                                             -- 10.CopyCredit
+		else
+			return nil
+		end
+	else
+		return nil
+	end
+end
+
+
+-- Helper Functions: Expand, Hide, PreFinal
+--
+local function Expand(self)
+	Phase = 2
+	local SELF = msg_url().path
+	local PB, EZ1, EZ2 = go.PLAYBACK_ONCE_FORWARD, go.EASING_OUTCUBIC, go.EASING_LINEAR
+
+	-- Animatings
+	--
+	local go_animate = go.animate
+	go_animate(SELF, "position.x", PB, 1125, EZ1, 0.27, 0, function() Phase=3 ButtonPressed=nil ShowFps=true end)
+	go_animate(Panel, "size.x", PB, 1276, EZ1, 0.27)
+	go_animate(Panel, TINTW, PB, 0.937, EZ1, 0.27)
+
+	go_animate(Titles, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(ImportButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(ExportButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(CreditButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(HapticToggle, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(HitSoundToggle, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(AudioLatencyButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(InputDeltaButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+	go_animate(OffsetTypeButton, TINTW, PB, 1, EZ2, 0.1, 0.1)
+
+	go_animate(Message, COLORW, PB, 0.637, EZ2, 0.1, 0.1)
+	go_animate(AudioLatencyText, COLORW, PB, 0.937, EZ2, 0.1, 0.1)
+	go_animate(InputDeltaText, COLORW, PB, 0.937, EZ2, 0.1, 0.1)
+	go_animate(Exit, COLORW, PB, 0.937, EZ2, 0.1, 0.1)
+
+	-- Posts
+	--
+	msg_post(SELF, ENABLE)
+	label_set_text(ShowHide, STR_HIDE)
+	go_set(ShowHide, COLOR, TEXT_WHITE)
+	msg_post(self.current_canvas, SHOW_OPTIONS)
+end
+
+local function Hide(self)
+	Phase = 4
+	ShowFps = false
+	local SELF = msg_url().path
+	local PB, EZ1, EZ2 = go.PLAYBACK_ONCE_FORWARD, go.EASING_INQUAD, go.EASING_LINEAR
+
+	-- Animatings
+	--
+	local go_animate = go.animate
+	go_animate(SELF, "position.x", PB, 1781.5, EZ1, 0.27, 0, function() Phase=1 ButtonPressed=false msg_post(SELF, DISABLE) end)
+	go_animate(Panel, "size.x", PB, 0, EZ1, 0.27)
+	go_animate(Panel, TINTW, PB, 0, EZ1, 0.27)
+
+	go_animate(Titles, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(ImportButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(ExportButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(CreditButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(HapticToggle, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(HitSoundToggle, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(AudioLatencyButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(InputDeltaButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(OffsetTypeButton, TINTW, PB, 0, EZ2, 0.1)
+
+	go_animate(Message, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(AudioLatencyText, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(InputDeltaText, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(Exit, COLORW, PB, 0, EZ2, 0.1)
+
+	-- Posts
+	--
+	label_set_text(ShowHide, STR_SHOW)
+	go_set(ShowHide, COLOR, TEXT_WHITE)
+	msg_post(self.current_canvas, HIDE_OPTIONS)
+end
+
+local function PreFinalStep2(SELF)
+	local go_animate = go.animate
+	local PB, EZ1, EZ2 = go.PLAYBACK_ONCE_FORWARD, go.EASING_INQUAD, go.EASING_LINEAR
+
+	go_animate(SELF, "position.x", PB, 1781.5, EZ1, 0.27, 0, function() go.delete(SELF) end)
+	go_animate(Panel, "size.x", PB, 0, EZ1, 0.27)
+	go_animate(Panel, TINTW, PB, 0, EZ1, 0.27)
+
+	go_animate(Titles, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(ImportButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(ExportButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(CreditButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(HapticToggle, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(HitSoundToggle, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(AudioLatencyButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(InputDeltaButton, TINTW, PB, 0, EZ2, 0.1)
+	go_animate(OffsetTypeButton, TINTW, PB, 0, EZ2, 0.1)
+
+	go_animate(Message, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(AudioLatencyText, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(InputDeltaText, COLORW, PB, 0, EZ2, 0.1)
+	go_animate(Exit, COLORW, PB, 0, EZ2, 0.1)
+end
+
+local function PreFinal()
+	local SELF, cancel = msg_url().path, go.cancel_animations
+	cancel(SELF)
+	cancel(Panel)					cancel(Titles)					cancel(Message)
+	cancel(ImportButton)			cancel(ExportButton)			cancel(CreditButton)
+	cancel(HapticToggle)			cancel(HitSoundToggle)
+	cancel(AudioLatencyButton)		cancel(AudioLatencyText)
+	cancel(InputDeltaButton)		cancel(InputDeltaText)
+	cancel(OffsetTypeButton)		cancel(Exit)
+
+	Phase = 0
+	ShowFps = false
+	PreFinalStep2(SELF)
+end
+
+
+-- LifeCycle Functions
+--
+function init(self)
+
+	-- Get Component URLs
+	--
+	local u = msg_url()			local p = u.path
+	Exit, OffsetTypeButton = msg_url(Ar, p, "Exit"), msg_url(Ar, p, "OffsetTypeButton")
+	Panel, Titles, Message = msg_url(Ar, p, "Panel"), msg_url(Ar, p, "Titles"), msg_url(Ar, p, "Message")
+	ImportButton, ExportButton, CreditButton = msg_url(Ar, p, "ImportButton"), msg_url(Ar, p, "ExportButton"), msg_url(Ar, p, "CreditButton")
+	AudioLatencyButton, AudioLatencyText = msg_url(Ar, p, "AudioLatencyButton"), msg_url(Ar, p, "AudioLatencyText")
+	InputDeltaButton, InputDeltaText = msg_url(Ar, p, "InputDeltaButton"), msg_url(Ar, p, "InputDeltaText")
+	HapticToggle, HitSoundToggle = msg_url(Ar, p, "HapticToggle"), msg_url(Ar, p, "HitSoundToggle")
+
+	-- Initial Elements Updating
+	--
+	if HapticFeedbackEnabled then sprite.play_flipbook(HapticToggle, HapticOn) end
+	if HitSoundEnabled then sprite.play_flipbook(HitSoundToggle, HitSoundOn) end
+	label_set_text( AudioLatencyText, string_format(FMT_MS, AudioLatency) )
+	label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
+	go_set( Panel, "tint", vmath.vector4(0.1337, 0.1337, 0.1337, 0) )
+	go_set( Panel, "size.x", 0 )
+
+	if OffsetType == 2 then sprite.play_flipbook(OffsetTypeButton, Wireless)
+	elseif OffsetType == 3 then sprite.play_flipbook(OffsetTypeButton, Stream)
+	end
+
+	-- Hide Elements
+	--
+	go_set(Titles, TINTW, 0)					go_set(Message, COLORW, 0)
+	go_set(ImportButton, TINTW, 0)				go_set(ExportButton, TINTW, 0)				go_set(CreditButton, TINTW, 0)
+	go_set(HapticToggle, TINTW, 0)				go_set(HitSoundToggle, TINTW, 0)
+	go_set(AudioLatencyButton, TINTW, 0)		go_set(AudioLatencyText, COLORW, 0)
+	go_set(InputDeltaButton, TINTW, 0)			go_set(InputDeltaText, COLORW, 0)
+	go_set(OffsetTypeButton, TINTW, 0)			go_set(Exit, COLORW, 0)
+
+	-- Register GUI Node & Clean Up
+	--
+	NodeMaxIndex = NodeMaxIndex + 1
+	OptionsInsertIndex = NodeMaxIndex
+	Nodes[OptionsInsertIndex] = u
+	NodeCount = NodeCount + 1
+
+	msg_post(p, DISABLE)
+	go_set(p, "position.x", 1781.5)
+	label_set_text(ShowHide, STR_SHOW)
+	Phase = 1
+end
+
+function update(self, dt)
+	if ShowFps then
+		FpsSampleTick = FpsSampleTick + 1
+		if FpsSampleTick == 31 then
+			FpsSampleTick = 1
+			FpsSamples[1] = dt
+
+			local current_fps = math_floor(30/( FpsSamples[1]+FpsSamples[2]+FpsSamples[3]+FpsSamples[4]+FpsSamples[5]+FpsSamples[6]+FpsSamples[7]+FpsSamples[8]+FpsSamples[9]+FpsSamples[10]+FpsSamples[11]+FpsSamples[12]+FpsSamples[13]+FpsSamples[14]+FpsSamples[15]+FpsSamples[16]+FpsSamples[17]+FpsSamples[18]+FpsSamples[19]+FpsSamples[20]+FpsSamples[21]+FpsSamples[22]+FpsSamples[23]+FpsSamples[24]+FpsSamples[25]+FpsSamples[26]+FpsSamples[27]+FpsSamples[28]+FpsSamples[29]+FpsSamples[30] ))
+			if current_fps ~= LastFps then
+				LastFps = current_fps
+				LastFpsStr = string_format(FMT_FPS, current_fps)
+			end
+
+			label_set_text(Message, LastFpsStr)
+		else
+			FpsSamples[FpsSampleTick] = dt
+		end
+	end
+end
+
+function final(self)
+	-- Unregister
+	--
+	label_set_text(ShowHide, "")
+	go_set(ShowHide, COLOR, TEXT_WHITE)
+	Nodes[OptionsInsertIndex] = nil
+	NodeCount = NodeCount - 1
+
+	-- Other Clean-Up
+	--
+	ButtonPressed = false
+	ShowFps, FpsSampleTick, LastFps, LastFpsStr = false, 0, 0, "0 fps"
+	for i=1, 30 do FpsSamples[i] = 0 end
+	OptionsInsertIndex = 0
+end
+
+
+-- Input Processing Stuff
+--
+local PressedFuncs = {
+	[0] = function()                                              -- 0.Exit
+		go_set(Exit, COLOR, TEXT_BLUE)
+	end,
+
+	[1] = function()                                              -- 1.OffsetType
+		if OffsetType == 1 then
+			sprite.play_flipbook(OffsetTypeButton, DirectPressed)
+		elseif OffsetType == 2 then
+			sprite.play_flipbook(OffsetTypeButton, WirelessPressed)
+		else
+			sprite.play_flipbook(OffsetTypeButton, StreamPressed)
+		end
+	end,
+
+	[2] = function()                                              -- 2.DecreaseAudioLatency
+		sprite.play_flipbook(AudioLatencyButton, Decrease)
+	end,
+
+	[3] = function()                                              -- 3.IncreaseAudioLatency
+		sprite.play_flipbook(AudioLatencyButton, Increase)
+	end,
+
+	[4] = function()                                              -- 4.DecreaseInputDelta
+		sprite.play_flipbook(InputDeltaButton, Decrease)
+	end,
+
+	[5] = function()                                              -- 5.IncreaseInputDelta
+		sprite.play_flipbook(InputDeltaButton, Increase)
+	end,
+
+	[6] = function()                                              -- 6.HapticFeedback
+		sprite.play_flipbook(HapticToggle, HapticPressed)
+	end,
+
+	[7] = function()                                              -- 7.HitSound
+		sprite.play_flipbook(HitSoundToggle, HitSoundPressed)
+	end,
+
+	[8] = function()                                              -- 8.ImportSave
+		sprite.play_flipbook(ImportButton, ImportPressed)
+	end,
+
+	[9] = function()                                              -- 9.ExportSave
+		sprite.play_flipbook(ExportButton, ExportPressed)
+	end,
+
+	[10] = function()                                             -- 10.CopyCredit
+		sprite.play_flipbook(CreditButton, CreditPressed)
+	end,
+
+	[11] = function()                                             -- 11.HideOptions
+		go_set(ShowHide, COLOR, TEXT_BLUE)
+	end
+}
+
+local CancelledFuncs = {
+	[0] = function()                                              -- 0.Exit
+		go_set(Exit, COLOR, TEXT_WHITE)
+	end,
+
+	[1] = function()                                              -- 1.OffsetType
+		if OffsetType == 1 then
+			sprite.play_flipbook(OffsetTypeButton, Direct)
+		elseif OffsetType == 2 then
+			sprite.play_flipbook(OffsetTypeButton, Wireless)
+		else
+			sprite.play_flipbook(OffsetTypeButton, Stream)
+		end
+	end,
+
+	[2] = function()                                              -- 2.DecreaseAudioLatency
+		sprite.play_flipbook(AudioLatencyButton, Offset)
+	end,
+
+	[3] = function()                                              -- 3.IncreaseAudioLatency
+		sprite.play_flipbook(AudioLatencyButton, Offset)
+	end,
+
+	[4] = function()                                              -- 4.DecreaseInputDelta
+		sprite.play_flipbook(InputDeltaButton, Offset)
+	end,
+
+	[5] = function()                                              -- 5.IncreaseInputDelta
+		sprite.play_flipbook(InputDeltaButton, Offset)
+	end,
+
+	[6] = function()                                              -- 6.HapticFeedback
+		if HapticFeedbackEnabled then
+			sprite.play_flipbook(HapticToggle, HapticOn)
+		else
+			sprite.play_flipbook(HapticToggle, Haptic)
+		end
+	end,
+
+	[7] = function()                                              -- 7.HitSound
+		if HitSoundEnabled then
+			sprite.play_flipbook(HitSoundToggle, HitSoundOn)
+		else
+			sprite.play_flipbook(HitSoundToggle, HitSound)
+		end
+	end,
+
+	[8] = function()                                              -- 8.ImportSave
+		sprite.play_flipbook(ImportButton, Import)
+	end,
+
+	[9] = function()                                              -- 9.ExportSave
+		sprite.play_flipbook(ExportButton, Export)
+	end,
+
+	[10] = function()                                             -- 10.CopyCredit
+		sprite.play_flipbook(CreditButton, Credit)
+	end,
+
+	[11] = function()                                             -- 11.HideOptions
+		go_set(ShowHide, COLOR, TEXT_WHITE)
+	end
+}
+
+local ReleasedFuncs = {
+	[0] = function(self)                                          -- 0.Exit
+		go_set(Exit, COLOR, TEXT_WHITE)
+		go.delete(self.current_canvas)   -- Let the canvas send
+	end,                                 -- an "ar_final" message
+	--                                   -- to this script.
+	[1] = function()                                              -- 1.OffsetType
+		if OffsetType == 1 then
+			OffsetType = 2
+			AudioLatency = Save.Options.AudioLatency2
+			sprite.play_flipbook(OffsetTypeButton, Wireless)
+		elseif OffsetType == 2 then
+			OffsetType = 3
+			AudioLatency = Save.Options.AudioLatency3
+			sprite.play_flipbook(OffsetTypeButton, Stream)
+		else
+			OffsetType = 1
+			AudioLatency = Save.Options.AudioLatency1
+			sprite.play_flipbook(OffsetTypeButton, Direct)
+		end
+
+		label_set_text( AudioLatencyText, string_format(FMT_MS, AudioLatency) )
+		ContextTime = nil
+		SyncSave(true)
+	end,
+
+	[2] = function()                                              -- 2.DecreaseAudioLatency
+		AudioLatency = AudioLatency - 10
+		AudioLatency = (AudioLatency>-1000) and AudioLatency or -1000
+		label_set_text( AudioLatencyText, string_format(FMT_MS, AudioLatency) )
+		sprite.play_flipbook(AudioLatencyButton, Offset)
+		ContextTime = nil
+		SyncSave(true)
+	end,
+
+	[3] = function()                                              -- 3.IncreaseAudioLatency
+		AudioLatency = AudioLatency + 10
+		AudioLatency = (AudioLatency<1000) and AudioLatency or 1000
+		label_set_text( AudioLatencyText, string_format(FMT_MS, AudioLatency) )
+		sprite.play_flipbook(AudioLatencyButton, Offset)
+		ContextTime = nil
+		SyncSave(true)
+	end,
+
+	[4] = function()                                              -- 4.DecreaseInputDelta
+		InputDelta = InputDelta - 3
+		InputDelta = (InputDelta>-63) and InputDelta or -63
+		label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
+		sprite.play_flipbook(InputDeltaButton, Offset)
+		Arf2.SetIDelta(InputDelta)
+		SyncSave(true)
+	end,
+
+	[5] = function()                                              -- 5.IncreaseInputDelta
+		InputDelta = InputDelta + 3
+		InputDelta = (InputDelta<63) and InputDelta or 63
+		label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
+		sprite.play_flipbook(InputDeltaButton, Offset)
+		Arf2.SetIDelta(InputDelta)
+		SyncSave(true)
+	end,
+
+	[6] = function()                                              -- 6.HapticFeedback
+		if HapticFeedbackEnabled then
+			HapticFeedbackEnabled = false
+			sprite.play_flipbook(HapticToggle, Haptic)
+		else
+			HapticFeedbackEnabled = true
+			sprite.play_flipbook(HapticToggle, HapticOn)
+		end
+		SyncSave(true)
+	end,
+
+	[7] = function()                                              -- 7.HitSound
+		if HitSoundEnabled then
+			HitSoundEnabled = false
+			sprite.play_flipbook(HitSoundToggle, HitSound)
+		else
+			HitSoundEnabled = true
+			sprite.play_flipbook(HitSoundToggle, HitSoundOn)
+		end
+		SyncSave(true)
+	end,
+
+	[8] = function()                                             -- 8.ImportSave
+		ShowFps = false
+		label_set_text(Message, ImportSave() and SAVE_IMPORTED or SAVE_IMPORT_FAILED)
+		sprite.play_flipbook(ImportButton, Import)
+
+		if HapticFeedbackEnabled then sprite.play_flipbook(HapticToggle, HapticOn) end
+		if HitSoundEnabled then sprite.play_flipbook(HitSoundToggle, HitSoundOn) end
+		label_set_text( AudioLatencyText, string_format(FMT_MS, AudioLatency) )
+		label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
+
+		if OffsetType == 2 then sprite.play_flipbook(OffsetTypeButton, Wireless)
+		elseif OffsetType == 3 then sprite.play_flipbook(OffsetTypeButton, Stream)
+		end
+	end,
+
+	[9] = function()                                             -- 9.ExportSave
+		ExportSave()
+		ShowFps = false
+		label_set_text(Message, SAVE_EXPORTED)
+		sprite.play_flipbook(ExportButton, Export)
+	end,
+
+	[10] = function()                                            -- 10.CopyCredit
+		CopyCredit()
+		ShowFps = false
+		label_set_text(Message, CREDIT_COPIED)
+		sprite.play_flipbook(CreditButton, Credit)
+	end,
+
+	[11] = function(self)                                        -- 11.HideOptions
+		label_set_text(ShowHide, STR_SHOW)
+		go_set(ShowHide, COLOR, TEXT_WHITE)
+		Hide(self)
+	end
+}
+
+
+-- Input Handler
+--
+function on_message(self, message_id)
+	if message_id == PROCESS_GUI then
+		if Phase == 0 then   -- Not Loaded (Empty Branch)
+		elseif Phase == 3 then   -- Expanded
+			if CurrentGuiPhase == 2 and ButtonPressed then
+				local ButtonCurrent = ExpandedOnWhich()
+				if ButtonCurrent ~= ButtonPressed then
+					CancelledFuncs[ButtonPressed]()
+					GuiDoFeedback(false)   -- Won't Play SFX
+					ButtonPressed = nil
+				end
+			elseif CurrentGuiPhase == 1 then
+				ButtonPressed = ExpandedOnWhich()
+				if ButtonPressed then
+					PressedFuncs[ButtonPressed]()
+					GuiDoFeedback(true)   -- Play SFX
+				end
+			elseif ButtonPressed then
+				local ButtonCurrent = ExpandedOnWhich()
+
+				if ButtonCurrent == ButtonPressed then
+					ReleasedFuncs[ButtonPressed](self)
+				else
+					CancelledFuncs[ButtonPressed]()
+				end
+
+				GuiDoFeedback(false)   -- Won't Play SFX
+				ButtonPressed = nil
+			end
+		else
+			if CurrentGuiPhase == 2 and ButtonPressed then
+				if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then   -- Empty Branch
+				else
+					go_set(ShowHide, COLOR, TEXT_WHITE)
+					ButtonPressed = nil
+					GuiDoFeedback(false)   -- Won't Play SFX
+				end
+			elseif CurrentGuiPhase == 1 then
+				if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
+					go_set(ShowHide, COLOR, TEXT_BLUE)
+					ButtonPressed = true
+					GuiDoFeedback(true)   -- Play SFX
+				end
+			elseif ButtonPressed then
+				go_set(ShowHide, COLOR, TEXT_WHITE)
+				ButtonPressed = nil
+				GuiDoFeedback(false)   -- Won't Play SFX
+
+				if Phase == 1 then   -- Only Expand when Phase == Hidden
+					label_set_text(ShowHide, STR_HIDE)
+					Expand(self)
+				end
+			end
+		end
+	elseif message_id == AR_FINAL then PreFinal()
+	end
+end

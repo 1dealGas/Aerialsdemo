@@ -1,0 +1,400 @@
+go.property("options", false)
+go.property("display_losts", false)   -- On non-demo versions, this will be determined by the canvas itself, based on the save loaded.
+go.property("options_x_delta", 0)
+
+
+-- Context Info
+-- Exposed: ContextTime, WishSprites
+local Before
+local WGOs, HGOs, AlGOs, ArGOs
+local WishTints, HintTints, AnimTints
+local HintSprites, HintHelpers, AlSprites, ArSprites
+
+local ButtonPressed, ButtonInsertIndex = false, 0
+local LastContextTime, LastWgoUsed, LastHgoUsed, LastAgoUsed = 0, 0, 0, 0
+local LastHit, LastNonHit, LastStr = 0, 0, ""
+-- TotalJud, Early, Late, Hit
+-- Self: options_expanded(only if self.options == true), show_score
+
+
+-- Caches & Constants
+-- Only functions used in update() & on_message() should be cached here;
+--      functions used in the for loop of init() & final() should be cached internally.
+local hash = hash
+local go_set = go.set
+local msg_url = msg.url
+local msg_post = msg.post
+local string_format = string.format
+local socket_gettime = socket.gettime
+local label_set_text = label.set_text
+
+local GetTime = AcAudio.GetTime
+local PlayUnit = AcAudio.PlayUnit
+local CheckPlaying = AcAudio.CheckPlaying
+local UpdateArf = Arf2.UpdateArf
+local SetXDelta = Arf2.SetXDelta
+
+local FMT_SCORE, FMT_SCORE_DL = "◇  %d", "◇  %d · %d"
+local FMT_WO, FMT_WO_DL = "◇  World Obtained · %d", "◇  World Obtained · %d · %d"
+local FMT_PO = "◇  Perfection Obtained · %d"
+
+local TINT, TINTW, COLOR = hash("tint"), hash("tint.w"), hash("color")
+local SHOW_SCORE, HIDE_SCORE = hash("ar_show_score"), hash("ar_hide_score")
+local SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = hash("ar_show_options"), hash("ar_hide_options"), hash("ar_process_gui")
+local AR_INIT, AR_UPDATE, AR_FINAL = hash("ar_init"), hash("ar_update"), hash("ar_final")
+local ENABLE, DISABLE = hash("enable"), hash("disable")
+
+local TEXT_RED = vmath.vector4(1, 0.62890625, 0.62890625, 0.937)
+local TEXT_WHITE = vmath.vector4(1, 1, 1, 0.937)
+
+local Ar, Sprite, Helper = hash("Ar"), hash("Sprite"), hash("Helper")
+local Label, ButtonLabel = msg_url("Ar", "/Texts", "NorthWest"), msg_url("Ar", "/Texts", "SouthEast")
+local Wfac = msg_url("Ar", "/Pragma", "1 Wish")
+local Hfac = msg_url("Ar", "/Pragma", "1 Hint")
+local Afac = msg_url("Ar", "/Pragma", "1 Anim")
+
+
+-- Init & Update Functions
+--
+function init(self)
+	local track_id_str = tostring(CurrentTrackId)
+
+	-- Load Audio
+	--
+	_, CurrentAudioRes = AcAudio.CreateResource(CurrentAudioBuffer)
+	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
+
+	-- Load Arf
+	--
+	local fmbuf, wgo_required, hgo_required = sys.load_buffer("/Arf/"..track_id_str..".ar")
+	Before, TotalJud, wgo_required, hgo_required = Arf2.InitArf(fmbuf, false, CurrentAudioUnit)
+
+	-- Load Context
+	--
+	local nt = Arf2.NewTable
+	local factory_create = factory.create
+	local vmath_vector4 = vmath.vector4
+	local sprite_play_flipbook = sprite.play_flipbook
+	do
+		-- Create Tables
+		--
+		WGOs, HGOs, AlGOs, ArGOs = nt(wgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0)
+		WishSprites, HintSprites, HintHelpers, AlSprites, ArSprites = nt(wgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0)
+		WishTints, HintTints, AnimTints = nt(wgo_required, 0), nt(hgo_required, 0), nt(hgo_required, 0)
+
+		-- Fill Tables: Wish
+		--
+		for i = 1, wgo_required do
+			local W = factory_create(Wfac)
+			local WS = msg_url(Ar, W, Sprite)
+			sprite_play_flipbook(WS, track_id_str)
+			WGOs[i], WishSprites[i] = W, WS
+			msg_post(W, DISABLE)
+		end
+
+		-- Fill Tables: Hint & Anim
+		--
+		for i = 1, hgo_required do
+			local H = factory_create(Hfac)
+			HGOs[i], HintSprites[i], HintHelpers[i] = H, msg_url(Ar, H, Sprite), msg_url(Ar, H, Helper)
+			msg_post(H, DISABLE)
+
+			local AL = factory_create(Afac)
+			AlGOs[i], AlSprites[i] = AL, msg_url(Ar, AL, Sprite)
+			msg_post(AL, DISABLE)
+
+			local AR = factory_create(Afac)
+			ArGOs[i], ArSprites[i] = AR, msg_url(Ar, AR, Sprite)
+			msg_post(AR, DISABLE)
+
+			HintTints[i] = vmath_vector4(0,0,0,1)
+			AnimTints[i] = vmath_vector4(0,0,0,1)
+		end
+	end
+
+	--  Load UI Node
+	--
+	if self.options then
+		-- No "CurrentCanvas" right now. We need to pass the Canvas URL to
+		-- the UI Node to be created as a script property here.
+		self.options = factory_create("Ar:/Pragma#1 Options", nil, nil, {current_canvas = msg_url("#")})
+	else
+		-- Register GUI Node
+		--
+		NodeMaxIndex = NodeMaxIndex + 1
+		ButtonInsertIndex = NodeMaxIndex
+		Nodes[ButtonInsertIndex] = msg_url()
+		NodeCount = NodeCount + 1
+
+		-- Set Text
+		label_set_text(ButtonLabel, "Exit「×」")
+	end
+
+	self.show_score = true
+end
+
+function update(self, dt)
+
+	-- Update ContextTime
+	--
+	if ContextTime then
+		ContextTime = ContextTime + dt*1000
+	else
+		if WindowActive and GetTime(CurrentAudioUnit) > 0 then
+			if not CheckPlaying(CurrentAudioUnit) then PlayUnit(CurrentAudioUnit, false) end
+			ContextTime = GetTime(CurrentAudioUnit) - AudioLatency
+		else return end
+	end
+
+	-- Update Context
+	--
+	if ContextTime < Before then
+		local hint_lost, wgo_used, hgo_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, AlGOs, ArGOs, WishTints, HintTints, AnimTints)
+
+		-- Mutate Tints
+		--
+		for i = 1, wgo_used do
+			go_set(WishSprites[i], TINTW, WishTints[i])
+		end
+
+		for i = 1, hgo_used do
+			local helper_tintw = HintTints[i].x * 1.73
+			go_set( HintHelpers[i], TINTW, (helper_tintw>0.37) and 0.37 or helper_tintw )
+			go_set(HintSprites[i], TINT, HintTints[i])
+		end
+
+		for i = 1, ago_used do
+			go_set(AlSprites[i], TINT, AnimTints[i])
+			go_set(ArSprites[i], TINT, AnimTints[i])
+		end
+
+		-- Enable & Disable Components
+		--
+		if wgo_used > LastWgoUsed then
+			for i = LastWgoUsed+1, wgo_used do
+				msg_post(WishSprites[i], ENABLE)
+			end
+		elseif wgo_used < LastWgoUsed then
+			for i = wgo_used+1, LastWgoUsed do
+				msg_post(WishSprites[i], DISABLE)
+			end
+		end
+
+		if hgo_used > LastHgoUsed then
+			for i = LastHgoUsed+1, hgo_used do
+				msg_post(HintSprites[i], ENABLE)
+				msg_post(HintHelpers[i], ENABLE)
+			end
+		elseif hgo_used < LastHgoUsed then
+			for i = hgo_used+1, LastHgoUsed do
+				msg_post(HintSprites[i], DISABLE)
+				msg_post(HintHelpers[i], DISABLE)
+			end
+		end
+
+		if ago_used > LastAgoUsed then
+			for i = LastAgoUsed+1, ago_used do
+				msg_post(AlSprites[i], ENABLE)
+				msg_post(ArSprites[i], ENABLE)
+			end
+		elseif ago_used < LastAgoUsed then
+			for i = ago_used+1, LastAgoUsed do
+				msg_post(AlSprites[i], DISABLE)
+				msg_post(ArSprites[i], DISABLE)
+			end
+		end
+
+
+		-- Update Externals & Score
+		--
+		Late = Late + hint_lost
+		LastWgoUsed, LastHgoUsed, LastAgoUsed = wgo_used, hgo_used, ago_used
+
+		if self.options			then SetXDelta(self.options_x_delta)			end
+		if CurrentFumenScript	then msg_post(CurrentFumenScript, AR_UPDATE)	end
+
+		if self.show_score then
+			local percent = Hit / TotalJud
+			local current_nonhit = Early + Late
+			if Hit ~= LastHit or current_nonhit ~= LastNonHit then
+
+				if self.display_losts then
+					if percent < 0.963 then
+						LastStr = string_format(FMT_SCORE_DL, Hit, current_nonhit)
+						label_set_text(Label, LastStr)
+					elseif percent < 1 then
+						LastStr = string_format(FMT_WO_DL, Hit, current_nonhit)
+						label_set_text(Label, LastStr)
+					else
+						LastStr = string_format(FMT_PO, Hit)
+						label_set_text(Label, LastStr)
+					end
+				else
+					if percent < 0.963 then
+						LastStr = string_format(FMT_SCORE, Hit)
+						label_set_text(Label, LastStr)
+					elseif percent < 1 then
+						LastStr = string_format(FMT_WO, Hit)
+						label_set_text(Label, LastStr)
+					else
+						LastStr = string_format(FMT_PO, Hit)
+						label_set_text(Label, LastStr)
+					end
+				end
+
+				LastHit = Hit
+				LastNonHit = current_nonhit
+			end
+		end
+
+		LastContextTime = ContextTime
+	else
+		go.delete()   -- Won't be cached
+	end
+end
+
+
+-- Message Handling Functions
+--
+local message_callbacks = {
+
+	[SHOW_OPTIONS] = function()
+		go.cancel_animations("#", "options_x_delta")
+		go.animate("#", "options_x_delta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
+	end,
+
+	[HIDE_OPTIONS] = function()
+		go.cancel_animations("#", "options_x_delta")
+		go.animate("#", "options_x_delta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
+	end,
+
+	[PROCESS_GUI] = function()   -- Button Size: 108*36
+		if CurrentGuiPhase == 2 then   -- OnScreen
+			if not ButtonPressed then return end
+			if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
+				local t = socket_gettime()
+				if t - ButtonPressed > 1.237 then
+					GuiDoFeedback(false)
+					go.delete()
+				end
+			else   -- Out of Range -> Released
+				go_set(ButtonLabel, COLOR, TEXT_WHITE)
+				label_set_text(ButtonLabel, "Exit「×」")
+				ButtonPressed = false
+				GuiDoFeedback(false)
+			end
+		elseif CurrentGuiPhase == 1 then   -- Pressed
+			if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
+				go_set(ButtonLabel, COLOR, TEXT_RED)
+				label_set_text(ButtonLabel, "Hold to Exit「×」")
+				ButtonPressed = socket_gettime()
+				GuiDoFeedback(true)
+			end
+		elseif ButtonPressed then   -- Released
+			go_set(ButtonLabel, COLOR, TEXT_WHITE)
+			label_set_text(ButtonLabel, "Exit「×」")
+			ButtonPressed = false
+			GuiDoFeedback(false)
+		end
+	end,
+
+	[SHOW_SCORE] = function(self)
+		self.show_score = true
+
+		local percent = Hit / TotalJud
+		local current_nonhit = Early + Late
+		if Hit ~= LastHit or current_nonhit ~= LastNonHit then
+			LastHit, LastNonHit = Hit, current_nonhit
+			if self.display_losts then
+				if percent < 0.963 then
+					LastStr = string_format(FMT_SCORE_DL, Hit, current_nonhit)
+					label_set_text(Label, LastStr)
+				elseif percent < 1 then
+					LastStr = string_format(FMT_WO_DL, Hit, current_nonhit)
+					label_set_text(Label, LastStr)
+				else
+					LastStr = string_format(FMT_PO, Hit)
+					label_set_text(Label, LastStr)
+				end
+			else
+				if percent < 0.963 then
+					LastStr = string_format(FMT_SCORE, Hit)
+					label_set_text(Label, LastStr)
+				elseif percent < 1 then
+					LastStr = string_format(FMT_WO, Hit)
+					label_set_text(Label, LastStr)
+				else
+					LastStr = string_format(FMT_PO, Hit)
+					label_set_text(Label, LastStr)
+				end
+			end
+		else
+			label_set_text(Label, LastStr)
+		end
+	end,
+
+	[HIDE_SCORE] = function(self)
+		self.show_score = false
+	end
+}
+
+function on_message(self, message_id)
+	if message_callbacks[message_id] then
+		message_callbacks[message_id](self)
+	end
+end
+
+
+-- Clear Function
+--
+function final(self)
+
+	-- Score Clean-up
+	--
+	Arf2.FinalArf()
+	Late = TotalJud - Hit - Early
+	message_callbacks[SHOW_SCORE](self)
+
+	-- Node Clean-up
+	--
+	if self.options then
+		msg_post(self.options, AR_FINAL)
+	else
+		label_set_text(ButtonLabel, "")
+		go_set(ButtonLabel, COLOR, TEXT_WHITE)
+		Nodes[ButtonInsertIndex] = nil
+		NodeCount = NodeCount - 1
+	end
+
+	-- Global Clean-up
+	-- CurrentAudioRes & CurrentAudioUnit will be cleared by Track Manager
+	--
+	TotalJud = 0
+	Hit, Early, Late = 0, 0, 0
+	ContextTime = nil
+
+	-- Release GOs
+	--
+	local go_delete = go.delete
+	for i = 1, #WGOs do
+		go_delete(WGOs[i])
+	end
+
+	for i = 1, #HGOs do
+		go_delete(HGOs[i])
+		go_delete(AlGOs[i])
+		go_delete(ArGOs[i])
+	end
+
+	-- Local Clean-up
+	--
+	Before = 0
+	WGOs, HGOs, AlGOs, ArGOs = nil, nil, nil, nil
+	WishTints, HintTints, AnimTints = nil, nil, nil
+	HintSprites, HintHelpers, AlSprites, ArSprites = nil, nil, nil, nil
+
+	ButtonPressed, ButtonInsertIndex = false, 0
+	LastContextTime, LastWgoUsed, LastHgoUsed, LastAgoUsed = 0, 0, 0, 0
+	LastHit, LastNonHit, LastStr = 0, 0, ""
+
+end

@@ -1,0 +1,128 @@
+[bootstrap]
+main_collection = /Ar.collectionc
+render = /System/Ar.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 1800
+height = 1080
+
+[android]
+input_method = HiddenInputField
+minimum_sdk_version = 26
+target_sdk_version = 34
+immersive_mode = 1
+package = idealgas.aerials.demo
+app_icon_36x36 = /System/Icon/Android 36x36.png
+app_icon_48x48 = /System/Icon/Android 48x48.png
+app_icon_72x72 = /System/Icon/Android 72x72.png
+app_icon_96x96 = /System/Icon/Android 96x96.png
+app_icon_144x144 = /System/Icon/Android 144x144.png
+app_icon_192x192 = /System/Icon/Android 192x192.png
+manifest = /System/AndroidManifest.xml
+
+[project]
+title = Aerials Demo
+version = 2
+publisher = 1dealGas
+developer = 1dealGas
+custom_resources = Arf, Reference/Audio, Ar.License
+
+[network]
+http_thread_count = 0
+http_cache_enabled = 0
+
+[input]
+use_accelerometer = 0
+game_binding = /System/Ar.input_bindingc
+gamepads = /System/Ar.gamepadsc
+
+[native_extension]
+app_manifest = /System/Ar.appmanifest
+
+[resource]
+max_resources = 128
+
+[profiler]
+track_cpu = 1
+
+[physics]
+max_collision_object_count = 0
+allow_dynamic_transforms = 0
+max_collisions = 0
+max_contacts = 0
+ray_cast_limit_2d = 0
+ray_cast_limit_3d = 0
+
+[graphics]
+max_draw_calls = 64
+verify_graphics_calls = 0
+texture_profiles = /System/Ar.texture_profiles
+
+[tilemap]
+max_count = 0
+max_tile_count = 0
+
+[sprite]
+max_count = 2048
+
+[sound]
+max_sound_data = 0
+max_sound_buffers = 0
+max_sound_sources = 0
+max_sound_instances = 0
+max_component_count = 0
+use_thread = 0
+
+[particle_fx]
+max_count = 0
+max_emitter_count = 0
+max_particle_count = 0
+
+[model]
+max_count = 0
+
+[mesh]
+max_count = 0
+
+[label]
+max_count = 32
+
+[gui]
+max_count = 0
+max_particlefx_count = 0
+max_animation_count = 0
+max_particle_count = 0
+
+[factory]
+max_count = 8
+
+[collection_proxy]
+max_count = 0
+
+[collectionfactory]
+max_count = 0
+
+[collection]
+max_input_stack_entries = 1
+max_instances = 2048
+
+[osx]
+bundle_name = Aerials Demo
+bundle_identifier = idealgas.aerials.demo
+
+[ios]
+bundle_name = Aerials Demo
+bundle_identifier = idealgas.aerials.demo
+bundle_version = 1
+app_icon_76x76 = /System/Icon/iOS 76x76.png
+app_icon_152x152 = /System/Icon/iOS 152x152.png
+app_icon_167x167 = /System/Icon/iOS 167x167.png
+app_icon_120x120 = /System/Icon/iOS 120x120.png
+app_icon_180x180 = /System/Icon/iOS 180x180.png
+
+[engine]
+fixed_update_frequency = 0
+

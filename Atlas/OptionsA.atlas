@@ -1,0 +1,70 @@
+images {
+  image: "/Reference/Visual/OptionText.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHaptic.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHapticOn.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHapticPressed.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHitSound.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHitSoundOn.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionHitSoundPressed.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionOffset.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionOffsetDecrease.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionOffsetIncrease.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionCredit.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionCreditPressed.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionExport.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionExportPressed.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionImport.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+images {
+  image: "/Reference/Visual/OptionImportPressed.png"
+  sprite_trim_mode: SPRITE_TRIM_POLYGONS
+}
+margin: 2
+extrude_borders: 0
+inner_padding: 0
+max_page_width: 0
+max_page_height: 0
+rename_patterns: ""

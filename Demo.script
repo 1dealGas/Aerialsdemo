@@ -1,0 +1,25 @@
+local IllustTint = vmath.vector4(0.2337, 0.2337, 0.2337, 1)
+local CoverTint = vmath.vector4(0.1037, 0.1037, 0.1037, 1)
+
+function init(self)
+	-- Load Audio Buffer & Create Canvas
+	--
+	CurrentAudioBuffer = sys.load_buffer("/Reference/Audio/2001.mp3")
+	Canvas = factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
+
+	-- Do Demo-Specific Settings
+	--
+	go.set("Ar:/Demo#DemoBG", "tint", IllustTint)
+	go.set("Ar:/Demo#DemoLeft", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoRight", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoTop", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoBottom", "tint", CoverTint)
+
+	-- Interlude Out
+	--
+	InterludeCallbackOut = function()
+		AcAudio.PlayUnit(CurrentAudioUnit, false)
+		Arf2.SetJudgeRange(84)
+	end
+	InterludeOut()
+end

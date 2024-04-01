@@ -1,0 +1,62 @@
+path_settings {
+  path: "/Atlas/UI.atlas"
+  profile: "UI"
+}
+path_settings {
+  path: "/Atlas/Wish.atlas"
+  profile: "UI"
+}
+path_settings {
+  path: "/Atlas/Options*.atlas"
+  profile: "UI"
+}
+path_settings {
+  path: "/Atlas/Cover.atlas"
+  profile: "Cover"
+}
+path_settings {
+  path: "**"
+  profile: "Illust"
+}
+profiles {
+  name: "Cover"
+  platforms {
+    os: OS_ID_GENERIC
+    formats {
+      format: TEXTURE_FORMAT_RGB
+      compression_level: BEST
+      compression_type: COMPRESSION_TYPE_DEFAULT
+    }
+    mipmaps: false
+    max_texture_size: 0
+    premultiply_alpha: true
+  }
+}
+profiles {
+  name: "Illust"
+  platforms {
+    os: OS_ID_GENERIC
+    formats {
+      format: TEXTURE_FORMAT_RGB
+      compression_level: BEST
+      compression_type: COMPRESSION_TYPE_BASIS_UASTC
+    }
+    mipmaps: false
+    max_texture_size: 0
+    premultiply_alpha: true
+  }
+}
+profiles {
+  name: "UI"
+  platforms {
+    os: OS_ID_GENERIC
+    formats {
+      format: TEXTURE_FORMAT_RGBA
+      compression_level: HIGH
+      compression_type: COMPRESSION_TYPE_BASIS_UASTC
+    }
+    mipmaps: true
+    max_texture_size: 0
+    premultiply_alpha: true
+  }
+}
