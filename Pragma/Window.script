@@ -9,15 +9,17 @@ local JudgeArf = Arf2.JudgeArf
 local socket_gettime = socket.gettime
 local AcAudioGetTime = AcAudio.GetTime
 local DoHapticFeedback = AcUtil.DoHapticFeedback
+local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
 local msg_post = msg.post
 
 local CenterX, CenterY, PosDnm = 0, 0, 0
-local NodeProgress, LastHapticTime, LastHitSoundTime = 0, 0, 0
+local NodeProgress, LastHapticTime = 0, 0
 local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
-local HitSoundUnits = {}
+local HitSoundUnits = Arf2.NewTable(42, 0)
+local HsWhich = 1
 
 
--- Platform-Independent Functions (HitSound NYI)
+-- Platform-Independent Functions
 --
 function init()
 	-- Prepare Input
@@ -25,6 +27,7 @@ function init()
 	msg_post("#", "acquire_input_focus")
 
 	-- Set Window Listener
+	--
 	window.set_listener(
 		function(self, event, data)
 			if event == 0 then
@@ -50,6 +53,7 @@ function init()
 	)
 
 	-- Initial Window Size Adapting
+	--
 	local W, H = window.get_size()
 	CenterX, CenterY = W / 2, H / 2
 	local wr, hr = W / 1800, H / 1080
@@ -59,6 +63,16 @@ function init()
 	else
 		LayoutModeLandscape = true
 		PosDnm = 1 / wr
+	end
+
+	-- Prepare HitSounds
+	--
+	local CreateUnit = AcAudio.CreateUnit
+	local hitsoundbuf = sys.load_buffer("Reference/maou_se_system14.wav")
+	local _, hitsoundres = AcAudio.CreateResource(hitsoundbuf)
+	for i = 1, 42 do
+		local _, u = CreateUnit(hitsoundres)
+		HitSoundUnits[i] = u
 	end
 end
 
@@ -74,7 +88,7 @@ function on_message(self, message_id)
 	end
 end
 
--- Platform Specific Functions (HitSound NYI)
+-- Platform Specific Functions
 --
 local system_name = sys.get_sys_info().system_name
 if (system_name == "Android") or (system_name == "iPhone OS") then
@@ -89,12 +103,13 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 			DoHapticFeedback()
 		end
 
-		-- Play HitSound(NYI)
+		-- Play HitSound
 		--
-		-- if HitSoundEnabled and with_hitsound and current_time - LastHitSoundTime > 0.037 then
-		-- 	LastHitSoundTime = current_time
-		-- 	-- ···
-		-- end
+		if HitSoundEnabled and with_hitsound then
+			PlayUnit(HitSoundUnits[HsWhich], false)
+			HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+			StopUnit(HitSoundUnits[HsWhich], true)
+		end
 	end
 
 	function on_input(self, action_id, action)
@@ -135,12 +150,13 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 						DoHapticFeedback()
 					end
 
-					-- Play HitSound(NYI)
+					-- Play HitSound
 					--
-					-- if HitSoundEnabled and AudioLatency < 30 and current_time - LastHitSoundTime > 0.037 then
-					-- 	LastHitSoundTime = current_time
-					-- 	-- ···
-					-- end
+					if HitSoundEnabled and AudioLatency < 30 then
+						PlayUnit(HitSoundUnits[HsWhich], false)
+						HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+						StopUnit(HitSoundUnits[HsWhich], true)
+					end
 				end
 
 				-- Send message to FumenScript if needed
@@ -170,13 +186,13 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 	end
 else
 	function GuiDoFeedback(with_hitsound)
-		-- Play HitSound(NYI)
+		-- Play HitSound
 		--
-		-- local current_time = socket_gettime()
-		-- if HitSoundEnabled and with_hitsound and current_time - LastHitSoundTime > 0.037 then
-		-- 	LastHitSoundTime = current_time
-		-- 	-- ···
-		-- end
+		if HitSoundEnabled and with_hitsound then
+			PlayUnit(HitSoundUnits[HsWhich], false)
+			HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+			StopUnit(HitSoundUnits[HsWhich], true)
+		end
 	end
 
 	function on_input(self, action_id, action)
@@ -198,15 +214,13 @@ else
 				local hit, early, late, s = JudgeArf(ContextTime, TouchTable)
 				Hit, Early, Late = Hit + hit, Early + early, Late + late
 
-				-- Play HitSound(NYI)
+				-- Play HitSound
 				--
-				-- if HitSoundEnabled and (hit+early+late) > 0 then
-				-- 	local current_time = socket_gettime()
-				-- 	if AudioLatency < 30 and current_time - LastHitSoundTime > 0.037 then
-				-- 		LastHitSoundTime = current_time
-				-- 		-- ···
-				-- 	end
-				-- end
+				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency < 30 then
+					PlayUnit(HitSoundUnits[HsWhich], false)
+					HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+					StopUnit(HitSoundUnits[HsWhich], true)
+				end
 
 				-- Send message to FumenScript if needed
 				--
