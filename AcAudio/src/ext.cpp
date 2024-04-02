@@ -2,12 +2,13 @@
 #pragma once
 
 /* Includes */
-#include <miniaudio.h>   // Trimmings are moved to ext.manifest now
 #include <dmsdk/sdk.h>
+#include <dmsdk/dlib/time.h>
 #include <dmsdk/dlib/buffer.h>
 #include <dmsdk/script/script.h>
 #include <dmsdk/dlib/log.h>
 #include <unordered_map>
+#include <miniaudio.h>   // Trimmings are moved to ext.manifest now
 
 
 /* Lua API Implementations */
@@ -37,15 +38,17 @@ static int AmCreateResource(lua_State* L) {   // "Am": Aerials miniaudio binding
 	memcpy(B, OB, BSize);
 
 	// Decoding
+	char C[128];
 	auto R = new ma_resource_manager_data_source;
+	sprintf( C, "%llu", (unsigned long long)dmTime::GetTime() );
 	const auto N = ma_resource_manager_pipeline_notifications_init();
-	ma_resource_manager_register_encoded_data(PlayerRM, "B", B, (size_t)BSize);
+	ma_resource_manager_register_encoded_data(PlayerRM, C, B, (size_t)BSize);
 	const auto result = ma_resource_manager_data_source_init(
-		PlayerRM, "B",
+		PlayerRM, C,
 		// For "flags", using bor for the combination is recommended here
 		MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT,
 		&N, R);
-	ma_resource_manager_unregister_data(PlayerRM, "B");
+	ma_resource_manager_unregister_data(PlayerRM, C);
 
 	// Do Returns
 	if(result == MA_SUCCESS) {
