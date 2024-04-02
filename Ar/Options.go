@@ -26,8 +26,8 @@ embedded_components {
   "  w: 15.0\n"
   "}\n"
   "size {\n"
-  "  x: 1276.0\n"
-  "  y: 2086.0\n"
+  "  x: 638.0\n"
+  "  y: 1043.0\n"
   "  z: 0.0\n"
   "  w: 0.0\n"
   "}\n"
@@ -47,11 +47,6 @@ embedded_components {
     y: 0.0
     z: 0.0
     w: 1.0
-  }
-  scale {
-    x: 0.5
-    y: 0.5
-    z: 1.0
   }
 }
 embedded_components {

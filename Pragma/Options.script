@@ -65,9 +65,9 @@ local Panel, Titles, Message
 local function ExpandedOnWhich()
 	local x, y = CurrentGuiX, CurrentGuiY
 
-	if x >= 1655 and x <= 1800 and y >= 1007 and y <= 1080 then
+	if x >= 1627 and x <= 1800 and y >= 1007 and y <= 1080 then
 		return 0                                                  -- 0.Exit
-	elseif x >= 1655 and x <= 1800 and y >= 0 and y <= 73 then
+	elseif x >= 1627 and x <= 1800 and y >= 0 and y <= 73 then
 		return 11                                                 -- 11.HideOptions
 
 	elseif y >= 501.5 and y <= 686.5 then
@@ -125,7 +125,7 @@ local function Expand(self)
 	--
 	local go_animate = go.animate
 	go_animate(SELF, "position.x", PB, 1125, EZ1, 0.27, 0, function() Phase=3 ButtonPressed=nil ShowFps=true end)
-	go_animate(Panel, "size.x", PB, 1276, EZ1, 0.27)
+	go_animate(Panel, "size.x", PB, 638, EZ1, 0.27)
 	go_animate(Panel, TINTW, PB, 0.937, EZ1, 0.27)
 
 	go_animate(Titles, TINTW, PB, 1, EZ2, 0.1, 0.1)
@@ -515,6 +515,8 @@ local ReleasedFuncs = {
 			HitSoundEnabled = true
 			sprite.play_flipbook(HitSoundToggle, HitSoundOn)
 		end
+		ShowFps = false
+		label_set_text(Message, "HitSound NYI")
 		SyncSave(true)
 	end,
 
@@ -588,14 +590,14 @@ function on_message(self, message_id)
 			end
 		else
 			if CurrentGuiPhase == 2 and ButtonPressed then
-				if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then   -- Empty Branch
+				if CurrentGuiX >= 1627 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then   -- Empty Branch
 				else
 					go_set(ShowHide, COLOR, TEXT_WHITE)
 					ButtonPressed = nil
 					GuiDoFeedback(false)   -- Won't Play SFX
 				end
 			elseif CurrentGuiPhase == 1 then
-				if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
+				if CurrentGuiX >= 1627 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
 					go_set(ShowHide, COLOR, TEXT_BLUE)
 					ButtonPressed = true
 					GuiDoFeedback(true)   -- Play SFX
