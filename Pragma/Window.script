@@ -152,7 +152,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 
 					-- Play HitSound
 					--
-					if HitSoundEnabled and AudioLatency < 30 then
+					if HitSoundEnabled and AudioLatency <= 37 then
 						PlayUnit(HitSoundUnits[HsWhich], false)
 						HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
 						StopUnit(HitSoundUnits[HsWhich], true)
@@ -216,7 +216,7 @@ else
 
 				-- Play HitSound
 				--
-				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency < 30 then
+				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency <= 37 then
 					PlayUnit(HitSoundUnits[HsWhich], false)
 					HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
 					StopUnit(HitSoundUnits[HsWhich], true)
