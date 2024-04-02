@@ -40,7 +40,7 @@ static int AmCreateResource(lua_State* L) {   // "Am": Aerials miniaudio binding
 	// Decoding
 	char C[128];
 	auto R = new ma_resource_manager_data_source;
-	sprintf( C, "%llu", (unsigned long long)dmTime::GetTime() );
+	sprintf_s( C, "%llu", (unsigned long long)dmTime::GetTime() );
 	const auto N = ma_resource_manager_pipeline_notifications_init();
 	ma_resource_manager_register_encoded_data(PlayerRM, C, B, (size_t)BSize);
 	const auto result = ma_resource_manager_data_source_init(
@@ -193,9 +193,7 @@ static int AmSetTime(lua_State* L) {
 		// Set the time
 		ms = (ms > 0) ? ms : 0;
 		ms = (ms < len-2.0) ? ms : len-2.0;
-		const auto result = ma_sound_seek_to_pcm_frame(U,
-			(uint64_t)(ms * ma_engine_get_sample_rate(&PlayerEngine) / 1000.0)
-		);
+		const auto result = ma_sound_seek_to_pcm_frame(U, (uint64_t)(ms * 44.1) );
 		lua_pushboolean(L, result == MA_SUCCESS);   // OK
 	}
 	else
@@ -228,14 +226,16 @@ static int AmPlayPreview(lua_State* L) {
 	AmStopPreview(L);
 
 	// Load Resource
+	char C[128];
 	PreviewResource = new ma_resource_manager_data_source;
+	sprintf_s( C, "%llu", (unsigned long long)dmTime::GetTime() );
 	const auto N = ma_resource_manager_pipeline_notifications_init();
-	ma_resource_manager_register_encoded_data(PreviewRM, "PD", B, (size_t)BSize);
+	ma_resource_manager_register_encoded_data(PreviewRM, C, B, (size_t)BSize);
 	const auto res_result = ma_resource_manager_data_source_init(
-		PreviewRM, "PD",
+		PreviewRM, C,
 		MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT,
 		&N, PreviewResource);
-	ma_resource_manager_unregister_data(PreviewRM, "PD");
+	ma_resource_manager_unregister_data(PreviewRM, C);
 
 	// Load Unit & Play
 	if(res_result == MA_SUCCESS) {
@@ -295,7 +295,7 @@ constexpr luaL_reg AmFuncs[] = {
 	{"PlayUnit", AmPlayUnit}, {"StopUnit", AmStopUnit},
 	{"GetTime", AmGetTime}, {"SetTime", AmSetTime},
 	{"CheckPlaying", AmCheckPlaying},
-	{0, 0}
+	{nullptr, nullptr}
 };
 
 inline dmExtension::Result AmInit(dmExtension::Params* p) {
@@ -311,7 +311,7 @@ inline dmExtension::Result AmInit(dmExtension::Params* p) {
 	auto rm_config		= ma_resource_manager_config_init();
 		 rm_config.decodedFormat			= device -> playback.format;
 		 rm_config.decodedChannels			= device -> playback.channels;
-		 rm_config.decodedSampleRate		= device -> sampleRate;
+		 rm_config.decodedSampleRate		= 44100;
 	if( ma_resource_manager_init(&rm_config, &player_rm) != MA_SUCCESS) {
 		dmLogFatal("Failed to Init the miniaudio Resource Manager \"PlayerRM\".");
 		return dmExtension::RESULT_INIT_ERROR;
@@ -321,6 +321,7 @@ inline dmExtension::Result AmInit(dmExtension::Params* p) {
 	// Init the Player Engine: a custom engine config
 	auto engine_config			= ma_engine_config_init();
 		 engine_config.pResourceManager		= PlayerRM;
+		 engine_config.sampleRate			= 44100;
 	if( ma_engine_init(&engine_config, &PlayerEngine) != MA_SUCCESS ) {
 		dmLogFatal("Failed to Init the miniaudio Engine \"Player\".");
 		return dmExtension::RESULT_INIT_ERROR;
@@ -331,7 +332,6 @@ inline dmExtension::Result AmInit(dmExtension::Params* p) {
 	lua_pop(p->m_L, 1);
 	return dmExtension::RESULT_OK;
 }
-
 inline void AmOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
 	switch(e->m_Event) {   // Now you need to check the "playing" status manually.
 		case dmExtension::EVENT_ID_ICONIFYAPP:
@@ -343,7 +343,6 @@ inline void AmOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
 		default:;   // break omitted
 	}
 }
-
 inline dmExtension::Result AmFinal(dmExtension::Params* p) {
 	// Close Exisiting Units(miniaudio sounds)
 	if(PreviewSound) {
@@ -368,6 +367,7 @@ inline dmExtension::Result AmFinal(dmExtension::Params* p) {
 	// No further cleranup since it's the finalizer
 	return dmExtension::RESULT_OK;
 }
-
-inline dmExtension::Result AmAPPOK(dmExtension::AppParams* params) { return dmExtension::RESULT_OK; }
+inline dmExtension::Result AmAPPOK(dmExtension::AppParams* params) {
+	return dmExtension::RESULT_OK;
+}
 DM_DECLARE_EXTENSION(AcAudio, "AcAudio", AmAPPOK, AmAPPOK, AmInit, nullptr, AmOnEvent, AmFinal)
