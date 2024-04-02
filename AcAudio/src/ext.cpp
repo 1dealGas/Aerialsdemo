@@ -40,7 +40,7 @@ static int AmCreateResource(lua_State* L) {   // "Am": Aerials miniaudio binding
 	// Decoding
 	char C[128];
 	auto R = new ma_resource_manager_data_source;
-	sprintf_s( C, "%llu", (unsigned long long)dmTime::GetTime() );
+	sprintf( C, "%llu", (unsigned long long)dmTime::GetTime() );
 	const auto N = ma_resource_manager_pipeline_notifications_init();
 	ma_resource_manager_register_encoded_data(PlayerRM, C, B, (size_t)BSize);
 	const auto result = ma_resource_manager_data_source_init(
@@ -228,7 +228,7 @@ static int AmPlayPreview(lua_State* L) {
 	// Load Resource
 	char C[128];
 	PreviewResource = new ma_resource_manager_data_source;
-	sprintf_s( C, "%llu", (unsigned long long)dmTime::GetTime() );
+	sprintf( C, "%llu", (unsigned long long)dmTime::GetTime() );
 	const auto N = ma_resource_manager_pipeline_notifications_init();
 	ma_resource_manager_register_encoded_data(PreviewRM, C, B, (size_t)BSize);
 	const auto res_result = ma_resource_manager_data_source_init(
