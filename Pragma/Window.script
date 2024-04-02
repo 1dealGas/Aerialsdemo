@@ -15,7 +15,7 @@ local msg_post = msg.post
 local CenterX, CenterY, PosDnm = 0, 0, 0
 local NodeProgress, LastHapticTime = 0, 0
 local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
-local HitSoundUnits = Arf2.NewTable(42, 0)
+local HitSoundUnits = Arf2.NewTable(64, 0)
 local HsWhich = 1
 
 
@@ -70,7 +70,7 @@ function init()
 	local CreateUnit = AcAudio.CreateUnit
 	local hitsoundbuf = sys.load_buffer("Reference/maou_se_system14.wav")
 	local _, hitsoundres = AcAudio.CreateResource(hitsoundbuf)
-	for i = 1, 42 do
+	for i = 1, 64 do
 		local _, u = CreateUnit(hitsoundres)
 		HitSoundUnits[i] = u
 	end
@@ -107,7 +107,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 		--
 		if HitSoundEnabled and with_hitsound then
 			PlayUnit(HitSoundUnits[HsWhich], false)
-			HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+			HsWhich = (HsWhich==64) and 1 or (HsWhich+1)
 			StopUnit(HitSoundUnits[HsWhich], true)
 		end
 	end
@@ -154,7 +154,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 					--
 					if HitSoundEnabled and AudioLatency < 30 then
 						PlayUnit(HitSoundUnits[HsWhich], false)
-						HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+						HsWhich = (HsWhich==64) and 1 or (HsWhich+1)
 						StopUnit(HitSoundUnits[HsWhich], true)
 					end
 				end
@@ -190,7 +190,7 @@ else
 		--
 		if HitSoundEnabled and with_hitsound then
 			PlayUnit(HitSoundUnits[HsWhich], false)
-			HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+			HsWhich = (HsWhich==64) and 1 or (HsWhich+1)
 			StopUnit(HitSoundUnits[HsWhich], true)
 		end
 	end
@@ -218,7 +218,7 @@ else
 				--
 				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency < 30 then
 					PlayUnit(HitSoundUnits[HsWhich], false)
-					HsWhich = (HsWhich==42) and 1 or (HsWhich+1)
+					HsWhich = (HsWhich==64) and 1 or (HsWhich+1)
 					StopUnit(HitSoundUnits[HsWhich], true)
 				end
 
