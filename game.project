@@ -28,7 +28,7 @@ title = Aerials Demo
 version = 2
 publisher = 1dealGas
 developer = 1dealGas
-custom_resources = Arf, Reference/Audio, Ar.license
+custom_resources = Arf, Reference/Audio, Reference/maou_se_system14.wav, Ar.license
 
 [network]
 http_thread_count = 0
