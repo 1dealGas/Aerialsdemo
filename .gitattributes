@@ -11,6 +11,7 @@ ext.manifest linguist-language=YAML
 *.atlas linguist-language=text proto
 *.render linguist-language=text proto
 *.gamepads linguist-language=text proto
+*.material linguist-language=text proto
 *.collection linguist-language=text proto
 *.input_binding linguist-language=text proto
 *.texture_profiles linguist-language=text proto
