@@ -195,7 +195,7 @@ embedded_components {
   "line_break: false\n"
   "text: \"0 ms\"\n"
   "font: \"/System/Ar.font\"\n"
-  "material: \"/builtins/fonts/label.material\"\n"
+  "material: \"/System/Af.material\"\n"
   ""
   position {
     x: 468.5
@@ -248,7 +248,7 @@ embedded_components {
   "line_break: false\n"
   "text: \"0 ms\"\n"
   "font: \"/System/Ar.font\"\n"
-  "material: \"/builtins/fonts/label.material\"\n"
+  "material: \"/System/Af.material\"\n"
   ""
   position {
     x: 468.5
@@ -441,7 +441,7 @@ embedded_components {
   "line_break: false\n"
   "text: \"0 fps\"\n"
   "font: \"/System/Ar.font\"\n"
-  "material: \"/builtins/fonts/label.material\"\n"
+  "material: \"/System/Af.material\"\n"
   ""
   position {
     x: 37.0
@@ -494,7 +494,7 @@ embedded_components {
   "line_break: false\n"
   "text: \"Exit\\343\\200\\214\\303\\227\\343\\200\\215\"\n"
   "font: \"/System/Ar.font\"\n"
-  "material: \"/builtins/fonts/label.material\"\n"
+  "material: \"/System/Af.material\"\n"
   ""
   position {
     x: 638.0
