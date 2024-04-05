@@ -1,11 +1,13 @@
-local IllustTint = vmath.vector4(0.2337, 0.2337, 0.2337, 1)
-local CoverTint = vmath.vector4(0.1037, 0.1037, 0.1037, 1)
+local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
+local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 
 function init(self)
-	-- Load Audio Buffer & Create Canvas
+	-- Load Audio & Create Canvas
 	--
 	CurrentAudioBuffer = sys.load_buffer("/Reference/Audio/2001.mp3")
-	Canvas = factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
+	_, CurrentAudioRes = AcAudio.CreateResource(CurrentAudioBuffer)
+	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
+	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
 	-- Do Demo-Specific Settings
 	--

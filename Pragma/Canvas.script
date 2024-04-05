@@ -59,11 +59,6 @@ local Afac = msg_url("Ar", "/Pragma", "1 Anim")
 function init(self)
 	local track_id_str = tostring(CurrentTrackId)
 
-	-- Load Audio
-	--
-	_, CurrentAudioRes = AcAudio.CreateResource(CurrentAudioBuffer)
-	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
-
 	-- Load Arf
 	--
 	local fmbuf, wgo_required, hgo_required = sys.load_buffer("/Arf/"..track_id_str..".ar")
@@ -112,7 +107,7 @@ function init(self)
 		end
 	end
 
-	--  Load UI Node
+	--  Load Externals
 	--
 	if self.options then
 		-- No "CurrentCanvas" right now. We need to pass the Canvas URL to
@@ -131,6 +126,9 @@ function init(self)
 	end
 
 	self.show_score = true
+	if CurrentFumenScript then
+		msg_post(CurrentFumenScript, AR_INIT)
+	end
 end
 
 function update(self, dt)
@@ -140,9 +138,10 @@ function update(self, dt)
 	if ContextTime then
 		ContextTime = ContextTime + dt*1000
 	else
-		if WindowActive and GetTime(CurrentAudioUnit) > 0 then
+		local AudioTime = GetTime(CurrentAudioUnit)
+		if WindowActive and AudioTime and AudioTime > 0 then
 			if not CheckPlaying(CurrentAudioUnit) then PlayUnit(CurrentAudioUnit, false) end
-			ContextTime = GetTime(CurrentAudioUnit) - AudioLatency
+			ContextTime = AudioTime - AudioLatency
 		else return end
 	end
 
@@ -204,7 +203,6 @@ function update(self, dt)
 			end
 		end
 
-
 		-- Update Externals & Score
 		--
 		Late = Late + hint_lost
@@ -246,8 +244,7 @@ function update(self, dt)
 				LastNonHit = current_nonhit
 			end
 		end
-
-		LastContextTime = ContextTime
+			LastContextTime = ContextTime
 	else
 		go.delete()   -- Won't be cached
 	end
@@ -355,7 +352,7 @@ function final(self)
 	Late = TotalJud - Hit - Early
 	message_callbacks[SHOW_SCORE](self)
 
-	-- Node Clean-up
+	-- External Clean-up
 	--
 	if self.options then
 		msg_post(self.options, AR_FINAL)
@@ -364,6 +361,10 @@ function final(self)
 		go_set(ButtonLabel, COLOR, TEXT_WHITE)
 		Nodes[ButtonInsertIndex] = nil
 		NodeCount = NodeCount - 1
+	end
+
+	if CurrentFumenScript then
+		msg_post(CurrentFumenScript, AR_FINAL)
 	end
 
 	-- Global Clean-up
@@ -396,5 +397,4 @@ function final(self)
 	ButtonPressed, ButtonInsertIndex = false, 0
 	LastContextTime, LastWgoUsed, LastHgoUsed, LastAgoUsed = 0, 0, 0, 0
 	LastHit, LastNonHit, LastStr = 0, 0, ""
-
 end
