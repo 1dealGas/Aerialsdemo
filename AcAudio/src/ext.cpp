@@ -346,25 +346,32 @@ inline void AmOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
 inline dmExtension::Result AmFinal(dmExtension::Params* p) {
 	// Close Exisiting Units(miniaudio sounds)
 	if(PreviewSound) {
-		ma_sound_stop(PreviewSound);
-		ma_sound_uninit(PreviewSound);
+		ma_sound_stop(PreviewSound);	ma_sound_uninit(PreviewSound);
+		delete PreviewSound;			PreviewSound = nullptr;
 	}
 	for(const auto it : PlayerUnits) {
-		ma_sound_stop(it.first);
-		ma_sound_uninit(it.first);   // No free() calls since it's the finalizer
+		ma_sound_stop(it.first);		ma_sound_uninit(it.first);
+		delete it.first;
 	}
+	PlayerUnits.clear();
 
 	// Close Existing Resources(miniaudio data sources)
-	if(PreviewResource)
+	if(PreviewResource) {
 		ma_resource_manager_data_source_uninit(PreviewResource);
-	for( const auto it : PlayerResources )
+		delete PreviewResource;			PreviewResource = nullptr;
+	}
+	for( const auto it : PlayerResources ) {
 		ma_resource_manager_data_source_uninit(it.first);
+		free(it.second);				delete it.first;
+	}
+	PlayerResources.clear();
 
 	// Uninit (miniaudio)Engines; resource managers will be uninitialized automatically here.
-	// No further cleranup since it's the finalizer
-	ma_engine_uninit(&PreviewEngine);
-	ma_engine_uninit(&PlayerEngine);
+	ma_engine_uninit(&PreviewEngine);   // Stack memory, no delete call here
+	ma_engine_uninit(&PlayerEngine);   // Will be nullified byte-by-byte in the next initialization
 	return dmExtension::RESULT_OK;
 }
-inline dmExtension::Result AmAPPOK(dmExtension::AppParams* params) { return dmExtension::RESULT_OK; }
+inline dmExtension::Result AmAPPOK(dmExtension::AppParams* params) {
+	return dmExtension::RESULT_OK;
+}
 DM_DECLARE_EXTENSION(AcAudio, "AcAudio", AmAPPOK, AmAPPOK, AmInit, nullptr, AmOnEvent, AmFinal)
