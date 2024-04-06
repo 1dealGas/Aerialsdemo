@@ -1215,26 +1215,20 @@ static int SetJudgeRange(lua_State *L) {
 	return 0;
 }
 static int SetHintSize(lua_State* L) {
-	if( lua_isnumber(L,2) ) {
-		lua_Number hint_size_x_script = luaL_checknumber(L, 1);
-		lua_Number hint_size_y_script = luaL_checknumber(L, 2);
-		hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
-		hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
-		hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
-		hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 ;
-		hint_size_x = (float)hint_size_x_script * 112.5f;
-		hint_size_y = (float)hint_size_y_script * 112.5f;
-	}
-	else {
-		lua_Number hint_size_script = luaL_checknumber(L, 1);
-		hint_size_script = (hint_size_script > 3.0) ? hint_size_script : 3.0 ;
-		hint_size_script = (hint_size_script < 48.0) ? hint_size_script : 48.0 ;
-		hint_size_x = hint_size_y = (float)hint_size_script * 112.5f;
-	}
+	lua_Number hint_size_x_script = luaL_checknumber(L, 1);
+	lua_Number hint_size_y_script = hint_size_x_script;
+	if( lua_isnumber(L,2) )
+		hint_size_y_script = luaL_checknumber(L, 2);
+
+	hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
+	hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
+	hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
+	hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 
+	hint_size_x = hint_size_x_script * 112.5f;
+	hint_size_y = hint_size_y_script * 112.5f;
 	return 0;
 }
 static int NewTable(lua_State *L) {
-	lua_checkstack(L, 1);
 	lua_createtable( L, (int)luaL_checknumber(L, 1), (int)luaL_checknumber(L, 2) );
 	return 1;
 }
