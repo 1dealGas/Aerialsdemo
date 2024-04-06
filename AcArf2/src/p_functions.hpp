@@ -43,7 +43,7 @@ static uint32_t before;
 static uint16_t special_hint;
 static uint8_t judge_range = 37;
 
-static float hint_size = 337.5f;
+static float hint_size_x = 360.0f, hint_size_y = 360.0f;
 static float xscale, yscale, xdelta, ydelta, rotsin, rotcos;
 static bool daymode;
 
@@ -77,7 +77,7 @@ static int InitArf(lua_State* L) {
 	last_ms = dt_p1 = dt_p2 = 0;
 
 	// Reset Judge Params
-	judge_range = 37;						hint_size = 337.5f;
+	judge_range = 37;						hint_size_x = hint_size_y = 337.5f;
 	mindt = idelta - judge_range;			mindt = (mindt < -100) ? -100 : mindt;
 	maxdt = idelta + judge_range;			maxdt = (maxdt >  100) ?  100 : maxdt;
 
@@ -354,9 +354,9 @@ static int SetIDelta(lua_State* L) {
 inline bool has_touch_near(const ArHint& hint, const ab* valid_fingers, const uint8_t vf_count) {
 
 	// Unpack the Hint
-	const float hl = 900.0f - hint_size * 0.5f + (hint.c_dx * rotcos - hint.c_dy * rotsin) * xscale + xdelta;
-	const float hd = 540.0f - hint_size * 0.5f + (hint.c_dx * rotsin + hint.c_dy * rotcos) * yscale + ydelta;
-	const float hr = hl + hint_size, hu = hd + hint_size;
+	const float hl = 900.0f - hint_size_x * 0.5f + (hint.c_dx * rotcos - hint.c_dy * rotsin) * xscale + xdelta;
+	const float hd = 540.0f - hint_size_y * 0.5f + (hint.c_dx * rotsin + hint.c_dy * rotcos) * yscale + ydelta;
+	const float hr = hl + hint_size_x, hu = hd + hint_size_y;
 
 	// Detect Touches
 	for( uint8_t i=0; i<vf_count; i++ ) {
@@ -371,8 +371,8 @@ inline bool has_touch_near(const ArHint& hint, const ab* valid_fingers, const ui
 	return false;
 }
 inline bool is_safe_when_anmitsu(ArHint& hint) {
-	const float hl = hint.c_dx - hint_size, hd = hint.c_dy - hint_size;
-	const float hr = hint.c_dx + hint_size, hu = hint.c_dy + hint_size;
+	const float hl = hint.c_dx - hint_size_x, hd = hint.c_dy - hint_size_y;
+	const float hr = hint.c_dx + hint_size_x, hu = hint.c_dy + hint_size_y;
 
 	// Iterate blocked blocks
 	for(const auto i : blocked)
@@ -1215,10 +1215,22 @@ static int SetJudgeRange(lua_State *L) {
 	return 0;
 }
 static int SetHintSize(lua_State* L) {
-	double hint_size_script = luaL_checknumber(L, 1);
-	hint_size_script = (hint_size_script > 3.0) ? hint_size_script : 3.0 ;
-	hint_size_script = (hint_size_script < 16.0) ? hint_size_script : 16.0 ;
-	hint_size = (float)hint_size_script * 112.5f;
+	if( lua_isnumber(L,2) ) {
+		lua_Number hint_size_x_script = luaL_checknumber(L, 1);
+		lua_Number hint_size_y_script = luaL_checknumber(L, 2);
+		hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
+		hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
+		hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
+		hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 ;
+		hint_size_x = (float)hint_size_x_script * 112.5f;
+		hint_size_y = (float)hint_size_y_script * 112.5f;
+	}
+	else {
+		lua_Number hint_size_script = luaL_checknumber(L, 1);
+		hint_size_script = (hint_size_script > 3.0) ? hint_size_script : 3.0 ;
+		hint_size_script = (hint_size_script < 48.0) ? hint_size_script : 48.0 ;
+		hint_size_x = hint_size_y = (float)hint_size_script * 112.5f;
+	}
 	return 0;
 }
 static int NewTable(lua_State *L) {

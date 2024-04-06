@@ -123,9 +123,11 @@
   - name: SetHintSize
     type: function
     parameters:
-    - name: range
+    - name: x
       type: number
-
+    - name: y
+      type: number
+      desc: Optional. y=x if y is not a number
 
   - name: NewTable
     type: function
