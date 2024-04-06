@@ -85,15 +85,15 @@ HitSoundEnabled = false           -- Unused in the Demo
 -- Rule 2:
 --    Provide the TriggerFns table like this, or nil:
 --        {
---            10000, function() end,   -- TriggerMs, TriggerFn
---            20000, function() end
+--            10000, function(canvas) end,   -- TriggerMs, TriggerFn
+--            20000, function(canvas) end
 --        }
 --
 -- Rule 3:
 --    Provide TaskFns table like this, or nil:
 --        {
---            10000, 18000, function() end,   -- StartMs, EndMs, TaskFn
---            12000, 24000, function() end
+--            10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
+--            12000, 24000, function(canvas) end
 --        }
 --
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
@@ -164,12 +164,12 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			[hash("ar_init")] = type(FmInitFn)=="function" and FmInitFn or nil,
 			[hash("ar_final")] = type(FmFinalFn)=="function" and FmFinalFn or nil,
 			[hash("ar_special_hint_judged")] = type(SpecialHintJudgedFn)=="function" and SpecialHintJudgedFn or nil,
-			[hash("ar_update")] = function()   -- Will be called only when ContextTime exists
+			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
 				-- Trigger
 				--
 				local current_trigger_time = Trigger[TriggerWhich]
 				if current_trigger_time and ContextTime > current_trigger_time then
-					Trigger[TriggerWhich+1]()
+					Trigger[TriggerWhich+1](canvas)
 					TriggerWhich = TriggerWhich + 2
 				end
 
@@ -199,15 +199,15 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 				--
 				for i=1, TaskMaxIndex do
 					if Tasks[i] then
-						Tasks[i]()
+						Tasks[i](canvas)
 					end
 				end
 			end
 		}
 
-		function on_message(self, message_id)
+		function on_message(self, message_id, message, sender)
 			if MSG_FUNCS[message_id] then
-				MSG_FUNCS[message_id]()
+				MSG_FUNCS[message_id](sender)
 			end
 		end
 	end
