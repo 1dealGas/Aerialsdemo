@@ -1,3 +1,4 @@
+CurrentTrackId = 2001
 local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
 local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 
