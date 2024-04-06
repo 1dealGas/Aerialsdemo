@@ -150,14 +150,14 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		Unregister[i*2] = unregister_tables[i][2]
 	end
 
+	TriggerFns, TaskFns = nil, nil
 	trigger_tables, task_tables = nil, nil
 	register_tables, unregister_tables = nil, nil
 
 	-- Do "Macro-Like" Stuff
 	--
 	do
-		local Tasks = {}
-		local TaskCount, TaskMaxIndex = 0, 0
+		local Tasks, TaskCount, TaskMaxIndex = {}, 0, 0
 		local TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
 
 		local MSG_FUNCS = {
