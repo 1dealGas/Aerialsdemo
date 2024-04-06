@@ -120,6 +120,12 @@
     - name: range
       type: number
 
+  - name: SetHintSize
+    type: function
+    parameters:
+    - name: range
+      type: number
+
 
   - name: NewTable
     type: function

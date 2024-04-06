@@ -13,7 +13,7 @@ static const luaL_reg Arf2[] =   // Considering Adding a "JudgeArfController" Fu
 	{"SetXScale", SetXS}, {"SetYScale", SetYS}, {"SetXDelta", SetXD}, {"SetYDelta", SetYD},
 	{"SetRotDeg", SetRotDeg}, {"SetDaymode", SetDaymode},
 
-	{"NewTable", NewTable}, {nullptr, nullptr}
+	{"NewTable", NewTable}, {"SetHintSize", SetHintSize}, {nullptr, nullptr}
 
 };
 
