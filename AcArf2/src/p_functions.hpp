@@ -77,7 +77,7 @@ static int InitArf(lua_State* L) {
 	last_ms = dt_p1 = dt_p2 = 0;
 
 	// Reset Judge Params
-	judge_range = 37;						hint_size_x = hint_size_y = 337.5f;
+	judge_range = 37;						hint_size_x = hint_size_y = 360.0f;
 	mindt = idelta - judge_range;			mindt = (mindt < -100) ? -100 : mindt;
 	maxdt = idelta + judge_range;			maxdt = (maxdt >  100) ?  100 : maxdt;
 
