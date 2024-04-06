@@ -1223,7 +1223,7 @@ static int SetHintSize(lua_State* L) {
 	hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
 	hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
 	hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
-	hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 
+	hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 ;
 	hint_size_x = hint_size_x_script * 112.5f;
 	hint_size_y = hint_size_y_script * 112.5f;
 	return 0;
