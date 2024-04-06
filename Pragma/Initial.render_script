@@ -76,7 +76,7 @@ HapticFeedbackEnabled = true
 HitSoundEnabled = false           -- Unused in the Demo
 
 
--- Fumen Script Util
+-- FumenScript
 --
 -- Rule 1:
 --    Manually Register the Fumen Script in Engine init(self) like this:
