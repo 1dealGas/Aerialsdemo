@@ -79,7 +79,7 @@ HitSoundEnabled = false           -- Unused in the Demo
 -- FumenScript
 --
 -- Rule 1:
---    Manually Register the Fumen Script in Engine init(self) like this:
+--    Manually Register the FumenScript in Engine init(self) with Other Preparations, like this:
 --        CurrentFumenScript = msg.url("#")
 --
 -- Rule 2:
@@ -119,8 +119,12 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local cnt = 1
 	local task_tables = nt(task_count, 0)
 	for i=1, #TaskFns, 3 do
-		task_tables[cnt] = { TaskFns[i], TaskFns[i+1], TaskFns[i+2] }   -- StartMs, EndMs, TaskFn
-		cnt = cnt + 1
+		if TaskFns[i] <= TaskFns[i+1] then
+			task_tables[cnt] = { TaskFns[i], TaskFns[i+1], TaskFns[i+2] }   -- StartMs, EndMs, TaskFn
+			cnt = cnt + 1
+		else
+			task_count = task_count - 1
+		end
 	end
 	table_sort(task_tables, time_sorter)   -- Sort by StartMs
 
@@ -183,6 +187,12 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					TaskCount = TaskCount + 1
 				end
 
+				-- Do Tasks
+				--
+				for i=1, TaskMaxIndex do
+					if Tasks[i] then Tasks[i](canvas) end
+				end
+
 				-- Unregister
 				--
 				local current_unregister_time = Unregister[UnregisterWhich]
@@ -194,21 +204,11 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 						TaskMaxIndex = 0
 					end
 				end
-
-				-- Do Tasks
-				--
-				for i=1, TaskMaxIndex do
-					if Tasks[i] then
-						Tasks[i](canvas)
-					end
-				end
 			end
 		}
 
 		function on_message(self, message_id, message, sender)
-			if MSG_FUNCS[message_id] then
-				MSG_FUNCS[message_id](sender)
-			end
+			if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
 		end
 	end
 
