@@ -476,33 +476,26 @@ static int JudgeArf(lua_State* L) {
 
 				// Judge the Hint
 				if(current_hint.status == HINT_NONJUDGED_LIT) {
-					const bool iswa = is_safe_when_anmitsu(current_hint);	// Must Register STA Hints
-					if( (!min_time) || min_time == current_hint.ms ) {
-						min_time = current_hint.ms;							/* Status Update */
-						if(current_hint_id == special_hint) {
-							special_hint_judged = (bool)special_hint;
-						}
-						current_hint.status = HINT_JUDGED_LIT;
-						current_hint.judged_ms = mstime;
+					const bool iswa = is_safe_when_anmitsu(current_hint);		/* Register */
+					if( (!min_time) || min_time == current_hint.ms )
+						min_time = current_hint.ms;
+					else if( !iswa )
+						continue;
 
-						if(dt < mindt) {									/* Classify */
-							current_hint.elstatus = HINT_EARLY;
-							hint_early++;
-						}
-						else if(dt <= maxdt)
-							hint_hit++;
-						else {
-							current_hint.elstatus = HINT_LATE;
-							hint_late++;
-						}
+					current_hint.judged_ms = mstime;								/* Status Update */
+					current_hint.status = HINT_JUDGED_LIT;
+					if(current_hint_id == special_hint)
+						special_hint_judged = (bool)special_hint;
+
+					if(dt < mindt) {												/* Classify */
+						current_hint.elstatus = HINT_EARLY;
+						hint_early++;
 					}
-					else if( iswa && (dt>=mindt) && (dt<=maxdt) ) {			// Only "Hit" is allowed for Anmitsu Hints.
-						if(current_hint_id == special_hint) {
-							special_hint_judged = (bool)special_hint;
-						}
-						current_hint.status = HINT_JUDGED_LIT;
-						current_hint.judged_ms = mstime;
+					else if(dt <= maxdt)
 						hint_hit++;
+					else {
+						current_hint.elstatus = HINT_LATE;
+						hint_late++;
 					}
 				}
 			}
@@ -1167,7 +1160,6 @@ static int UpdateArf(lua_State* L) {
 			}
 		}
 	}
-
 
 	/* Clean Up & Do Returns */
 	lua_checkstack(L, 4);				lua_pushnumber(L, hint_lost);
