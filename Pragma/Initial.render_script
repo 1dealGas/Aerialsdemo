@@ -36,9 +36,9 @@ WindowActive = true
 WithinInterlude = true
 LayoutModeLandscape = false
 
+Nodes = Arf2.NewTable(8, 0)
 NodeMaxIndex = 0
 NodeCount = 0
-Nodes = {}
 
 CurrentGuiX = 0
 CurrentGuiY = 0
@@ -48,7 +48,7 @@ CurrentGuiPhase = nil
 
 -- Track Managing & Resources Related
 --
-Tracks = {}
+-- Tracks = {}                   -- Unused in the Demo
 CurrentTrackId = 1011
 CurrentTrackIndex = 0            -- Unused in the Demo
 
@@ -161,7 +161,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	-- Do "Macro-Like" Stuff
 	--
 	do
-		local Tasks, TaskCount, TaskMaxIndex = {}, 0, 0
+		local Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
 		local TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
 
 		local MSG_FUNCS = {
