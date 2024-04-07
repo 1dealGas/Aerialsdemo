@@ -14,7 +14,7 @@ local ButtonPressed, ButtonInsertIndex = false, 0
 local LastContextTime, LastWgoUsed, LastHgoUsed, LastAgoUsed = 0, 0, 0, 0
 local LastHit, LastNonHit, LastStr = 0, 0, ""
 -- TotalJud, Early, Late, Hit
--- Self: options_expanded(only if self.options == true), show_score
+-- self.show_score
 
 
 -- Caches & Constants
