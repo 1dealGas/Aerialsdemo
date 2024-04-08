@@ -163,9 +163,10 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			[hash("ar_special_hint_judged")] = type(SpecialHintJudgedFn)==FUNC and SpecialHintJudgedFn or nil,
 			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
 				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
-				if current_trigger_time and ContextTime > current_trigger_time then
-					Trigger[TriggerWhich+1](canvas)
+				while (current_trigger_time  and  ContextTime > current_trigger_time) do
 					TriggerWhich = TriggerWhich + 2
+					Trigger[TriggerWhich - 1](canvas)
+					current_trigger_time = Trigger[TriggerWhich]
 				end
 
 				local current_register_time = Register[RegisterWhich]                          -- Register
@@ -176,7 +177,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					TaskCount = TaskCount + 1
 				end
 
-				for i=1, TaskMaxIndex do                                                       -- Do Tasks
+				for i=TaskMaxIndex, 1, -1 do                                                   -- Do Tasks
 					if Tasks[i] then Tasks[i](canvas) end
 				end
 
@@ -283,8 +284,7 @@ function SyncSave(options_updated)
 			Save.Options.AudioLatency3 = AudioLatency
 		end
 	end
-
-	sys.save(SAVE_PATH, Save)
+		sys.save(SAVE_PATH, Save)
 end
 
 
