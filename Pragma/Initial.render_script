@@ -77,24 +77,17 @@ HitSoundEnabled = false           -- Unused in the Demo
 
 
 -- FumenScript
+-- Provide the TriggerFns table like this, or nil:
+--    {
+--        10000, function(canvas) end,   -- TriggerMs, TriggerFn
+--        20000, function(canvas) end
+--    }
 --
--- Rule 1:
---    Manually Register the FumenScript in Engine init(self) with Other Preparations, like this:
---        CurrentFumenScript = msg.url("#")
---
--- Rule 2:
---    Provide the TriggerFns table like this, or nil:
---        {
---            10000, function(canvas) end,   -- TriggerMs, TriggerFn
---            20000, function(canvas) end
---        }
---
--- Rule 3:
---    Provide TaskFns table like this, or nil:
---        {
---            10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
---            12000, 24000, function(canvas) end
---        }
+-- Provide TaskFns table like this, or nil:
+--    {
+--        10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
+--        12000, 24000, function(canvas) end
+--    }
 --
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
 	local type, nt = type, Arf2.NewTable
@@ -162,24 +155,20 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	--
 	do
 		local Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
-		local TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
+		local TriggerWhich, RegisterWhich, UnregisterWhich, FUNC = 1, 1, 1, "function"
 
 		local MSG_FUNCS = {
-			[hash("ar_init")] = type(FmInitFn)=="function" and FmInitFn or nil,
-			[hash("ar_final")] = type(FmFinalFn)=="function" and FmFinalFn or nil,
-			[hash("ar_special_hint_judged")] = type(SpecialHintJudgedFn)=="function" and SpecialHintJudgedFn or nil,
+			[hash("ar_init")] = type(FmInitFn)==FUNC and FmInitFn or nil,
+			[hash("ar_final")] = type(FmFinalFn)==FUNC and FmFinalFn or nil,
+			[hash("ar_special_hint_judged")] = type(SpecialHintJudgedFn)==FUNC and SpecialHintJudgedFn or nil,
 			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
-				-- Trigger
-				--
-				local current_trigger_time = Trigger[TriggerWhich]
+				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
 				if current_trigger_time and ContextTime > current_trigger_time then
 					Trigger[TriggerWhich+1](canvas)
 					TriggerWhich = TriggerWhich + 2
 				end
 
-				-- Register
-				--
-				local current_register_time = Register[RegisterWhich]
+				local current_register_time = Register[RegisterWhich]                          -- Register
 				if current_register_time and ContextTime > current_register_time then
 					TaskMaxIndex = TaskMaxIndex + 1
 					Tasks[TaskMaxIndex] = Register[RegisterWhich+1]
@@ -187,15 +176,11 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					TaskCount = TaskCount + 1
 				end
 
-				-- Do Tasks
-				--
-				for i=1, TaskMaxIndex do
+				for i=1, TaskMaxIndex do                                                       -- Do Tasks
 					if Tasks[i] then Tasks[i](canvas) end
 				end
 
-				-- Unregister
-				--
-				local current_unregister_time = Unregister[UnregisterWhich]
+				local current_unregister_time = Unregister[UnregisterWhich]                    -- Unregister
 				if current_unregister_time and ContextTime > current_unregister_time then
 					Tasks[ Unregister[UnregisterWhich+1] ] = nil
 					UnregisterWhich = UnregisterWhich + 2
@@ -207,12 +192,39 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			end
 		}
 
-		function on_message(self, message_id, message, sender)
-			if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
+		if type(init)==FUNC then
+			local original_init = init
+			init = function(self)
+				original_init(self)
+				CurrentFumenScript = msg.url("#")
+			end
+		else
+			function init() CurrentFumenScript = msg.url("#") end
+		end
+
+		if type(final)==FUNC then
+			local original_final = final
+			final = function(self)
+				original_final(self)
+				CurrentFumenScript = nil
+			end
+		else
+			function final() CurrentFumenScript = nil end
+		end
+
+		if type(on_message)==FUNC then
+			local original_on_message = on_message
+			on_message = function(self, message_id, message, sender)
+				if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
+				original_on_message(self, message_id, message, sender)
+			end
+		else
+			function on_message(self, message_id, message, sender)
+				if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
+			end
 		end
 	end
-
-	collectgarbage()
+		collectgarbage()
 end
 
 
@@ -220,7 +232,7 @@ end
 -- Save == nil before the initialization
 --
 local B64 = require("Reference/lbase64")
-local SAVE_PATH = sys.get_save_file("Aerials Demo", "SAVE")
+local SAVE_PATH = sys.get_save_file("Aerials Tester", "SAVE")
 local EMPTY_SAVE = {
 	Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {},
 	Options = {
