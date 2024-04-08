@@ -153,8 +153,9 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	-- Do "Macro-Like" Stuff
 	--
 	do
-		local Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
-		local TriggerWhich, RegisterWhich, UnregisterWhich, FINAL, FUNC = 1, 1, 1, false, "function"
+		local Tasks, TaskCount, TaskMaxIndex, FINAL = nt(task_count,0), 0, 0
+		local TriggerWhich, RegisterWhich, UnregisterWhich, FUNC = 1, 1, 1, "function"
+		local Trigger, Register, Unregister = Trigger, Register, Unregister
 
 		if type(FmFinalFn) == FUNC then
 			FINAL = function(canvas)
@@ -242,8 +243,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 end
 
 
--- Save & Credits
--- Save == nil before the initialization
+-- Save(nil before the initialization) & Credits
 --
 local B64 = require("Reference/lbase64")
 local SAVE_PATH = sys.get_save_file("Aerials Demo", "SAVE")
@@ -288,9 +288,9 @@ function SyncSave(options_updated)
 		Save.Options.InputDelta = InputDelta
 		Save.Options.HitSoundEnabled = HitSoundEnabled
 		Save.Options.HapticFeedbackEnabled = HapticFeedbackEnabled
-		if OffsetType == 1 then		Save.Options.AudioLatency1 = AudioLatency
-		elseif OffsetType == 2 then	Save.Options.AudioLatency2 = AudioLatency
-		else				Save.Options.AudioLatency3 = AudioLatency
+		if OffsetType == 1 then			Save.Options.AudioLatency1 = AudioLatency
+		elseif OffsetType == 2 then		Save.Options.AudioLatency2 = AudioLatency
+		else							Save.Options.AudioLatency3 = AudioLatency
 		end
 	end
 		sys.save(SAVE_PATH, Save)
