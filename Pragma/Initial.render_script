@@ -192,7 +192,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 				end
 
 				for i=TaskMaxIndex, 1, -1 do                                                   -- Do Tasks
-					if Tasks[i] then			Tasks[i](canvas)
+					if Tasks[i] then				Tasks[i](canvas)
 					elseif i == TaskMaxIndex then		TaskMaxIndex = i - 1
 					end
 				end
