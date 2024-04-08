@@ -232,7 +232,7 @@ end
 -- Save == nil before the initialization
 --
 local B64 = require("Reference/lbase64")
-local SAVE_PATH = sys.get_save_file("Aerials Tester", "SAVE")
+local SAVE_PATH = sys.get_save_file("Aerials Demo", "SAVE")
 local EMPTY_SAVE = {
 	Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {},
 	Options = {
