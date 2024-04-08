@@ -82,6 +82,7 @@ HitSoundEnabled = false           -- Unused in the Demo
 --        10000, function(canvas) end,   -- TriggerMs, TriggerFn
 --        20000, function(canvas) end
 --    }
+--
 -- Provide TaskFns table like this, or nil:
 --    {
 --        10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
@@ -139,6 +140,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		Trigger[i*2-1] = trigger_tables[i][1]
 		Trigger[i*2] = trigger_tables[i][2]
 	end
+
 	for i=1, task_count do
 		Register[i*2-1] = register_tables[i][1]
 		Register[i*2] = register_tables[i][2]
@@ -182,25 +184,22 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 				end
 
 				local current_register_time = Register[RegisterWhich]                          -- Register
-				if current_register_time and ContextTime > current_register_time then
-					TaskMaxIndex = TaskMaxIndex + 1
-					Tasks[TaskMaxIndex] = Register[RegisterWhich+1]
-					RegisterWhich = RegisterWhich + 2
+				while (current_register_time  and  ContextTime > current_register_time) do
 					TaskCount = TaskCount + 1
+					TaskMaxIndex = TaskMaxIndex + 1
+					RegisterWhich = RegisterWhich + 2
+					Tasks[TaskMaxIndex] = Register[RegisterWhich - 1]
+					current_register_time = Register[RegisterWhich]
 				end
-
-				for i=TaskMaxIndex, 1, -1 do                                                   -- Do Tasks
-					if Tasks[i] then Tasks[i](canvas) end
-				end
+				for i=TaskMaxIndex, 1, -1 do  if Tasks[i] then Tasks[i](canvas) end  end       -- Do Tasks
 
 				local current_unregister_time = Unregister[UnregisterWhich]                    -- Unregister
-				if current_unregister_time and ContextTime > current_unregister_time then
-					Tasks[ Unregister[UnregisterWhich+1] ] = nil
-					UnregisterWhich = UnregisterWhich + 2
+				while (current_unregister_time  and  ContextTime > current_unregister_time) do
 					TaskCount = TaskCount - 1
-					if TaskCount == 0 then
-						TaskMaxIndex = 0
-					end
+					UnregisterWhich = UnregisterWhich + 2
+					if TaskCount == 0 then TaskMaxIndex = 0 end
+					Tasks[ Unregister[UnregisterWhich - 1] ] = nil
+					current_unregister_time = Unregister[UnregisterWhich]
 				end
 			end,
 
@@ -444,7 +443,6 @@ local function update_state(w, h)
 end
 
 
---
 -- Defold Gameloop Funcs
 --
 function init(self)
