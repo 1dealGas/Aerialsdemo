@@ -190,7 +190,14 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					Tasks[TaskMaxIndex] = Register[RegisterWhich - 1]
 					current_register_time = Register[RegisterWhich]
 				end
-				for i=TaskMaxIndex, 1, -1 do  if Tasks[i] then Tasks[i](canvas) end  end       -- Do Tasks
+
+				local tm = TaskMaxIndex
+				for i=tm, 1, -1 do                                                             -- Do Tasks
+					if Tasks[i] then			Tasks[i](canvas)
+					elseif i == tm then			tm = i - 1
+					end
+				end
+				TaskMaxIndex = tm
 
 				local current_unregister_time = Unregister[UnregisterWhich]                    -- Unregister
 				while (current_unregister_time  and  ContextTime > current_unregister_time) do
@@ -247,7 +254,6 @@ local B64 = require("Reference/lbase64")
 local SAVE_PATH = sys.get_save_file("Aerials Demo", "SAVE")
 function CopyCredit() clipboard.copy( sys.load_resource("/Ar.license") ) end
 function ExportSave() clipboard.copy( B64.encode( sys.serialize(Save) ) ) end
-
 function ImportSave()
 	local OK, SaveStr = pcall( B64.decode, clipboard.paste() )
 	local OK, SaveTable = pcall(sys.deserialize, SaveStr)
@@ -337,8 +343,7 @@ end
 --     Strip Several Encapsulations We Considered Useless
 --
 --
-local hash = hash
-local pairs = pairs
+local hash, pairs = hash, pairs
 local vmath_vector4 = vmath.vector4
 local vmath_matrix4 = vmath.matrix4
 local vmath_matrix4_orthographic = vmath.matrix4_orthographic
@@ -454,7 +459,6 @@ function init(self)
 end
 
 function update(self)
-
 	-- Check if the state is valid
 	--
 	if not (state_window_w > 0 and state_window_h > 0) then
