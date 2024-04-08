@@ -6,25 +6,26 @@ local TOUCH, TOUCH_MULTI = hash("touch"), hash("touch_multi")
 
 local v3 = vmath.vector3
 local JudgeArf = Arf2.JudgeArf
-local socket_gettime = socket.gettime
 local AcAudioGetTime = AcAudio.GetTime
 local DoHapticFeedback = AcUtil.DoHapticFeedback
 local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
+local collectgarbage, socket_gettime = collectgarbage, socket.gettime
 local msg_post = msg.post
 
 local CenterX, CenterY, PosDnm = 0, 0, 0
 local NodeProgress, LastHapticTime = 0, 0
 local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
-local HitSoundUnits = Arf2.NewTable(6, 0)
-local HsWhich = 1
+local HitSoundUnits, HsWhich = Arf2.NewTable(6,0), 1
 
 
 -- Platform-Independent Functions
 --
 function init()
-	-- Prepare Input
+	-- Prepare Input & GC
 	--
 	msg_post("#", "acquire_input_focus")
+	collectgarbage("setpause", 0x10485761048576)
+	collectgarbage("setstepmul", 1)
 
 	-- Set Window Listener
 	--
@@ -76,6 +77,7 @@ function init()
 	end
 end
 
+function update() collectgarbage("step", 0) end
 function on_message(self, message_id)
 	if message_id == PG then
 		for i = NodeProgress-1, 1, -1 do
@@ -175,8 +177,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 				if NodeCount == 0 then NodeMaxIndex = 0 end
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
-						NodeMaxIndex = i
-						NodeProgress = i
+						NodeMaxIndex, NodeMaxIndex = i, i
 						msg_post(Nodes[i], PG)
 						break
 					end
@@ -235,8 +236,7 @@ else
 			if NodeCount == 0 then NodeMaxIndex = 0 end
 			for i = NodeMaxIndex, 1, -1 do
 				if Nodes[i] then
-					NodeMaxIndex = i
-					NodeProgress = i
+					NodeMaxIndex, NodeProgress = i, i
 					msg_post(Nodes[i], PG)
 					break
 				end
