@@ -82,7 +82,6 @@ HitSoundEnabled = false           -- Unused in the Demo
 --        10000, function(canvas) end,   -- TriggerMs, TriggerFn
 --        20000, function(canvas) end
 --    }
---
 -- Provide TaskFns table like this, or nil:
 --    {
 --        10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
@@ -155,11 +154,23 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	--
 	do
 		local Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
-		local TriggerWhich, RegisterWhich, UnregisterWhich, FUNC = 1, 1, 1, "function"
+		local TriggerWhich, RegisterWhich, UnregisterWhich, FINAL, FUNC = 1, 1, 1, false, "function"
+
+		if type(FmFinalFn) == FUNC then
+			FINAL = function(canvas)
+				FmFinalFn(canvas)
+				TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
+				Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
+			end
+		else
+			FINAL = function()
+				TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
+				Tasks, TaskCount, TaskMaxIndex = nt(task_count,0), 0, 0
+			end
+		end
 
 		local MSG_FUNCS = {
 			[hash("ar_init")] = type(FmInitFn)==FUNC and FmInitFn or nil,
-			[hash("ar_final")] = type(FmFinalFn)==FUNC and FmFinalFn or nil,
 			[hash("ar_special_hint_judged")] = type(SpecialHintJudgedFn)==FUNC and SpecialHintJudgedFn or nil,
 			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
 				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
@@ -190,7 +201,9 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 						TaskMaxIndex = 0
 					end
 				end
-			end
+			end,
+
+			[hash("ar_final")] = FINAL
 		}
 
 		if type(init)==FUNC then
@@ -275,13 +288,9 @@ function SyncSave(options_updated)
 		Save.Options.InputDelta = InputDelta
 		Save.Options.HitSoundEnabled = HitSoundEnabled
 		Save.Options.HapticFeedbackEnabled = HapticFeedbackEnabled
-
-		if OffsetType == 1 then
-			Save.Options.AudioLatency1 = AudioLatency
-		elseif OffsetType == 2 then
-			Save.Options.AudioLatency2 = AudioLatency
-		else
-			Save.Options.AudioLatency3 = AudioLatency
+		if OffsetType == 1 then		Save.Options.AudioLatency1 = AudioLatency
+		elseif OffsetType == 2 then	Save.Options.AudioLatency2 = AudioLatency
+		else				Save.Options.AudioLatency3 = AudioLatency
 		end
 	end
 		sys.save(SAVE_PATH, Save)
@@ -354,7 +363,7 @@ local render_disable_state = render.disable_state
 local render_draw_debug3d = render.draw_debug3d
 local render_draw = render.draw
 
---
+
 -- Constants
 --
 local MSG_CLEAR_COLOR =         hash("clear_color")
@@ -369,7 +378,7 @@ local render_STATE_CULL_FACE = render.STATE_CULL_FACE
 local render_STATE_BLEND = render.STATE_BLEND
 local render_STATE_STENCIL_TEST = render.STATE_STENCIL_TEST
 
---
+
 -- Unwraped State & Camera Args
 -- Near = -1, Far = 1, Zoom = 1
 --
@@ -392,7 +401,6 @@ state_clear_buffers[render_BUFFER_DEPTH_BIT] = 1
 state_clear_buffers[render_BUFFER_STENCIL_BIT] = 0
 
 
---
 -- Last Encapsulation Layer
 --
 local function update_state(w, h)
