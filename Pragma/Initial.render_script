@@ -191,13 +191,11 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					current_register_time = Register[RegisterWhich]
 				end
 
-				local tm = TaskMaxIndex
-				for i=tm, 1, -1 do                                                             -- Do Tasks
+				for i=TaskMaxIndex, 1, -1 do                                                   -- Do Tasks
 					if Tasks[i] then			Tasks[i](canvas)
-					elseif i == tm then			tm = i - 1
+					elseif i == TaskMaxIndex then		TaskMaxIndex = i - 1
 					end
 				end
-				TaskMaxIndex = tm
 
 				local current_unregister_time = Unregister[UnregisterWhich]                    -- Unregister
 				while (current_unregister_time  and  ContextTime > current_unregister_time) do
