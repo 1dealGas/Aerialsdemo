@@ -224,10 +224,10 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			local original_final = final
 			final = function(self)
 				original_final(self)
-				if CurrentFumenScript==msg.url("#") then CurrentFumenScript=nil end
+				if CurrentFumenScript.fragment==msg.url("#").fragment then CurrentFumenScript=nil end
 			end
 		else
-			function final()  if CurrentFumenScript==msg.url("#") then CurrentFumenScript=nil end  end
+			function final()  if CurrentFumenScript.fragment==msg.url("#").fragment then CurrentFumenScript=nil end  end
 		end
 
 		if type(on_message)==FUNC then
