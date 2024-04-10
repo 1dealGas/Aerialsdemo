@@ -21,8 +21,9 @@ AcArf2/include/arf2_generated.h linguist-generated
 AcArf2/include/ease_constants.h linguist-generated
 AcArf2/include/flatbuffers/** linguist-vendored
 
+AcClipboard/** linguist-vendored
 Reference/lbase64.lua linguist-vendored
 AcAudio/include/miniaudio.h linguist-vendored
 AcAudio/src/miniaudio.cpp linguist-vendored
 AcAudio/src/miniaudio.mm linguist-vendored
-AcClipboard/** linguist-vendored
+Pragma/Ar.render_script linguist-vendored
