@@ -230,7 +230,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	--
 	do
 		local TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
-		local Tasks, TaskCount, TaskMaxIndex, FINAL, ARUPD = nt(task_count,0), 0, 0
+		local Tasks, TaskCount, TaskMaxIndex, UPDATE, FINAL = nt(task_count,0), 0, 0
 		local Trigger, Register, Unregister = Trigger, Register, Unregister
 
 		if is_callable(FmFinalFn) then
@@ -247,7 +247,8 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		end
 
 		if task_count > 0 then
-			ARUPD = function(canvas)   -- Will be called only when ContextTime exists
+			UPDATE = function(canvas)   -- Will be called only when ContextTime exists
+				local ContextTime = ContextTime
 				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
 					TriggerWhich = TriggerWhich + 2
@@ -280,8 +281,8 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 				end
 			end
 		else
-			ARUPD = function(canvas)
-				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
+			UPDATE = function(canvas)
+				local ContextTime, current_trigger_time = ContextTime, Trigger[TriggerWhich]                             -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
 					TriggerWhich = TriggerWhich + 2
 					Trigger[TriggerWhich - 1](canvas)
@@ -293,7 +294,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		local MSG_FUNCS = {
 			[hash("ar_init")] = is_callable(FmInitFn) and FmInitFn or nil,
 			[hash("ar_special_hint_judged")] = is_callable(SpecialHintJudgedFn) and SpecialHintJudgedFn or nil,
-			[hash("ar_update")] = ARUPD,
+			[hash("ar_update")] = UPDATE,
 			[hash("ar_final")] = FINAL
 		}
 
@@ -391,7 +392,6 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__div = function(lnum, rnum)   -- Merge Tweens
 		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or {}
 		local merge_target_size = #merge_target
-
 		for i=1, tween_capacity do  merge_target[merge_target_size + i] = tween_cache[i]  end
 		tween_cache, tween_capacity = {}, 0
 		return merge_target
