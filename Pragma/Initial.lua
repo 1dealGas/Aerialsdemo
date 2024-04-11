@@ -35,7 +35,7 @@ WindowActive = true
 WithinInterlude = true
 LayoutModeLandscape = false
 
-Nodes = Arf2.NewTable(8, 0)
+Nodes = AcUtil.NewTable(8, 0)
 NodeMaxIndex = 0
 NodeCount = 0
 
@@ -88,7 +88,7 @@ HitSoundEnabled = false           -- Unused in the Demo
 --    }
 --
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
-	local type, nt = type, Arf2.NewTable
+	local type, nt = type, AcUtil.NewTable
 	local table_sort, time_sorter = table.sort, function(a,b) return a[1]<b[1] end
 
 	TriggerFns = type(TriggerFns)=="table" and TriggerFns or {}
