@@ -119,16 +119,8 @@ function init(self)
 		-- the UI Node to be created as a script property here.
 		self.options = factory_create("Ar:/Pragma#1 Options", nil, nil, {current_canvas = msg_url("#")})
 	else
-		-- Register GUI Node
-		--
-		NodeMaxIndex = NodeMaxIndex + 1
-		ButtonInsertIndex = NodeMaxIndex
-		Nodes[ButtonInsertIndex] = msg_url()
-		NodeCount = NodeCount + 1
-
-		-- Set Text
-		--
 		label_set_text(ButtonLabel, "Exit「×」")
+		ButtonInsertIndex = AppendNode()
 	end
 
 	self.show_score = true
@@ -361,34 +353,26 @@ function final(self)
 
 	-- External Clean-up
 	--
-	if self.options then
-		msg_post(self.options, AR_FINAL)
+	if CurrentFumenScript then 				msg_post(CurrentFumenScript, AR_FINAL)  end
+	if self.options then					msg_post(self.options, AR_FINAL)
 	else
 		label_set_text(ButtonLabel, "")
 		go_set(ButtonLabel, COLOR, TEXT_WHITE)
-		Nodes[ButtonInsertIndex] = nil
-		NodeCount = NodeCount - 1
-	end
-
-	if CurrentFumenScript then
-		msg_post(CurrentFumenScript, AR_FINAL)
+		RemoveNode(ButtonInsertIndex)
 	end
 
 	-- Release GOs
 	--
 	local go_delete = go.delete
-	for i = 1, #WGOs do
-		go_delete(WGOs[i])
-	end
-
+	for i = 1, #WGOs do				go_delete(WGOs[i])			end
 	for i = 1, #HGOs do
 		go_delete(HGOs[i])			go_delete(AlGOs[i])			go_delete(ArGOs[i])
 	end
 
 	-- Param Clean-up
 	--
-	Before = 0
-	TotalJud, Hit, Early, Late, ContextTime = 0, 0, 0, 0, nil
+	Before, ContextTime = 0, nil
+	TotalJud, Hit, Early, Late = 0, 0, 0, 0
 
 	WGOs, HGOs, AlGOs, ArGOs = nil, nil, nil, nil
 	WishTints, HintTints, AnimTints = nil, nil, nil

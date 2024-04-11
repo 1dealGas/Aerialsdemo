@@ -8,26 +8,7 @@
 
 -- Input & GUI System
 --
--- Rule 1:
---    Phase 0 / Pressed
---    Phase 1 / OnScreen
---    Phase 2 / Released
---
--- Rule 2:
---    When adding a GUI Node, cache its index and update NodeMaxIndex,
---    and then increase the NodeCount, like this:
---        NodeMaxIndex = NodeMaxIndex + 1
---        local insert_index	= NodeMaxIndex
---        Nodes[insert_index]	= msg.url()
---        NodeCount = NodeCount + 1
---
--- Rule 3:
---    Remove a GUI Node like this:
---        Nodes[insert_index] = nil
---        NodeCount = NodeCount - 1
---    Then it's ok to do other clean-ups.
---
--- Callbacks:
+-- Non-local Callbacks:
 --     GuiDoFeedback(with_hitsound)
 --     InterludeIn(fn, is_async)
 --     InterludeOut(fn)
@@ -35,14 +16,19 @@
 WindowActive = true
 WithinInterlude = true
 LayoutModeLandscape = false
+Nodes, NodeCount, NodeMaxIndex = AcUtil.NewTable(8, 0), 0, 0
+CurrentGuiX, CurrentGuiY, CurrentGuiPhase = 0, 0, nil   -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
 
-Nodes = AcUtil.NewTable(8, 0)
-NodeMaxIndex = 0
-NodeCount = 0
+function AppendNode(url)
+	NodeCount, NodeMaxIndex = NodeCount+1, NodeMaxIndex+1
+	Nodes[NodeMaxIndex]	= url or msg.url("#")
+	return NodeMaxIndex
+end
 
-CurrentGuiX = 0
-CurrentGuiY = 0
-CurrentGuiPhase = nil
+function RemoveNode(idx)
+	NodeCount = NodeCount - 1
+	Nodes[idx] = nil
+end
 
 
 -- Track Managing & Resources Related

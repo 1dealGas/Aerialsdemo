@@ -52,8 +52,7 @@ local Credit, CreditPressed = hash("OptionCredit"), hash("OptionCreditPressed")
 
 -- Component Caches
 --
-local Exit
-local ShowHide = msg_url(Ar, "/Texts", "SouthEast")
+local ShowHide, Exit = msg_url(Ar, "/Texts", "SouthEast")
 local OffsetTypeButton, AudioLatencyButton, AudioLatencyText, InputDeltaButton, InputDeltaText
 local ImportButton, ExportButton, CreditButton
 local HapticToggle, HitSoundToggle
@@ -264,15 +263,9 @@ function init(self)
 
 	-- Register GUI Node & Clean Up
 	--
-	NodeMaxIndex = NodeMaxIndex + 1
-	OptionsInsertIndex = NodeMaxIndex
-	Nodes[OptionsInsertIndex] = u
-	NodeCount = NodeCount + 1
-
-	msg_post(p, DISABLE)
-	go_set(p, "position.x", 1781.5)
 	label_set_text(ShowHide, STR_SHOW)
-	Phase = 1
+	go_set(p, "position.x", 1781.5)				msg_post(p, DISABLE)
+	OptionsInsertIndex = AppendNode()			Phase = 1
 end
 
 function update(self, dt)
@@ -298,17 +291,14 @@ end
 function final(self)
 	-- Unregister
 	--
-	label_set_text(ShowHide, "")
-	go_set(ShowHide, COLOR, TEXT_WHITE)
-	Nodes[OptionsInsertIndex] = nil
-	NodeCount = NodeCount - 1
+	label_set_text(ShowHide, "")				go_set(ShowHide, COLOR, TEXT_WHITE)
+	RemoveNode(OptionsInsertIndex)				OptionsInsertIndex = 0
 
 	-- Other Clean-Up
 	--
 	ButtonPressed = false
 	ShowFps, FpsSampleTick, LastFps, LastFpsStr = false, 0, 0, "0 fps"
 	for i=1, 30 do FpsSamples[i] = 0 end
-	OptionsInsertIndex = 0
 end
 
 
