@@ -16,11 +16,6 @@ namespace AcUtil {
 		return 1;
 	}
 
-	inline int PushNullptr(lua_State* L) {   // Sth just for pairing with a metatable, and not a Table
-		lua_pushlightuserdata(L, nullptr);
-		return 1;
-	}
-
 	inline int StrToSha1(lua_State* L) {
 		size_t InSize;
 		const auto Input	= (uint8_t*)luaL_checklstring(L, 1, &InSize);
@@ -71,9 +66,10 @@ namespace AcUtil {
 /* Binding Stuff */
 namespace AuBinding {
 	constexpr luaL_reg LuaAPIs[] = {
-		{"NewTable", AcUtil::NewTable}, {"PushNullptr", AcUtil::PushNullptr},
-		{"StrToSha1", AcUtil::StrToSha1}, {"StrToSha256", AcUtil::StrToSha256}, {"StrToSha512", AcUtil::StrToSha512},
-		{"StrToMd5", AcUtil::StrToMd5}, {"DoHapticFeedback", AcUtil::DoHapticFeedback}, {nullptr, nullptr}
+		{"DoHapticFeedback", AcUtil::DoHapticFeedback}, {"NewTable", AcUtil::NewTable},
+		{"StrToSha1", AcUtil::StrToSha1}, {"StrToSha256", AcUtil::StrToSha256},
+		{"StrToMd5", AcUtil::StrToMd5}, {"StrToSha512", AcUtil::StrToSha512},
+		{nullptr, nullptr}
 	};
 
 	// Lifecycle Calls
