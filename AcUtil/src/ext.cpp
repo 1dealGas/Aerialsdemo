@@ -4,16 +4,24 @@
 
 
 /* APIs */
-#if !( defined(DM_PLATFORM_IOS) || defined(DM_PLATFORM_ANDROID) )
-	void AcUtilDoHapticFeedback() {}
-#else
+#if defined(DM_PLATFORM_IOS) || defined(DM_PLATFORM_ANDROID)
 	extern void AcUtilDoHapticFeedback();
 #endif
-namespace AcUtil {
 
+namespace AcUtil {
 	inline int NewTable(lua_State* L) {   // LUA_MINSTACK should be larger than 20
 		lua_createtable( L, (int)luaL_checknumber(L, 1), (int)luaL_checknumber(L, 2) );
 		return 1;
+	}
+	inline int PushNullptr(lua_State* L) {   // Sth just for pairing with a metatable, and not a Table
+		lua_pushlightuserdata(L, nullptr);
+		return 1;
+	}
+	inline int DoHapticFeedback(lua_State* L) {
+		#if defined(DM_PLATFORM_IOS) || defined(DM_PLATFORM_ANDROID)
+		AcUtilDoHapticFeedback();
+		#endif
+		return 0;
 	}
 
 	inline int StrToSha1(lua_State* L) {
@@ -55,21 +63,15 @@ namespace AcUtil {
 		delete[] Output;
 		return 1;
 	}
-
-	inline int DoHapticFeedback(lua_State* L) {
-		AcUtilDoHapticFeedback();
-		return 0;
-	}
 }
 
 
 /* Binding Stuff */
 namespace AuBinding {
 	constexpr luaL_reg LuaAPIs[] = {
-		{"DoHapticFeedback", AcUtil::DoHapticFeedback}, {"NewTable", AcUtil::NewTable},
-		{"StrToSha1", AcUtil::StrToSha1}, {"StrToSha256", AcUtil::StrToSha256},
-		{"StrToMd5", AcUtil::StrToMd5}, {"StrToSha512", AcUtil::StrToSha512},
-		{nullptr, nullptr}
+		{"NewTable", AcUtil::NewTable}, {"PushNullptr", AcUtil::PushNullptr},
+		{"StrToSha1", AcUtil::StrToSha1}, {"StrToSha256", AcUtil::StrToSha256}, {"StrToSha512", AcUtil::StrToSha512},
+		{"StrToMd5", AcUtil::StrToMd5}, {"DoHapticFeedback", AcUtil::DoHapticFeedback}, {nullptr, nullptr}
 	};
 
 	// Lifecycle Calls

@@ -13,6 +13,9 @@
     - name: table_created
       type: table
 
+  - name: PushNullptr
+    type: function
+
   - name: StrToSha1
     type: function
     parameters:
