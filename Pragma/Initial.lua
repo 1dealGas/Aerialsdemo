@@ -340,13 +340,13 @@ local type, msg_post, STRING, ENABLE, DISABLE = type, msg.post, "string", hash("
 function TriggerDisable(...)
 	local urls = {...}			local urllen = #urls
 	if urllen == 1 then			return function() msg_post(urls[1], DISABLE) end
-	else						return function() for i=1, #urls do msg_post(urls[i], DISABLE) end end
+	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
 	end
 end
 function TriggerEnable(...)
 	local urls = {...}			local urllen = #urls
 	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
-	else						return function() for i=1, #urls do msg_post(urls[i], ENABLE) end end
+	else						return function() for i=1, urllen do msg_post(urls[i], ENABLE) end end
 	end
 end
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
