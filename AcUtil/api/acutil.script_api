@@ -2,6 +2,20 @@
   type: table
   members:
 
+  - name: NewTable
+    type: function
+    parameters:
+    - name: narr
+      type: number
+    - name: nrec
+      type: number
+    returns:
+    - name: table_created
+      type: table
+
+  - name: PushNullptr
+    type: function
+
   - name: StrToSha1
     type: function
     parameters:

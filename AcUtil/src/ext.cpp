@@ -10,6 +10,17 @@
 	extern void AcUtilDoHapticFeedback();
 #endif
 namespace AcUtil {
+
+	inline int NewTable(lua_State* L) {   // LUA_MINSTACK should be larger than 20
+		lua_createtable( L, (int)luaL_checknumber(L, 1), (int)luaL_checknumber(L, 2) );
+		return 1;
+	}
+
+	inline int PushNullptr(lua_State* L) {   // Sth just for pairing with a metatable, and not a Table
+		lua_pushlightuserdata(L, nullptr);
+		return 1;
+	}
+
 	inline int StrToSha1(lua_State* L) {
 		size_t InSize;
 		const auto Input	= (uint8_t*)luaL_checklstring(L, 1, &InSize);
@@ -60,6 +71,7 @@ namespace AcUtil {
 /* Binding Stuff */
 namespace AuBinding {
 	constexpr luaL_reg LuaAPIs[] = {
+		{"NewTable", AcUtil::NewTable}, {"PushNullptr", AcUtil::PushNullptr},
 		{"StrToSha1", AcUtil::StrToSha1}, {"StrToSha256", AcUtil::StrToSha256}, {"StrToSha512", AcUtil::StrToSha512},
 		{"StrToMd5", AcUtil::StrToMd5}, {"DoHapticFeedback", AcUtil::DoHapticFeedback}, {nullptr, nullptr}
 	};
