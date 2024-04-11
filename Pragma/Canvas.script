@@ -1,10 +1,11 @@
 go.property("options", false)   -- On non-demo versions, this will be determined by CurrentTrackId
 go.property("display_losts", false)   -- On non-demo versions, this will be determined by Save.Wish
-go.property("xscale", 1)
-go.property("yscale", 1)
-go.property("xdelta", 0)
-go.property("ydelta", 0)
-go.property("rotdeg", 0)
+go.property("update_camera", true)
+go.property("x_scale", 1)
+go.property("y_scale", 1)
+go.property("x_delta", 0)
+go.property("y_delta", 0)
+go.property("euler_z", 0)
 
 
 -- Context Info
@@ -126,6 +127,7 @@ function init(self)
 		NodeCount = NodeCount + 1
 
 		-- Set Text
+		--
 		label_set_text(ButtonLabel, "Exit「×」")
 	end
 
@@ -151,7 +153,7 @@ function update(self, dt)
 	-- Update Context
 	--
 	if ContextTime < Before then
-		SetCam(self.xscale, self.yscale, self.xdelta, self.ydelta, self.rotdeg)
+		if self.update_camera then SetCam(self.x_scale, self.y_scale, self.x_delta, self.y_delta, self.euler_z) end
 		local hint_lost, wgo_used, hgo_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, AlGOs, ArGOs, WishTints, HintTints, AnimTints)
 
 		-- Mutate Tints
@@ -244,9 +246,7 @@ function update(self, dt)
 						label_set_text(Label, LastStr)
 					end
 				end
-
-				LastHit = Hit
-				LastNonHit = current_nonhit
+					LastHit, LastNonHit = Hit, current_nonhit
 			end
 		end
 			LastContextTime = ContextTime
@@ -261,15 +261,15 @@ end
 local message_callbacks = {
 	[SHOW_OPTIONS] = function(self)
 		if self.options then
-			go.cancel_animations("#", "xdelta")
-			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
+			go.cancel_animations("#", "x_delta")
+			go.animate("#", "x_delta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
 		end
 	end,
 
 	[HIDE_OPTIONS] = function(self)
 		if self.options then
-			go.cancel_animations("#", "xdelta")
-			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
+			go.cancel_animations("#", "x_delta")
+			go.animate("#", "x_delta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
 		end
 	end,
 
