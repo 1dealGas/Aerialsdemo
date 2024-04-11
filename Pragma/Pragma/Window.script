@@ -1,0 +1,240 @@
+-- Caches & Local Variables
+--
+local PG = hash("ar_process_gui")
+local SHJ = hash("ar_special_hint_judged")
+local TOUCH, TOUCH_MULTI = hash("touch"), hash("touch_multi")
+
+local v3 = vmath.vector3
+local JudgeArf = Arf2.JudgeArf
+local AcAudioGetTime = AcAudio.GetTime
+local DoHapticFeedback = AcUtil.DoHapticFeedback
+local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
+local socket_gettime, msg_post = socket.gettime, msg.post
+
+local CenterX, CenterY, PosDnm = 0, 0, 0
+local NodeProgress, LastHapticTime = 0, 0
+local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
+local HitSoundUnits, HsWhich = AcUtil.NewTable(6,0), 1
+
+
+-- Platform-Independent Functions
+--
+function init()
+	-- Preparations
+	--
+	msg_post("#", "acquire_input_focus")
+	window.set_listener(
+		function(self, event, data)
+			if event == 0 then
+				WindowActive = false
+				if CurrentAudioUnit then
+					ContextTime = nil
+					AcAudio.StopUnit(CurrentAudioUnit, false)
+				end
+			elseif event == 1 then
+				WindowActive = true
+			elseif event == 2 then
+				CenterX, CenterY = data.width / 2, data.height / 2
+				local wr, hr = CenterX / 900, CenterY / 540
+				if wr > hr then
+					LayoutModeLandscape = true
+					PosDnm = 1 / hr
+				else
+					LayoutModeLandscape = true
+					PosDnm = 1 / wr
+				end
+			end
+		end
+	)
+
+	-- Initial Window Size Adapting
+	--
+	local W, H = window.get_size()
+	CenterX, CenterY = W / 2, H / 2
+	local wr, hr = W / 1800, H / 1080
+	if wr > hr then
+		LayoutModeLandscape = true
+		PosDnm = 1 / hr
+	else
+		LayoutModeLandscape = true
+		PosDnm = 1 / wr
+	end
+
+	-- Prepare HitSounds
+	--
+	local CreateUnit = AcAudio.CreateUnit
+	local hitsoundbuf = sys.load_buffer("Reference/maou_se_system14.wav")
+	local _, hitsoundres = AcAudio.CreateResource(hitsoundbuf)
+	for i = 1, 6 do
+		local _, u = CreateUnit(hitsoundres)
+		HitSoundUnits[i] = u
+	end
+end
+
+function on_message(self, message_id)
+	if message_id == PG then
+		for i = NodeProgress-1, 1, -1 do
+			if Nodes[i] then
+				NodeProgress = i
+				msg_post(Nodes[i], PG)
+				break
+			end
+		end
+	end
+end
+
+
+-- Platform Specific Functions
+--
+local system_name = sys.get_sys_info().system_name
+if (system_name == "Android") or (system_name == "iPhone OS") then
+
+	function GuiDoFeedback(with_hitsound)
+		local current_time = socket_gettime()
+
+		-- Do Haptic Feedback
+		--
+		if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
+			LastHapticTime = current_time
+			DoHapticFeedback()
+		end
+
+		-- Play HitSound
+		--
+		if HitSoundEnabled and with_hitsound then
+			PlayUnit(HitSoundUnits[HsWhich], false)
+			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+			StopUnit(HitSoundUnits[HsWhich], true)
+		end
+	end
+
+	function on_input(self, action_id, action)
+		if WindowActive and (not WithinInterlude) and action_id == TOUCH_MULTI then
+
+			-- Motion Update
+			--
+			local cx, cy, pd = CenterX, CenterY, PosDnm
+			local TouchMsgs = action.touch
+
+			for i = 1, 10 do
+				TouchTable[i].z = 0
+			end
+
+			for i = 1, #TouchMsgs do
+				local touchmsg = TouchMsgs[i]
+				local touchvec = TouchTable[touchmsg.id + 1]
+				touchvec.x = 900 + (touchmsg.screen_x - CenterX) * PosDnm
+				touchvec.y = 540 + (touchmsg.screen_y - CenterY) * PosDnm
+				local phase = touchmsg.pressed	and 1 or 2
+					  phase = touchmsg.released	and 3 or phase
+				touchvec.z = phase
+			end
+
+			-- Judge & Do Feedback
+			--
+			if ContextTime then
+				local hit, early, late, s = JudgeArf(ContextTime, TouchTable)
+				Hit, Early, Late = Hit + hit, Early + early, Late + late
+
+				if (hit+early+late) > 0 then
+					local current_time = socket_gettime()
+
+					-- Do Haptic Feedback
+					--
+					if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
+						LastHapticTime = current_time
+						DoHapticFeedback()
+					end
+
+					-- Play HitSound
+					--
+					if HitSoundEnabled and AudioLatency < 51 then
+						PlayUnit(HitSoundUnits[HsWhich], false)
+						HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+						StopUnit(HitSoundUnits[HsWhich], true)
+					end
+				end
+
+				-- Send message to FumenScript if needed
+				--
+				if s and CurrentFumenScript then
+					msg_post(CurrentFumenScript, SHJ)
+				end
+			end
+
+			-- Do GUI Stuff
+			--
+			local GuiTouch = TouchTable[1]
+			local Phase = GuiTouch.z
+			if Phase > 0 then
+				CurrentGuiX, CurrentGuiY, CurrentGuiPhase = GuiTouch.x, GuiTouch.y, Phase
+				if NodeCount == 0 then NodeMaxIndex = 0 end
+				for i = NodeMaxIndex, 1, -1 do
+					if Nodes[i] then
+						NodeMaxIndex, NodeMaxIndex = i, i
+						msg_post(Nodes[i], PG)
+						break
+					end
+				end
+			end
+		end
+	end
+else
+	function GuiDoFeedback(with_hitsound)
+		-- Play HitSound
+		--
+		if HitSoundEnabled and with_hitsound then
+			PlayUnit(HitSoundUnits[HsWhich], false)
+			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+			StopUnit(HitSoundUnits[HsWhich], true)
+		end
+	end
+
+	function on_input(self, action_id, action)
+		if WindowActive and (not WithinInterlude) and action_id == TOUCH then
+
+			-- Cursor Update
+			--
+			local x, y, phase
+			local cursor = TouchTable[1]
+			x = 900 + (action.screen_x - CenterX) * PosDnm
+			y = 540 + (action.screen_y - CenterY) * PosDnm
+			phase = action.pressed	and 1 or 2
+			phase = action.released	and 3 or phase
+			cursor.x, cursor.y, cursor.z = x, y, phase
+
+			-- Judge & Do Feedback
+			--
+			if ContextTime then
+				local hit, early, late, s = JudgeArf(ContextTime, TouchTable)
+				Hit, Early, Late = Hit + hit, Early + early, Late + late
+
+				-- Play HitSound
+				--
+				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency < 51 then
+					PlayUnit(HitSoundUnits[HsWhich], false)
+					HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+					StopUnit(HitSoundUnits[HsWhich], true)
+				end
+
+				-- Send message to FumenScript if needed
+				--
+				if s and CurrentFumenScript then
+					msg_post(CurrentFumenScript, SHJ)
+				end
+			end
+
+			-- Do GUI Stuff
+			--
+			CurrentGuiX, CurrentGuiY, CurrentGuiPhase = x, y, phase
+			if NodeCount == 0 then NodeMaxIndex = 0 end
+			for i = NodeMaxIndex, 1, -1 do
+				if Nodes[i] then
+					NodeMaxIndex, NodeProgress = i, i
+					msg_post(Nodes[i], PG)
+					break
+				end
+			end
+		end
+	end
+end

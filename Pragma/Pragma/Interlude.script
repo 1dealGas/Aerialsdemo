@@ -1,0 +1,70 @@
+local hash = hash
+local msg_url = msg.url
+local msg_post = msg.post
+local go_animate = go.animate
+local collectgarbage = collectgarbage
+local In, Out
+
+local l = msg_url("Ar:/InterludeIconL")
+local r = msg_url("Ar:/InterludeIconR")
+local ls = msg_url("Ar:/InterludeIconL#Sprite")
+local rs = msg_url("Ar:/InterludeIconR#Sprite")
+local ds = msg_url("Ar:/InterludeDimmer#Sprite")
+
+local enable = hash("enable")
+local disable = hash("disable")
+local eulerz = hash("euler.z")
+local tintw = hash("tint.w")
+
+local ONCE = go.PLAYBACK_ONCE_FORWARD
+local LINEAR = go.EASING_LINEAR
+local INQUAD = go.EASING_INQUAD
+local OUTQUAD = go.EASING_OUTQUAD
+
+
+local function interlude_in_internal_async()
+	if In then  In()  In = nil  end
+	collectgarbage()
+end
+
+local function interlude_in_internal()
+	if In then  In()  In = nil  end
+	collectgarbage()
+	InterludeOut()
+end
+
+local function interlude_out_internal()
+	msg_post(ds, disable)
+	msg_post(ls, disable)
+	msg_post(rs, disable)
+	if Out then  Out()  Out = nil  end
+	WithinInterlude = false
+end
+
+
+function InterludeIn(fn, is_async)
+	In, WithinInterlude = fn, true
+
+	msg_post(ds, enable)
+	msg_post(ls, enable)
+	msg_post(rs, enable)
+
+	go_animate(ds, tintw, ONCE, 1, OUTQUAD, 0.233)
+	go_animate(ls, tintw, ONCE, 1, INQUAD, 0.37)
+	go_animate(rs, tintw, ONCE, 1, INQUAD, 0.37)
+	go_animate(l, eulerz, ONCE, 45, LINEAR, 0.37)
+	go_animate(r, eulerz, ONCE, 45, LINEAR, 0.37, 0, is_async and interlude_in_internal_async or interlude_in_internal)
+end
+
+function InterludeOut(fn)
+	Out = fn
+	go_animate(ds, tintw, ONCE, 0, INQUAD, 0.233, 0.137, interlude_out_internal)
+	go_animate(ls, tintw, ONCE, 0, OUTQUAD, 0.37)
+	go_animate(rs, tintw, ONCE, 0, OUTQUAD, 0.37)
+	go_animate(l, eulerz, ONCE, 90, LINEAR, 0.37)
+	go_animate(r, eulerz, ONCE, 0, LINEAR, 0.37)
+end
+
+function init(self)
+	go.set( ds, "tint", vmath.vector4(0, 0, 0, 1) )
+end
