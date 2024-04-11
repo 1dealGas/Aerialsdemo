@@ -174,7 +174,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local cnt = 1
 	local trigger_tables = nt(trigger_count, 0)
 	for i=1, #TriggerFns, 2 do
-		if type(TriggerFns[i+1])==F or TriggerFns[i+1].__call then
+		if type(TriggerFns[i+1])==F or type(TriggerFns[i+1].__call)==F then
 			trigger_tables[cnt] = { TriggerFns[i], TriggerFns[i+1] }      -- TriggerMs, TriggerFn
 			cnt = cnt + 1
 		end
@@ -186,7 +186,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local cnt = 1
 	local task_tables = nt(task_count, 0)
 	for i=1, #TaskFns, 3 do
-		if (TaskFns[i]<=TaskFns[i+1]) and (type(TaskFns[i+2])==F or TaskFns[i+2].__call) then
+		if (TaskFns[i]<=TaskFns[i+1]) and (type(TaskFns[i+2])==F or type(TaskFns[i+2].__call)==F) then
 			task_tables[cnt] = { TaskFns[i], TaskFns[i+1], TaskFns[i+2] }   -- StartMs, EndMs, TaskFn
 			cnt = cnt + 1
 		else
@@ -233,7 +233,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		local Tasks, TaskCount, TaskMaxIndex, FINAL = nt(task_count,0), 0, 0
 		local Trigger, Register, Unregister = Trigger, Register, Unregister
 
-		if type(FmFinalFn)==F or FmFinalFn.__call then
+		if type(FmFinalFn)==F or type(FmFinalFn.__call)==F then
 			FINAL = function(canvas)
 				FmFinalFn(canvas)
 				TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
@@ -247,8 +247,8 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		end
 
 		local MSG_FUNCS = {
-			[hash("ar_init")] = (type(FmInitFn)==F or FmInitFn.__call) and FmInitFn or nil,
-			[hash("ar_special_hint_judged")] = (type(SpecialHintJudgedFn)==F or SpecialHintJudgedFn.__call) and SpecialHintJudgedFn or nil,
+			[hash("ar_init")] = (type(FmInitFn)==F or type(FmInitFn.__call)==F) and FmInitFn or nil,
+			[hash("ar_special_hint_judged")] = (type(SpecialHintJudgedFn)==F or type(SpecialHintJudgedFn.__call)==F) and SpecialHintJudgedFn or nil,
 			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
 				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
@@ -285,7 +285,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			[hash("ar_final")] = FINAL
 		}
 
-		if type(init)==F or init.__call then
+		if type(init)==F or type(init.__call)==F then
 			local original_init = init
 			init = function(self)
 				original_init(self)
@@ -295,7 +295,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			function init() CurrentFumenScript = msg.url("#") end
 		end
 
-		if type(final)==F or final.__call then
+		if type(final)==F or type(final.__call)==F then
 			local original_final = final
 			final = function(self)
 				original_final(self)
@@ -305,7 +305,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			function final()  if CurrentFumenScript.fragment==msg.url("#").fragment then CurrentFumenScript=nil end  end
 		end
 
-		if type(on_message)==F or on_message.__call then
+		if type(on_message)==F or type(on_message.__call)==F then
 			local original_on_message = on_message
 			on_message = function(self, message_id, message, sender)
 				if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
@@ -337,8 +337,8 @@ end
 --
 local tween_cache, tween_capacity = {}, 0
 local type, msg_post, STRING, ENABLE, DISABLE = type, msg.post, "string", hash("enable"), hash("disable")
-function TriggerDisable(url)  return function(canvas) msg_post(url, DISABLE) end  end
-function TriggerEnable(url)  return function(canvas) msg_post(url, ENABLE) end  end
+function TriggerDisable(url)  return function() msg_post(url, DISABLE) end  end
+function TriggerEnable(url)  return function() msg_post(url, ENABLE) end  end
 Tween = debug.setmetatable(nil, {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
