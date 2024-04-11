@@ -197,4 +197,4 @@ function on_message(self, message_id, message)
 	end
 end
 
-require("Pragma/Initial")
+require("Pragma/InitialPart")
