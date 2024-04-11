@@ -1,25 +1,30 @@
-CurrentTrackId = 1034
+CurrentTrackId = 2001
 
+
+local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
+local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 function init(self)
 	-- Load Audio & Create Canvas
 	--
-	CurrentAudioBuffer = sys.load_buffer("/Reference/Audio/1034.mp3")
+	CurrentAudioBuffer = sys.load_buffer("/Reference/Audio/2001.mp3")
 	_, CurrentAudioRes = AcAudio.CreateResource(CurrentAudioBuffer)
 	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
 	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
+	-- Do Demo-Specific Settings
+	--
+	go.set("Ar:/Demo#DemoBG", "tint", IllustTint)
+	go.set("Ar:/Demo#DemoLeft", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoRight", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoTop", "tint", CoverTint)
+	go.set("Ar:/Demo#DemoBottom", "tint", CoverTint)
+
 	-- Interlude Out
 	--
-	InterludeCallbackOut = function()
-		AcAudio.PlayUnit(CurrentAudioUnit, false)
-	end
-	InterludeOut()
+	InterludeOut(
+		function()
+			AcAudio.PlayUnit(CurrentAudioUnit, false)
+			Arf2.SetJudgeRange(84)
+		end
+	)
 end
-
-
-local TRIGGER_TEST = {
-	0, function() Arf2.SetJudgeRange(73) end,
-	71042, function() Arf2.SetHintSize(48, 24) end,
-	92200, function() Arf2.SetHintSize(3.2) end
-}
-DeclareFumenScript(nil, nil, TRIGGER_TEST)

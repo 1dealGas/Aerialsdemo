@@ -4,13 +4,6 @@
 --     And require this "module" in the render script.
 --  Copyright (c) 2024- 1dealGas, under the MIT License.
 --------------------------------------------------------------------------------------
-local hash = hash
-
-
--- Interlude
---                               -- Order of interlude calls:
-InterludeCallbackIn = nil        -- InterludeIn -> InterludeCallbackIn
-InterludeCallbackOut = nil       --             -> InterludeOut -> InterludeCallbackOut
 
 
 -- Input & GUI System
@@ -34,6 +27,11 @@ InterludeCallbackOut = nil       --             -> InterludeOut -> InterludeCall
 --        NodeCount = NodeCount - 1
 --    Then it's ok to do other clean-ups.
 --
+-- Callbacks:
+--     GuiDoFeedback(with_hitsound)
+--     InterludeIn(fn, is_async)
+--     InterludeOut(fn)
+--
 WindowActive = true
 WithinInterlude = true
 LayoutModeLandscape = false
@@ -45,7 +43,6 @@ NodeCount = 0
 CurrentGuiX = 0
 CurrentGuiY = 0
 CurrentGuiPhase = nil
--- There is also a GuiDoFeedback() function.
 
 
 -- Track Managing & Resources Related
@@ -161,6 +158,7 @@ end
 --        12000, 24000, function(canvas) end
 --    }
 --
+local hash = hash
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
 	local type, gm, nt, F = type, debug.getmetatable, AcUtil.NewTable, "function"
 	local table_sort, time_sorter = table.sort, function(a,b) return a[1]<b[1] end

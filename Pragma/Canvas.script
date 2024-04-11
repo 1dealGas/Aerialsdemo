@@ -1,6 +1,10 @@
-go.property("options", false)
-go.property("display_losts", false)   -- On non-demo versions, this will be determined by the canvas itself, based on the save loaded.
-go.property("options_x_delta", 0)
+go.property("options", false)   -- On non-demo versions, this will be determined by CurrentTrackId
+go.property("display_losts", false)   -- On non-demo versions, this will be determined by Save.Wish
+go.property("xscale", 1)
+go.property("yscale", 1)
+go.property("xdelta", 0)
+go.property("ydelta", 0)
+go.property("rotdeg", 0)
 
 
 -- Context Info
@@ -32,7 +36,7 @@ local GetTime = AcAudio.GetTime
 local PlayUnit = AcAudio.PlayUnit
 local CheckPlaying = AcAudio.CheckPlaying
 local UpdateArf = Arf2.UpdateArf
-local SetXDelta = Arf2.SetXDelta
+local SetCam = Arf2.SetCam
 
 local FMT_SCORE, FMT_SCORE_DL = "◇  %d", "◇  %d · %d"
 local FMT_WO, FMT_WO_DL = "◇  World Obtained · %d", "◇  World Obtained · %d · %d"
@@ -66,7 +70,7 @@ function init(self)
 
 	-- Load Context
 	--
-	local nt = Arf2.NewTable
+	local nt = AcUtil.NewTable
 	local factory_create = factory.create
 	local vmath_vector4 = vmath.vector4
 	local sprite_play_flipbook = sprite.play_flipbook
@@ -132,7 +136,6 @@ function init(self)
 end
 
 function update(self, dt)
-
 	-- Update ContextTime
 	--
 	if ContextTime then
@@ -148,6 +151,7 @@ function update(self, dt)
 	-- Update Context
 	--
 	if ContextTime < Before then
+		SetCam(self.xscale, self.yscale, self.xdelta, self.ydelta, self.rotdeg)
 		local hint_lost, wgo_used, hgo_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, AlGOs, ArGOs, WishTints, HintTints, AnimTints)
 
 		-- Mutate Tints
@@ -208,8 +212,9 @@ function update(self, dt)
 		Late = Late + hint_lost
 		LastWgoUsed, LastHgoUsed, LastAgoUsed = wgo_used, hgo_used, ago_used
 
-		if self.options			then SetXDelta(self.options_x_delta)			end
-		if CurrentFumenScript	then msg_post(CurrentFumenScript, AR_UPDATE)	end
+		if CurrentFumenScript then
+			msg_post(CurrentFumenScript, AR_UPDATE)
+		end
 
 		if self.show_score then
 			local percent = Hit / TotalJud
@@ -254,15 +259,18 @@ end
 -- Message Handling Functions
 --
 local message_callbacks = {
-
-	[SHOW_OPTIONS] = function()
-		go.cancel_animations("#", "options_x_delta")
-		go.animate("#", "options_x_delta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
+	[SHOW_OPTIONS] = function(self)
+		if self.options then
+			go.cancel_animations("#", "xdelta")
+			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
+		end
 	end,
 
-	[HIDE_OPTIONS] = function()
-		go.cancel_animations("#", "options_x_delta")
-		go.animate("#", "options_x_delta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
+	[HIDE_OPTIONS] = function(self)
+		if self.options then
+			go.cancel_animations("#", "xdelta")
+			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
+		end
 	end,
 
 	[PROCESS_GUI] = function()   -- Button Size: 108*36
@@ -345,7 +353,6 @@ end
 -- Clear Function
 --
 function final(self)
-
 	-- Score Clean-up
 	--
 	Arf2.FinalArf()
@@ -367,13 +374,6 @@ function final(self)
 		msg_post(CurrentFumenScript, AR_FINAL)
 	end
 
-	-- Global Clean-up
-	-- CurrentAudioRes & CurrentAudioUnit will be cleared by Track Manager
-	--
-	TotalJud = 0
-	Hit, Early, Late = 0, 0, 0
-	ContextTime = nil
-
 	-- Release GOs
 	--
 	local go_delete = go.delete
@@ -382,14 +382,14 @@ function final(self)
 	end
 
 	for i = 1, #HGOs do
-		go_delete(HGOs[i])
-		go_delete(AlGOs[i])
-		go_delete(ArGOs[i])
+		go_delete(HGOs[i])			go_delete(AlGOs[i])			go_delete(ArGOs[i])
 	end
 
-	-- Local Clean-up
+	-- Param Clean-up
 	--
 	Before = 0
+	TotalJud, Hit, Early, Late, ContextTime = 0, 0, 0, 0, nil
+
 	WGOs, HGOs, AlGOs, ArGOs = nil, nil, nil, nil
 	WishTints, HintTints, AnimTints = nil, nil, nil
 	HintSprites, HintHelpers, AlSprites, ArSprites = nil, nil, nil, nil
