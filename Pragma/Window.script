@@ -14,7 +14,7 @@ local socket_gettime, msg_post = socket.gettime, msg.post
 local CenterX, CenterY, PosDnm = 0, 0, 0
 local NodeProgress, LastHapticTime = 0, 0
 local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
-local HitSoundUnits, HsWhich = AcUtil.NewTable(6,0), 1
+local HitSoundUnits, HsWhich = Arf2.NewTable(6,0), 1
 
 
 -- Platform-Independent Functions
