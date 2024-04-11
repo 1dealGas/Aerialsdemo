@@ -1,9 +1,9 @@
 go.property("options", false)   -- On non-demo versions, this will be determined by CurrentTrackId
 go.property("display_losts", false)   -- On non-demo versions, this will be determined by Save.Wish
-go.property("xdelta", 0)
-go.property("ydelta", 0)
 go.property("xscale", 1)
 go.property("yscale", 1)
+go.property("xdelta", 0)
+go.property("ydelta", 0)
 go.property("rotdeg", 0)
 
 
@@ -151,7 +151,7 @@ function update(self, dt)
 	-- Update Context
 	--
 	if ContextTime < Before then
-		SetCam(self.xdelta, self.ydelta, self.xscale, self.yscale, self.rotdeg)
+		SetCam(self.xscale, self.yscale, self.xdelta, self.ydelta, self.rotdeg)
 		local hint_lost, wgo_used, hgo_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, AlGOs, ArGOs, WishTints, HintTints, AnimTints)
 
 		-- Mutate Tints
@@ -259,14 +259,14 @@ end
 -- Message Handling Functions
 --
 local message_callbacks = {
-	[SHOW_OPTIONS] = function()
+	[SHOW_OPTIONS] = function(self)
 		if self.options then
 			go.cancel_animations("#", "xdelta")
 			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, -337.5, go.EASING_OUTCUBIC, 0.37)
 		end
 	end,
 
-	[HIDE_OPTIONS] = function()
+	[HIDE_OPTIONS] = function(self)
 		if self.options then
 			go.cancel_animations("#", "xdelta")
 			go.animate("#", "xdelta", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTCUBIC, 0.37)
