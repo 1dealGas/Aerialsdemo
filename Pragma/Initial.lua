@@ -162,7 +162,7 @@ end
 --    }
 --
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
-	local type, gm, nt, F = type, getmetatable, AcUtil.NewTable, "function"
+	local type, gm, nt, F = type, debug.getmetatable, AcUtil.NewTable, "function"
 	local table_sort, time_sorter = table.sort, function(a,b) return a[1]<b[1] end
 
 	TaskFns = type(TaskFns)=="table" and TaskFns or {}
