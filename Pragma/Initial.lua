@@ -152,15 +152,26 @@ end
 --        10000, function(canvas) end,   -- TriggerMs, TriggerFn
 --        20000, function(canvas) end
 --    }
+--
 -- Provide TaskFns table like this, or nil:
 --    {
 --        10000, 18000, function(canvas) end,   -- StartMs, EndMs, TaskFn
 --        12000, 24000, function(canvas) end
 --    }
 --
-local hash = hash
+local hash, gm, F = hash, debug.getmetatable, "function"
+local function is_callable(x)
+	if x then
+		if type(x) == F then									return true
+		else
+			local meta = gm(x)
+			if meta.__call and type(meta.__call) == F then		return true
+			end
+		end
+	end															return false
+end
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
-	local type, gm, nt, F = type, debug.getmetatable, AcUtil.NewTable, "function"
+	local type, nt = type, AcUtil.NewTable
 	local table_sort, time_sorter = table.sort, function(a,b) return a[1]<b[1] end
 
 	TaskFns = type(TaskFns)=="table" and TaskFns or {}
@@ -172,7 +183,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local cnt = 1
 	local trigger_tables = nt(trigger_count, 0)
 	for i=1, #TriggerFns, 2 do
-		if type(TriggerFns[i+1])==F or type( gm(TriggerFns[i+1]).__call )==F then
+		if is_callable(TriggerFns[i+1]) then
 			trigger_tables[cnt] = { TriggerFns[i], TriggerFns[i+1] }      -- TriggerMs, TriggerFn
 			cnt = cnt + 1
 		end
@@ -184,7 +195,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local cnt = 1
 	local task_tables = nt(task_count, 0)
 	for i=1, #TaskFns, 3 do
-		if (TaskFns[i]<=TaskFns[i+1]) and (type(TaskFns[i+2])==F or type( gm(TaskFns[i+2]).__call )==F) then
+		if (TaskFns[i]<=TaskFns[i+1]) and is_callable(TaskFns[i+2]) then
 			task_tables[cnt] = { TaskFns[i], TaskFns[i+1], TaskFns[i+2] }   -- StartMs, EndMs, TaskFn
 			cnt = cnt + 1
 		else
@@ -231,7 +242,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		local Tasks, TaskCount, TaskMaxIndex, FINAL = nt(task_count,0), 0, 0
 		local Trigger, Register, Unregister = Trigger, Register, Unregister
 
-		if type(FmFinalFn)==F or type( gm(FmFinalFn).__call )==F then
+		if is_callable(FmFinalFn) then
 			FINAL = function(canvas)
 				FmFinalFn(canvas)
 				TriggerWhich, RegisterWhich, UnregisterWhich = 1, 1, 1
@@ -245,8 +256,8 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		end
 
 		local MSG_FUNCS = {
-			[hash("ar_init")] = (type(FmInitFn)==F or type( gm(FmInitFn).__call )==F) and FmInitFn or nil,
-			[hash("ar_special_hint_judged")] = (type(SpecialHintJudgedFn)==F or type( gm(SpecialHintJudgedFn).__call)==F ) and SpecialHintJudgedFn or nil,
+			[hash("ar_init")] = is_callable(FmInitFn) and FmInitFn or nil,
+			[hash("ar_special_hint_judged")] = is_callable(SpecialHintJudgedFn) and SpecialHintJudgedFn or nil,
 			[hash("ar_update")] = function(canvas)   -- Will be called only when ContextTime exists
 				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
@@ -283,7 +294,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			[hash("ar_final")] = FINAL
 		}
 
-		if type(init)==F or type( gm(init).__call )==F then
+		if is_callable(init) then
 			local original_init = init
 			init = function(self)
 				original_init(self)
@@ -293,7 +304,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			function init() CurrentFumenScript = msg.url("#") end
 		end
 
-		if type(final)==F or type( gm(final).__call )==F then
+		if is_callable(final) then
 			local original_final = final
 			final = function(self)
 				original_final(self)
@@ -303,7 +314,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			function final()  if CurrentFumenScript.fragment==msg.url("#").fragment then CurrentFumenScript=nil end  end
 		end
 
-		if type(on_message)==F or type( gm(on_message).__call )==F then
+		if is_callable(on_message) then
 			local original_on_message = on_message
 			on_message = function(self, message_id, message, sender)
 				if MSG_FUNCS[message_id] then MSG_FUNCS[message_id](sender) end
@@ -373,10 +384,15 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 			end
 		end
 	end,
+
 	__div = function(lnum, rnum)   -- Merge Tweens
 		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or {}
 		local merge_target_size = #merge_target
-		for i=1, tween_capacity do  merge_target[merge_target_size + i] = tween_cache[i]  end
+
+		for i=1, tween_capacity do
+			merge_target[merge_target_size + i] = tween_cache[i]
+		end
+
 		tween_cache, tween_capacity = {}, 0
 		return merge_target
 	end
