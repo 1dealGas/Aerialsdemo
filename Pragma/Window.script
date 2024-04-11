@@ -168,7 +168,6 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 			local Phase = GuiTouch.z
 			if Phase > 0 then
 				CurrentGuiX, CurrentGuiY, CurrentGuiPhase = GuiTouch.x, GuiTouch.y, Phase
-				if NodeCount == 0 then NodeMaxIndex = 0 end
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
 						NodeMaxIndex, NodeMaxIndex = i, i
@@ -227,7 +226,6 @@ else
 			-- Do GUI Stuff
 			--
 			CurrentGuiX, CurrentGuiY, CurrentGuiPhase = x, y, phase
-			if NodeCount == 0 then NodeMaxIndex = 0 end
 			for i = NodeMaxIndex, 1, -1 do
 				if Nodes[i] then
 					NodeMaxIndex, NodeProgress = i, i

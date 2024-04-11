@@ -24,10 +24,10 @@ function AppendNode(url)
 	Nodes[NodeMaxIndex]	= url or msg.url("#")
 	return NodeMaxIndex
 end
-
 function RemoveNode(idx)
-	NodeCount = NodeCount - 1
 	Nodes[idx] = nil
+	NodeCount = NodeCount-1
+	if NodeCount==0 then NodeMaxIndex=0 end
 end
 
 
