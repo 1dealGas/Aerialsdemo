@@ -1170,28 +1170,14 @@ static int UpdateArf(lua_State* L) {
 
 // Sundries
 static int FinalArf(lua_State *L) {
-	Arf::clear();
-	before = 0;
+	Arf::clear();		before = 0;
 	return 0;
 }
-static int SetXS(lua_State *L) {
-	xscale = luaL_checknumber(L, 1);
-	return 0;
-}
-static int SetYS(lua_State *L) {
-	yscale = luaL_checknumber(L, 1);
-	return 0;
-}
-static int SetXD(lua_State *L) {
-	xdelta = luaL_checknumber(L, 1);
-	return 0;
-}
-static int SetYD(lua_State *L) {
-	ydelta = luaL_checknumber(L, 1);
-	return 0;
-}
-static int SetRotDeg(lua_State *L) {
-	GetSINCOS( luaL_checknumber(L, 1) );
+static int SetCam(lua_State *L) {
+	xscale = luaL_checknumber(L, 1);		yscale = luaL_checknumber(L, 2);
+	xdelta = luaL_checknumber(L, 3);		ydelta = luaL_checknumber(L, 4);
+
+	GetSINCOS( luaL_checknumber(L, 5) );
 	rotsin = SIN;	rotcos = COS;
 	return 0;
 }
@@ -1219,8 +1205,4 @@ static int SetHintSize(lua_State* L) {
 	hint_size_x = hint_size_x_script * 112.5f;
 	hint_size_y = hint_size_y_script * 112.5f;
 	return 0;
-}
-static int NewTable(lua_State *L) {
-	lua_createtable( L, (int)luaL_checknumber(L, 1), (int)luaL_checknumber(L, 2) );
-	return 1;
 }
