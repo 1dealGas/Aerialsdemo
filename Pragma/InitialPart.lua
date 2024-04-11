@@ -8,25 +8,30 @@
 
 -- Input & GUI System
 --
--- Non-local Callbacks:
---     GuiDoFeedback(with_hitsound)
---     InterludeIn(fn, is_async)
---     InterludeOut(fn)
---
 WindowActive = true
 WithinInterlude = true
 LayoutModeLandscape = false
-Nodes, NodeCount, NodeMaxIndex = AcUtil.NewTable(8, 0), 0, 0
-CurrentGuiX, CurrentGuiY, CurrentGuiPhase = 0, 0, nil   -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
 
+CurrentGuiX = 0
+CurrentGuiY = 0
+CurrentGuiPhase = nil   -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
+
+Nodes = AcUtil.NewTable(8, 0)
+NodeMaxIndex = 0
+NodeCount = 0
+--
+-- GuiDoFeedback(with_hitsound)
+-- InterludeIn(fn, is_async)
+-- InterludeOut(fn)
+--
 function AppendNode(url)
 	NodeCount, NodeMaxIndex = NodeCount+1, NodeMaxIndex+1
 	Nodes[NodeMaxIndex]	= url or msg.url("#")
 	return NodeMaxIndex
 end
+
 function RemoveNode(idx)
-	Nodes[idx] = nil
-	NodeCount = NodeCount-1
+	NodeCount, Nodes[idx] = NodeCount-1, nil
 	if NodeCount==0 then NodeMaxIndex=0 end
 end
 
@@ -370,15 +375,10 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 			end
 		end
 	end,
-
 	__div = function(lnum, rnum)   -- Merge Tweens
 		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or {}
 		local merge_target_size = #merge_target
-
-		for i=1, tween_capacity do
-			merge_target[merge_target_size + i] = tween_cache[i]
-		end
-
+		for i=1, tween_capacity do  merge_target[merge_target_size + i] = tween_cache[i]  end
 		tween_cache, tween_capacity = {}, 0
 		return merge_target
 	end
