@@ -337,8 +337,18 @@ end
 --
 local tween_cache, tween_capacity = {}, 0
 local type, msg_post, STRING, ENABLE, DISABLE = type, msg.post, "string", hash("enable"), hash("disable")
-function TriggerDisable(url)  return function() msg_post(url, DISABLE) end  end
-function TriggerEnable(url)  return function() msg_post(url, ENABLE) end  end
+function TriggerDisable(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return function() msg_post(urls[1], DISABLE) end
+	else						return function() for i=1, #urls do msg_post(urls[i], DISABLE) end end
+	end
+end
+function TriggerEnable(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
+	else						return function() for i=1, #urls do msg_post(urls[i], ENABLE) end end
+	end
+end
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
@@ -365,7 +375,6 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 			end
 		end
 	end,
-
 	__div = function(lnum, rnum)   -- Merge Tweens
 		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or {}
 		local merge_target_size = #merge_target
