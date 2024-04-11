@@ -78,33 +78,17 @@
       type: boolean
 
 
-  - name: SetXScale
+  - name: SetCam
     type: function
     parameters:
     - name: xscale
       type: number
-
-  - name: SetYScale
-    type: function
-    parameters:
     - name: yscale
       type: number
-
-  - name: SetXDelta
-    type: function
-    parameters:
     - name: xdelta
       type: number
-
-  - name: SetYDelta
-    type: function
-    parameters:
     - name: ydelta
       type: number
-
-  - name: SetRotDeg
-    type: function
-    parameters:
     - name: rotdeg
       type: number
 
@@ -128,14 +112,3 @@
     - name: y
       type: number
       desc: Optional. y=x if y is not a number
-
-  - name: NewTable
-    type: function
-    parameters:
-    - name: narr
-      type: number
-    - name: nrec
-      type: number
-    returns:
-    - name: new_table
-      type: table
