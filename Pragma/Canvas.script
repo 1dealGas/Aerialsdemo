@@ -150,6 +150,7 @@ function update(self, dt)
 
 		-- Mutate Tints
 		--
+		local WishSprites = WishSprites
 		for i = 1, wgo_used do
 			go_set(WishSprites[i], TINTW, WishTints[i])
 		end
@@ -214,7 +215,6 @@ function update(self, dt)
 			local percent = Hit / TotalJud
 			local current_nonhit = Early + Late
 			if Hit ~= LastHit or current_nonhit ~= LastNonHit then
-
 				if self.display_losts then
 					if percent < 0.963 then
 						LastStr = string_format(FMT_SCORE_DL, Hit, current_nonhit)
