@@ -318,7 +318,6 @@ end
 --  which should be safe when TriggerFns == nil.
 --
 local tween_cache, tween_capacity = {}, 0
-local msg_post, sprite_play_flipbook = msg.post, sprite.play_flipbook
 local STRING, ENABLE, DISABLE = "string", hash("enable"), hash("disable")
 
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
@@ -356,7 +355,6 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 		return merge_target
 	end
 })
-Tweens = Tween
 
 
 -- TriggerFn Shorthands
@@ -364,13 +362,24 @@ Tweens = Tween
 --     TriggerFns = { 666, TriggerEnable("#x", "#y") }
 --     TriggerFns = { 114514, TriggerPlayFlipbook("#m","#n")("some_anim", NO_CALLBACK, {playback_rate=2}) }
 --
+local msg_post, sprite_play_flipbook = msg.post
 local function tpf_rtn_1(url)
 	return function(u,v,w)		return function() sprite_play_flipbook(url,u,v,w) end									end
 end
 local function tpf_rtn_m(urls, urllen)
 	return function(u,v,w)		return function()  for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
 end
-
+local function tpf_common(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return tpf_rtn_1(urls[1])
+	else						return tpf_rtn_m(urls, urllen)
+	end
+end
+local function tpf_1st(...)
+	tpf_common(...)
+	sprite_play_flipbook = sprite.play_flipbook
+	TriggerPlayFlipbook = tpf_common
+end
 function TriggerEnable(...)
 	local urls = {...}			local urllen = #urls
 	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
@@ -383,12 +392,7 @@ function TriggerDisable(...)
 	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
 	end
 end
-function TriggerPlayFlipbook(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return tpf_rtn_1(urls[1])
-	else						return tpf_rtn_m(urls, urllen)
-	end
-end
+Tweens = TriggerPlayFlipbook = Tween, tpf_1st
 
 
 -- Function Concat Operator
@@ -419,9 +423,7 @@ end
 -- Initialization
 --
 do
-	FuncConcatEnable(true)
 	Save = sys.load(SAVE_PATH)
-
 	if not Save.Aerials then
 		Save = {
 			Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {},
@@ -438,11 +440,9 @@ do
 		sys.save(SAVE_PATH, Save)
 	end
 
-	OffsetType = Save.Options.OffsetType
+	OffsetType, HapticFeedbackEnabled, HitSoundEnabled = Save.Options.OffsetType, Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
-	HapticFeedbackEnabled = Save.Options.HapticFeedbackEnabled
-	HitSoundEnabled = Save.Options.HitSoundEnabled
-
 	InputDelta = Save.Options.InputDelta
 	Arf2.SetIDelta(InputDelta)
+	FuncConcatEnable(true)
 end
