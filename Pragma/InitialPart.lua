@@ -405,7 +405,7 @@ function FuncConcatEnable(trigger_only)
 			__concat = function(l, r)
 				assert(is_callable(l), "FuncConcat: The left operand is not callable")
 				assert(is_callable(r), "FuncConcat: The right operand is not callable")
-				return (function(canvas)	l(canvas) r(canvas)				end)
+				return (function(canvas)	l(canvas) return r(canvas)		end)
 			end
 		})
 	else
