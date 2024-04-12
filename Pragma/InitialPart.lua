@@ -365,10 +365,10 @@ Tweens = Tween
 --     TriggerFns = { 114514, TriggerPlayFlipbook("#m","#n")("some_anim", NO_CALLBACK, {playback_rate=2}) }
 --
 local function tpf_rtn_1(url)
-	return function(u,v,w)		(return function() sprite_play_flipbook(url,u,v,w) end)									end
+	return function(u,v,w)		return function() sprite_play_flipbook(url,u,v,w) end									end
 end
 local function tpf_rtn_m(urls, urllen)
-	return function(u,v,w)		(return function()  for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end)	end
+	return function(u,v,w)		return function()  for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
 end
 
 function TriggerEnable(...)
