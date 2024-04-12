@@ -31,7 +31,7 @@ function AppendNode(url)
 end
 
 function RemoveNode(idx)
-	NodeCount, Nodes[idx] = NodeCount-1, nil
+	NodeCount, Nodes[idx] = NodeCount-1, false
 	if NodeCount==0 then NodeMaxIndex=0 end
 end
 
@@ -390,7 +390,7 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	end,
 
 	__div = function(lnum, rnum)   -- Merge Tweens
-		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or {}
+		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or AcUtil.NewTable(#tween_cache, 0)
 		local merge_target_size = #merge_target
 		for i=1, tween_capacity do  merge_target[merge_target_size + i] = tween_cache[i]  end
 		tween_cache, tween_capacity = {}, 0
