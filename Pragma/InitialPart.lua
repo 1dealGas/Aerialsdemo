@@ -392,7 +392,7 @@ function TriggerDisable(...)
 	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
 	end
 end
-Tweens = TriggerPlayFlipbook = Tween, tpf_1st
+Tweens, TriggerPlayFlipbook = Tween, tpf_1st
 
 
 -- Function Concat Operator
