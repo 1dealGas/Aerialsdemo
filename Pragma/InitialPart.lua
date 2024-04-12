@@ -376,9 +376,9 @@ local function tpf_common(...)
 	end
 end
 local function tpf_1st(...)
-	tpf_common(...)
 	sprite_play_flipbook = sprite.play_flipbook
 	TriggerPlayFlipbook = tpf_common
+	return tpf_common(...)
 end
 function TriggerEnable(...)
 	local urls = {...}			local urllen = #urls
