@@ -393,7 +393,7 @@ end
 
 -- Function Concat Operator
 --
-function FuncConcatDisable()  debug.setmetatable(FuncConcatEnable, nil)  end
+function FuncConcatDisable()  debug.setmetatable(type, nil)  end
 function FuncConcatEnable(trigger_only)
 	local assert = assert
 	if trigger_only then
