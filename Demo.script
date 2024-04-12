@@ -1,8 +1,7 @@
 CurrentTrackId = 2001
-
-
 local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
 local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
+
 function init(self)
 	-- Load Audio & Create Canvas
 	--
@@ -23,6 +22,7 @@ function init(self)
 	--
 	InterludeOut(
 		function()
+			collectgarbage()	collectgarbage()	collectgarbage()
 			AcAudio.PlayUnit(CurrentAudioUnit, false)
 			Arf2.SetJudgeRange(84)
 		end
