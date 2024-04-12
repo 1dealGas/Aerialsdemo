@@ -24,12 +24,12 @@ local OUTQUAD = go.EASING_OUTQUAD
 
 local function interlude_in_internal_async()
 	if In then  In()  In = nil  end
-	collectgarbage()
+	collectgarbage()	collectgarbage()	collectgarbage()
 end
 
 local function interlude_in_internal()
 	if In then  In()  In = nil  end
-	collectgarbage()
+	collectgarbage()	collectgarbage()	collectgarbage()
 	InterludeOut()
 end
 

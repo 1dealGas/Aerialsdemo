@@ -364,10 +364,10 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 --
 local msg_post, sprite_play_flipbook = msg.post
 local function tpf_rtn_1(url)
-	return function(u,v,w)		return function() sprite_play_flipbook(url,u,v,w) end									end
+	return function(u,v,w)		return function()	sprite_play_flipbook(url,u,v,w) end									end
 end
 local function tpf_rtn_m(urls, urllen)
-	return function(u,v,w)		return function()  for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
+	return function(u,v,w)		return function()	for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
 end
 local function tpf_common(...)
 	local urls = {...}			local urllen = #urls
@@ -442,7 +442,7 @@ do
 
 	OffsetType, HapticFeedbackEnabled, HitSoundEnabled = Save.Options.OffsetType, Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
-	InputDelta = Save.Options.InputDelta
-	Arf2.SetIDelta(InputDelta)
+	InputDelta = Save.Options.InputDelta				Arf2.SetIDelta(InputDelta)
+	collectgarbage("setstepmul", 137)					collectgarbage("setpause", 137)
 	FuncConcatEnable(true)
 end
