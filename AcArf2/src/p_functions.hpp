@@ -43,7 +43,7 @@ static uint32_t before;
 static uint16_t special_hint;
 static uint8_t judge_range = 37;
 
-static float hint_size_x = 360.0f, hint_size_y = 360.0f;
+static float hint_size_x = 360.0f, hint_size_y = 450.0f;
 static float xscale, yscale, xdelta, ydelta, rotsin, rotcos;
 static bool daymode;
 
@@ -77,7 +77,7 @@ static int InitArf(lua_State* L) {
 	last_ms = dt_p1 = dt_p2 = 0;
 
 	// Reset Judge Params
-	judge_range = 37;						hint_size_x = hint_size_y = 360.0f;
+	judge_range = 37;						hint_size_x = 360.0f;						hint_size_y = 450.0f;
 	mindt = idelta - judge_range;			mindt = (mindt < -100) ? -100 : mindt;
 	maxdt = idelta + judge_range;			maxdt = (maxdt >  100) ?  100 : maxdt;
 
