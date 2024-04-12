@@ -107,36 +107,6 @@ function SyncSave(options_updated)
 end
 
 
--- Initialization
---
-do
-	Save = sys.load(SAVE_PATH)
-	if not Save.Aerials then
-		Save = {
-			Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {},
-			Options = {
-				OffsetType = 1, 
-				AudioLatency1 = 0,
-				AudioLatency2 = 0,
-				AudioLatency3 = 0,
-				InputDelta = 0,
-				HapticFeedbackEnabled = true,
-				HitSoundEnabled = false
-			}
-		}
-		sys.save(SAVE_PATH, Save)
-	end
-
-	OffsetType = Save.Options.OffsetType
-	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
-	HapticFeedbackEnabled = Save.Options.HapticFeedbackEnabled
-	HitSoundEnabled = Save.Options.HitSoundEnabled
-
-	InputDelta = Save.Options.InputDelta
-	Arf2.SetIDelta(InputDelta)
-end
-
-
 -- FumenScript
 -- Provide the TriggerFns table like this, or nil:
 --    {
@@ -150,7 +120,7 @@ end
 --        12000, 24000, function(canvas) end
 --    }
 --
-local hash, gm, F = hash, debug.getmetatable, "function"
+local hash, type, gm, F = hash, type, debug.getmetatable, "function"
 local function is_callable(x)
 	if x then
 		if type(x) == F then									return true
@@ -162,12 +132,11 @@ local function is_callable(x)
 	end															return false
 end
 function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHintJudgedFn)
-	local type, nt = type, AcUtil.NewTable
-	local table_sort, time_sorter = table.sort, function(a,b) return a[1]<b[1] end
-
 	TaskFns = type(TaskFns)=="table" and TaskFns or {}
 	TriggerFns = type(TriggerFns)=="table" and TriggerFns or {}
+
 	local trigger_count, task_count = #TriggerFns/2, #TaskFns/3
+	local nt, time_sorter = AcUtil.NewTable, function(a,b) return a[1]<b[1] end
 
 	-- Sort Triggers
 	--
@@ -179,7 +148,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			cnt = cnt + 1
 		end
 	end
-	table_sort(trigger_tables, time_sorter)
+	table.sort(trigger_tables, time_sorter)
 
 	-- Lump Tasks
 	--
@@ -193,7 +162,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			task_count = task_count - 1
 		end
 	end
-	table_sort(task_tables, time_sorter)   -- Sort by StartMs
+	table.sort(task_tables, time_sorter)   -- Sort by StartMs
 
 	-- Create Registers & Unregisters
 	--
@@ -202,7 +171,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		register_tables[i] = {task_tables[i][1], task_tables[i][3]}   -- StartMs, TaskFn
 		unregister_tables[i] = {task_tables[i][2], i}   -- EndMs, UnregisterWhich
 	end
-	table_sort(unregister_tables, time_sorter)   -- register_tables sorted
+	table.sort(unregister_tables, time_sorter)   -- register_tables sorted
 
 	-- Expand Stuff
 	--
@@ -349,19 +318,9 @@ end
 --  which should be safe when TriggerFns == nil.
 --
 local tween_cache, tween_capacity = {}, 0
-local type, msg_post, STRING, ENABLE, DISABLE = type, msg.post, "string", hash("enable"), hash("disable")
-function TriggerDisable(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return function() msg_post(urls[1], DISABLE) end
-	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
-	end
-end
-function TriggerEnable(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
-	else						return function() for i=1, urllen do msg_post(urls[i], ENABLE) end end
-	end
-end
+local msg_post, sprite_play_flipbook = msg.post, sprite.play_flipbook
+local STRING, ENABLE, DISABLE = "string", hash("enable"), hash("disable")
+
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
@@ -398,3 +357,92 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	end
 })
 Tweens = Tween
+
+
+-- TriggerFn Shorthands
+-- Example:
+--     TriggerFns = { 666, TriggerEnable("#x", "#y") }
+--     TriggerFns = { 114514, TriggerPlayFlipbook("#m","#n")("some_anim", NO_CALLBACK, {playback_rate=2}) }
+--
+local function tpf_rtn_1(url)
+	return function(u,v,w)		(return function() sprite_play_flipbook(url,u,v,w) end)									end
+end
+local function tpf_rtn_m(urls, urllen)
+	return function(u,v,w)		(return function()  for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end)	end
+end
+
+function TriggerEnable(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
+	else						return function() for i=1, urllen do msg_post(urls[i], ENABLE) end end
+	end
+end
+function TriggerDisable(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return function() msg_post(urls[1], DISABLE) end
+	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
+	end
+end
+function TriggerPlayFlipbook(...)
+	local urls = {...}			local urllen = #urls
+	if urllen == 1 then			return tpf_rtn_1(urls[1])
+	else						return tpf_rtn_m(urls, urllen)
+	end
+end
+
+
+-- Function Concat Operator
+--
+function FuncConcatDisable()  debug.setmetatable(FuncConcatEnable, nil)  end
+function FuncConcatEnable(trigger_only)
+	local assert = assert
+	if trigger_only then
+		debug.setmetatable(assert, {
+			__concat = function(l, r)
+				assert(is_callable(l), "FuncConcat: The left operand is not callable")
+				assert(is_callable(r), "FuncConcat: The right operand is not callable")
+				return (function() l() r() end)
+			end
+		})
+	else
+		debug.setmetatable(assert, {
+			__concat = function(l, r)
+				assert(is_callable(l), "FuncConcat: The left operand is not callable")
+				assert(is_callable(r), "FuncConcat: The right operand is not callable")
+				return (function(...)  return { l(...) }, { r(...) }  end)
+			end
+		})
+	end
+end
+
+
+-- Initialization
+--
+do
+	FuncConcatEnable(true)
+	Save = sys.load(SAVE_PATH)
+
+	if not Save.Aerials then
+		Save = {
+			Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {},
+			Options = {
+				OffsetType = 1, 
+				AudioLatency1 = 0,
+				AudioLatency2 = 0,
+				AudioLatency3 = 0,
+				InputDelta = 0,
+				HapticFeedbackEnabled = true,
+				HitSoundEnabled = false
+			}
+		}
+		sys.save(SAVE_PATH, Save)
+	end
+
+	OffsetType = Save.Options.OffsetType
+	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
+	HapticFeedbackEnabled = Save.Options.HapticFeedbackEnabled
+	HitSoundEnabled = Save.Options.HitSoundEnabled
+
+	InputDelta = Save.Options.InputDelta
+	Arf2.SetIDelta(InputDelta)
+end
