@@ -276,7 +276,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					TaskCount = TaskCount - 1
 					UnregisterWhich = UnregisterWhich + 2
 					if TaskCount == 0 then TaskMaxIndex = 0 end
-					Tasks[ Unregister[UnregisterWhich - 1] ] = nil
+					Tasks[ Unregister[UnregisterWhich - 1] ] = false
 					current_unregister_time = Unregister[UnregisterWhich]
 				end
 			end
