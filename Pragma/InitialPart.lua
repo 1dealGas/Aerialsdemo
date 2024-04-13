@@ -14,7 +14,7 @@ LayoutModeLandscape = false
 
 CurrentGuiX = 0
 CurrentGuiY = 0
-CurrentGuiPhase = nil   -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
+CurrentGuiPhase = nil            -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
 
 Nodes = AcUtil.NewTable(8, 0)
 NodeMaxIndex = 0
@@ -44,7 +44,6 @@ CurrentTrackIndex = 0            -- Unused in the Demo
 
 CurrentAudioRes = nil
 CurrentAudioUnit = nil
-CurrentAudioBuffer = nil
 
 CurrentPlate = nil               -- Unused in the Demo
 CurrentFumenScript = nil         -- Unused in the Demo
@@ -61,9 +60,10 @@ TotalJud = 0
 -- User Options
 --
 OffsetType = 1
-AudioLatency, InputDelta = 0, 0
+AudioLatency = 0
 HapticFeedbackEnabled = true
-HitSoundEnabled = false           -- Unused in the Demo
+HitSoundEnabled = false
+InputDelta = 0
 
 
 -- Save(nil before the initialization) & Credits
