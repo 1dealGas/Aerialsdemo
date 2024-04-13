@@ -21,7 +21,7 @@ NodeMaxIndex = 0
 NodeCount = 0
 --
 -- GuiDoFeedback(with_hitsound)
--- InterludeIn(fn, is_async)
+-- InterludeIn(infn, outfn, is_async)
 -- InterludeOut(fn)
 --
 function AppendNode(url)
