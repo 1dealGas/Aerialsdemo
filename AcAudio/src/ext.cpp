@@ -12,14 +12,6 @@
 
 
 /* Lua API Implementations */
-
-// The "Preview" Engine (fast to load, and slow to play)
-ma_engine PreviewEngine;
-ma_resource_manager* PreviewRM;
-ma_resource_manager_data_source* PreviewResource;   // delete & Set nullptr
-ma_sound* PreviewSound;   // sound_handle: delete & Set nullptr
-
-// The "Player" Engine (slow to load, and fast to play)
 ma_engine PlayerEngine;
 ma_resource_manager player_rm, *PlayerRM;
 std::unordered_map<ma_resource_manager_data_source*, void*> PlayerResources;   // HResource -> CopiedBuffer
@@ -203,94 +195,9 @@ static int AmSetTime(lua_State* L) {
 	return 1;
 }
 
-// Preview Functions
-static int AmStopPreview(lua_State* L) {   // Should be always safe
-	if(PreviewSound) {
-		ma_sound_stop(PreviewSound);
-		ma_sound_uninit(PreviewSound);
-
-		delete PreviewSound;
-		PreviewSound = nullptr;
-
-		ma_resource_manager_data_source_uninit(PreviewResource);
-		delete PreviewResource;
-		PreviewResource = nullptr;
-	}
-	return 0;
-}
-static int AmPlayPreview(lua_State* L) {
-	const auto LB = dmScript::CheckBuffer(L, 1);   // Buf
-	const bool is_looping = lua_toboolean(L, 2);   // IsLooping
-
-	// Get the ByteArray & Pre-Cleaning
-	uint32_t BSize, *B;
-	dmBuffer::GetBytes(LB -> m_Buffer, (void**)&B, &BSize);
-	AmStopPreview(L);
-
-	// Load Resource
-	char C[128];
-	PreviewResource = new ma_resource_manager_data_source;
-	sprintf( C, "%llu", (unsigned long long)dmTime::GetTime() );
-	const auto N = ma_resource_manager_pipeline_notifications_init();
-	ma_resource_manager_register_encoded_data(PreviewRM, C, B, (size_t)BSize);
-	const auto res_result = ma_resource_manager_data_source_init(
-		PreviewRM, C,
-		MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT,
-		&N, PreviewResource);
-	ma_resource_manager_unregister_data(PreviewRM, C);
-
-	// Load Unit & Play
-	if(res_result == MA_SUCCESS) {
-		PreviewSound = new ma_sound;
-		const auto unit_result = ma_sound_init_from_data_source(
-			&PreviewEngine, PreviewResource,
-			MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION,
-			nullptr, PreviewSound
-		);
-		if(unit_result == MA_SUCCESS) {
-			// Set Looping
-			ma_sound_set_looping( PreviewSound, is_looping );
-
-			// Start
-			if( ma_sound_start(PreviewSound) == MA_SUCCESS )
-				lua_pushboolean(L, true);   // OK
-			else {
-				// Clean Up 1
-				ma_sound_stop(PreviewSound);
-				ma_sound_uninit(PreviewSound);
-
-				delete PreviewSound;
-				PreviewSound = nullptr;
-
-				// Clean Up 2
-				lua_pushboolean(L, false);   // OK
-				ma_resource_manager_data_source_uninit(PreviewResource);
-				delete PreviewResource;		PreviewResource = nullptr;
-			}
-		}
-		else {
-			// Clean Up 1
-			delete PreviewSound;
-			PreviewSound = nullptr;
-
-			// Clean Up 2
-			lua_pushboolean(L, false);   // OK
-			ma_resource_manager_data_source_uninit(PreviewResource);
-			delete PreviewResource;		PreviewResource = nullptr;
-		}
-	}
-	else {   // Clean Up 2
-		lua_pushboolean(L, false);   // OK
-		delete PreviewResource;
-		PreviewResource = nullptr;
-	}
-	return 1;
-}
-
 
 /* Binding Stuff */
 constexpr luaL_reg AmFuncs[] = {
-	{"PlayPreview", AmPlayPreview}, {"StopPreview", AmStopPreview},
 	{"CreateResource", AmCreateResource}, {"ReleaseResource", AmReleaseResource},
 	{"CreateUnit", AmCreateUnit}, {"ReleaseUnit", AmReleaseUnit},
 	{"PlayUnit", AmPlayUnit}, {"StopUnit", AmStopUnit},
@@ -300,15 +207,15 @@ constexpr luaL_reg AmFuncs[] = {
 };
 
 inline dmExtension::Result AmInit(dmExtension::Params* p) {
-	// Init the Preview Engine, with Default Behaviors
-	if( ma_engine_init(nullptr, &PreviewEngine) != MA_SUCCESS ) {
+	// Init a Pseudo Engine with Default Behaviors
+	ma_engine PseudoEngine;
+	if( ma_engine_init(nullptr, &PseudoEngine) != MA_SUCCESS ) {
 		dmLogFatal("Failed to Init the miniaudio Engine \"Preview\".");
 		return dmExtension::RESULT_INIT_ERROR;
 	}
-	PreviewRM = ma_engine_get_resource_manager(&PreviewEngine);
 
 	// Init the Player Engine: a custom resource manager
-	const auto device = ma_engine_get_device(&PreviewEngine);   // The default device info
+	const auto device = ma_engine_get_device(&PseudoEngine);   // The default device info
 	auto rm_config		= ma_resource_manager_config_init();
 		 rm_config.decodedFormat			= device -> playback.format;
 		 rm_config.decodedChannels			= device -> playback.channels;
@@ -327,28 +234,22 @@ inline dmExtension::Result AmInit(dmExtension::Params* p) {
 		return dmExtension::RESULT_INIT_ERROR;
 	}
 
-	// Lua Registration
-	luaL_register(p->m_L, "AcAudio", AmFuncs);
-	lua_pop(p->m_L, 1);
+	// Clean Up & Lua Registration
+	ma_engine_uninit(&PseudoEngine);
+	luaL_register(p->m_L, "AcAudio", AmFuncs);			lua_pop(p->m_L, 1);
 	return dmExtension::RESULT_OK;
 }
 inline void AmOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
 	switch(e->m_Event) {   // Now you need to check the "playing" status manually.
 		case dmExtension::EVENT_ID_ICONIFYAPP:
 		case dmExtension::EVENT_ID_DEACTIVATEAPP:
-			if(PreviewSound)
-				ma_sound_stop(PreviewSound);   // Sounds won't rewind when "stopping"
 			for( const auto it : PlayerUnits )
-				ma_sound_stop(it.first);
+				ma_sound_stop(it.first);   // Sounds won't rewind when "stopping"
 		default:;   // break omitted
 	}
 }
 inline dmExtension::Result AmFinal(dmExtension::Params* p) {
 	// Close Exisiting Units(miniaudio sounds)
-	if(PreviewSound) {
-		ma_sound_stop(PreviewSound);	ma_sound_uninit(PreviewSound);
-		delete PreviewSound;			PreviewSound = nullptr;
-	}
 	for(const auto it : PlayerUnits) {
 		ma_sound_stop(it.first);		ma_sound_uninit(it.first);
 		delete it.first;
@@ -356,18 +257,13 @@ inline dmExtension::Result AmFinal(dmExtension::Params* p) {
 	PlayerUnits.clear();
 
 	// Close Existing Resources(miniaudio data sources)
-	if(PreviewResource) {
-		ma_resource_manager_data_source_uninit(PreviewResource);
-		delete PreviewResource;			PreviewResource = nullptr;
-	}
 	for( const auto it : PlayerResources ) {
 		ma_resource_manager_data_source_uninit(it.first);
 		free(it.second);				delete it.first;
 	}
 	PlayerResources.clear();
 
-	// Uninit (miniaudio)Engines; resource managers will be uninitialized automatically here.
-	ma_engine_uninit(&PreviewEngine);   // Stack memory, no delete call here
+	// Uninit the (miniaudio)Engine; resource managers will be uninitialized automatically here.
 	ma_engine_uninit(&PlayerEngine);   // Will be nullified byte-by-byte in the next initialization
 	return dmExtension::RESULT_OK;
 }

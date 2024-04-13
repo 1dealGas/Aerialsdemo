@@ -42,8 +42,8 @@ local function interlude_out_internal()
 end
 
 
-function InterludeIn(fn, is_async)
-	In, WithinInterlude = fn, true
+function InterludeIn(infn, outfn, is_async)
+	In, Out, WithinInterlude = infn, outfn, true
 
 	msg_post(ds, enable)
 	msg_post(ls, enable)

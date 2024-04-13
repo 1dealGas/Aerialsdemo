@@ -2,21 +2,6 @@
   type: table
   members:
 
-  - name: PlayPreview
-    type: function
-    desc: This API WON'T get the buffer copied, so you should ALWAYS maintain a ref of the original buffer.
-    parameters:
-    - name: buf
-      type: table
-    - name: is_looping
-      type: boolean
-    returns:
-    - name: OK
-      type: boolean
-
-  - name: StopPreview
-    type: function
-
 
   - name: CreateResource
     type: function
