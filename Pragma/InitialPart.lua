@@ -324,25 +324,45 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
 		return function(...)
-			local decl, go_set, go_animate, go_cancel_animations = {...}, go.set, go.animate, go.cancel_animations
-			for i=1, #decl, 3 do
-				tween_cache[tween_capacity+1] = decl[i]
-				if decl[i+3] then
-					local tovalue, easetype, delta_second = decl[i+1], decl[i+2], (decl[i+3]-decl[i])/1000
-					tween_cahce[tween_capacity+2] = function(canvas)
-						url = url or canvas   -- Safe.
+			local decl = {...}
+			local decllen, go_animate, go_cancel_animations = #decl, go.animate, go.cancel_animations
+			if decllen > 2 then
+				--
+				-- Convert the url var into a msg.url() pack, and cache it.
+				-- If (var) url==false or url==nil, we replace it to the Canvas URL.
+				--
+				tween_cache[1], tween_capacity = decl[1], 2
+				if decl[4] then
+					local tovalue, easetype, delta_second = decl[2], decl[3], (decl[4]-decl[1])/1000
+					tween_cahce[2] = function(canvas)
+						url = ( type(url)==STRING and msg.url(url) ) or url or canvas
 						go_cancel_animations(url, property)
 						go_animate(url, property, 1, tovalue, easetype, delta_second)
 					end
 				else
-					local final_value = decl[i+1]
-					tween_cahce[tween_capacity+2] = function(canvas)
-						url = url or canvas   -- Safe.
+					tween_cahce[2] = function(canvas)
+						url = ( type(url)==STRING and msg.url(url) ) or url or canvas
 						go_cancel_animations(url, property)
-						go_set(url, property, final_value)
+						go.set(url, property, decl[2])   -- Final Value.
 					end
 				end
-					tween_capacity = tween_capacity + 2
+
+				for i=4, decllen, 3 do
+					tween_cache[tween_capacity+1] = decl[i]
+					if decl[i+3] then
+						local tovalue, easetype, delta_second = decl[i+1], decl[i+2], (decl[i+3]-decl[i])/1000
+						tween_cahce[tween_capacity+2] = function()
+							go_cancel_animations(url, property)
+							go_animate(url, property, 1, tovalue, easetype, delta_second)
+						end
+					else
+						tween_cahce[tween_capacity+2] = function()
+							go_cancel_animations(url, property)
+							go.set(url, property, decl[i+1])   -- Final Value.
+						end
+					end
+						tween_capacity = tween_capacity + 2
+				end
 			end
 		end
 	end,
@@ -364,11 +384,11 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 --
 local msg_post, sprite_play_flipbook = msg.post
 local function tpf_rtn_1(url)
-	return function(u,v,w)		return function()	sprite_play_flipbook(url,u,v,w) end									end
+	return function(u,v,w)				return function()	sprite_play_flipbook(url,u,v,w) end									end
 end
 local function tpf_rtn_m(urls, urllen)
-	return function(u,v,w)		return function()	for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
-end
+	return function(u,v,w)	u=hash(u)	return function()	for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
+end                      -- Cache the Flipbook Hash for there is a loop.
 local function tpf_common(...)
 	local urls = {...}			local urllen = #urls
 	if urllen == 1 then			return tpf_rtn_1(urls[1])
