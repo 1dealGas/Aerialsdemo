@@ -88,8 +88,14 @@ static int InitArf(lua_State* L) {
 	// Get the Chart[Fumen] Buffer
 	void* ArfBuf = nullptr; {
 		uint32_t ArfSize = 0;
-		dmScript::LuaHBuffer *B = dmScript::CheckBuffer(L, 1);
-		dmBuffer::GetBytes(B -> m_Buffer, &ArfBuf, &ArfSize);
+		if( dmScript::IsBuffer(L, 1) ) {
+			dmScript::LuaHBuffer *B = dmScript::CheckBuffer(L, 1);
+			dmBuffer::GetBytes(B -> m_Buffer, &ArfBuf, &ArfSize);
+		}
+		else {
+			union { const char* LegalB;  void* HackB; }  B;
+			B.LegalB = luaL_checklstring(L, 1, (size_t*)&ArfSize);			ArfBuf = B.HackB;
+		}
 		if(!ArfSize) return 0;
 	}
 
@@ -1176,7 +1182,6 @@ static int FinalArf(lua_State *L) {
 static int SetCam(lua_State *L) {
 	xscale = luaL_checknumber(L, 1);		yscale = luaL_checknumber(L, 2);
 	xdelta = luaL_checknumber(L, 3);		ydelta = luaL_checknumber(L, 4);
-
 	GetSINCOS( luaL_checknumber(L, 5) );
 	rotsin = SIN;	rotcos = COS;
 	return 0;
@@ -1197,7 +1202,6 @@ static int SetHintSize(lua_State* L) {
 	lua_Number hint_size_y_script = hint_size_x_script;
 	if( lua_isnumber(L,2) )
 		hint_size_y_script = luaL_checknumber(L, 2);
-
 	hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
 	hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
 	hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
