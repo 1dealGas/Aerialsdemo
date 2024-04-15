@@ -92,10 +92,8 @@ static int InitArf(lua_State* L) {
 			dmScript::LuaHBuffer *B = dmScript::CheckBuffer(L, 1);
 			dmBuffer::GetBytes(B -> m_Buffer, &ArfBuf, &ArfSize);
 		}
-		else {
-			union { const char* LegalB;  void* HackB; }  B;
-			B.LegalB = luaL_checklstring(L, 1, (size_t*)&ArfSize);			ArfBuf = B.HackB;
-		}
+		else
+			ArfBuf = const_cast<char*>( luaL_checklstring(L, 1, (size_t*)&ArfSize) );
 		if(!ArfSize) return 0;
 	}
 
