@@ -22,9 +22,10 @@ AcClipboard/** linguist-vendored
 AcArf2/include/arf2_generated.h linguist-generated
 AcArf2/include/ease_constants.h linguist-generated
 AcArf2/include/flatbuffers/** linguist-vendored
-AcAudio/include/miniaudio.h linguist-vendored
 AcAudio/src/miniaudio.cpp linguist-vendored
 AcAudio/src/miniaudio.mm linguist-vendored
+AcAudio/src/opusfile/** linguist-vendored
+AcAudio/include/** linguist-vendored
 
 System/Ar.render_script linguist-vendored
 Reference/lbase64.lua linguist-vendored
