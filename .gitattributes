@@ -1,6 +1,7 @@
 *.script linguist-language=Lua
 *.render_script linguist-language=Lua
 AcArf2/src/p_singleton.h linguist-language=C++
+AcArf2/include/includes.h linguist-language=C++
 game.project linguist-language=editor-config
 
 ext.manifest linguist-language=YAML
