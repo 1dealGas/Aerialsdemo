@@ -63,8 +63,6 @@
   - name: JudgeArf
     type: function
     parameters:
-    - name: mstime
-      type: number
     - name: table_touch
       type: table
     returns:

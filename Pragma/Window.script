@@ -133,7 +133,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 			-- Judge & Do Feedback
 			--
 			if ContextTime then
-				local hit, early, late, s = JudgeArf(ContextTime, TouchTable)
+				local hit, early, late, s = JudgeArf(TouchTable)
 				Hit, Early, Late = Hit + hit, Early + early, Late + late
 
 				if (hit+early+late) > 0 then
@@ -205,7 +205,7 @@ else
 			-- Judge & Do Feedback
 			--
 			if ContextTime then
-				local hit, early, late, s = JudgeArf(ContextTime, TouchTable)
+				local hit, early, late, s = JudgeArf(TouchTable)
 				Hit, Early, Late = Hit + hit, Early + early, Late + late
 
 				-- Play HitSound

@@ -39,7 +39,6 @@ typedef dmGameObject::HInstance GO;
 typedef dmVMath::Point3 p3;
 
 // Settings
-static uint32_t before;
 static uint16_t special_hint;
 static uint8_t judge_range = 37;
 
@@ -388,45 +387,20 @@ inline bool is_safe_when_anmitsu(ArHint& hint) {
 	blocked.emplace_back(&hint);
 	return true;
 }
-static int JudgeArf(lua_State* L) {
-	// JudgeArf(mstime, table_touch)
-	//       -> hint_hit, hint_early, hint_late, special_hint_judged
-	if( !before ) return 0;
+JudgeResult JudgeArf(const ab* vf, const uint8_t vfcount, const bool any_pressed, const bool any_released) {
+	JudgeResult result = {0, 0, 0, false};
+	if( !before )					return result;
+	if( any_released )				blocked.clear();
 
-	// State Variables
-	lua_Number hint_hit = 0, hint_early = 0, hint_late = 0;
-	bool any_pressed = false, any_released = false, special_hint_judged = false;
-	const uint32_t mstime = luaL_checknumber(L, 1);
+	// Calculate the Context Time
+	const uint64_t judge_microsecond = dmTime::GetTime() - (systime - mstime*1000);
+	const uint32_t mstime = judge_microsecond / 1000;
 
 	// Prepare the Iteration Scale
 	const uint32_t location_group = mstime >> 9;
 	const uint16_t init_group	= (location_group > 1) ? (location_group - 1) : 0 ;
 		  uint16_t beyond_group = init_group + 3;
 				   beyond_group = (beyond_group < Arf::ic) ? beyond_group : Arf::ic ;
-
-	// Unpack Touches
-	ab vf[10];
-	uint8_t vfcount = 0;
-	for( uint8_t i=0; i<10; i++ ) {
-		lua_rawgeti(L, 2, i+1);
-		const v3 f = dmScript::CheckVector3(L, -1);
-		lua_pop(L, 1);
-
-		switch( (uint8_t)f->getZ() ) {
-			case 1:
-				any_pressed = true;   // No break here
-			case 2:
-				vf[vfcount].a = f->getX();		vf[vfcount].b = f->getY();		vfcount++;
-				break;
-			case 3:
-				any_released = true;
-				break;
-			default:;
-		}
-	}
-
-	if(any_released)
-		blocked.clear();
 
 	// Tag Cycle
 	for( uint16_t current_group = init_group; current_group < beyond_group; current_group++ ) {
@@ -489,27 +463,52 @@ static int JudgeArf(lua_State* L) {
 					current_hint.judged_ms = mstime;								/* Status Update */
 					current_hint.status = HINT_JUDGED_LIT;
 					if(current_hint_id == special_hint)
-						special_hint_judged = (bool)special_hint;
+						result.sh_judged = (bool)special_hint;
 
 					if(dt < mindt) {												/* Classify */
 						current_hint.elstatus = HINT_EARLY;
-						hint_early++;
+						result.early++;
 					}
 					else if(dt <= maxdt)
-						hint_hit++;
+						result.hit++;
 					else {
 						current_hint.elstatus = HINT_LATE;
-						hint_late++;
+						result.late++;
 					}
 				}
 			}
 		}
 	}
+		return result;
+}
+static int JudgeArf(lua_State* L) {   // JudgeArf_lua_State in C++
+	// JudgeArf(table_touch)
+	//        -> hint_hit, hint_early, hint_late, special_hint_judged,
+
+	// Unpack Touches
+	ab vf[10];
+	uint8_t vfcount = 0, any_pressed = false, any_released = false;
+	for( uint8_t i=0; i<10; i++ ) {
+		lua_rawgeti(L, 1, i+1);
+		const v3 f = dmScript::CheckVector3(L, -1);
+		lua_pop(L, 1);
+
+		switch( (uint8_t)f->getZ() ) {
+			case 1:
+				any_pressed = true;   // No break here
+			case 2:
+				vf[vfcount].a = f->getX();		vf[vfcount].b = f->getY();		vfcount++;
+				break;
+			case 3:
+				any_released = true;
+			default:;
+		}
+	}
 
 	// Do Returns
-	lua_checkstack(L, 4);
-	lua_pushnumber(L, hint_hit);	lua_pushnumber(L, hint_early);		lua_pushnumber(L, hint_late);
-	lua_pushboolean(L, special_hint_judged);
+	const auto result = JudgeArf(vf, vfcount, any_pressed, any_released);
+	lua_pushnumber(L, result.hit);			lua_pushnumber(L, result.early);
+	lua_pushnumber(L, result.late);			lua_pushboolean(L, result.sh_judged);
 	return 4;
 }
 
@@ -560,14 +559,15 @@ static int UpdateArf(lua_State* L) {
 
 	/* Prepare Returns & Process msTime */
 	// Z Distribution: Wish{0.07,0.08,0.09,0.10}  Hint(-0.06,0)
-	auto mstime = (uint32_t)luaL_checknumber(L, 1); {
-		if(mstime < 2)					mstime = 2;
+	mstime = (uint32_t)luaL_checknumber(L, 1); {
+		if(mstime < 2)						mstime = 2;
 		else if(mstime >= before)			return 0;
 	}
-	const uint16_t location_group = mstime >> 9 ;   // floordiv 512
+	systime = dmTime::GetTime();
 
-	uint16_t hint_lost = 0;
-	uint8_t wgo_used = 0, hgo_used = 0, ago_used = 0;
+		  uint16_t hint_lost = 0;
+	const uint16_t location_group = mstime >> 9 ;				// floordiv 512
+		  uint8_t wgo_used = 0, hgo_used = 0, ago_used = 0;
 
 
 	/* Check DTimes */
@@ -949,7 +949,7 @@ static int UpdateArf(lua_State* L) {
 				using namespace dmScript;
 				const float x = 900.f + (hint_c.c_dx * rotcos - hint_c.c_dy * rotsin) * xscale + xdelta;
 				const float y = 540.f + (hint_c.c_dx * rotsin + hint_c.c_dy * rotcos) * yscale + ydelta;
-				lua_rawgeti(L, T_HGO, hgo_used+1);		const GO hgo = CheckGOInstance(L, -1);
+				lua_rawgeti(L, T_HGO, hgo_used+1);	const GO hgo = CheckGOInstance(L, -1);
 				lua_rawgeti(L, T_HTINT, hgo_used+1);	const v4 htint = CheckVector4(L, -1);
 				lua_rawgeti(L, T_AGO_L, ago_used+1);	const GO agol = CheckGOInstance(L, -1);
 				lua_rawgeti(L, T_AGO_R, ago_used+1);	const GO agor = CheckGOInstance(L, -1);
