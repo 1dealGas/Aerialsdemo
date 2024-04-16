@@ -4,7 +4,7 @@ local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 function init(self)
 	-- Load Audio
 	--
-	_, CurrentAudioRes = AcAudio.CreateResource( sys.load_buffer("/Reference/Audio/2001.mp3") )
+	_, CurrentAudioRes = AcAudio.CreateResource( sys.load_buffer("/Reference/Audio/2001.opus") )
 	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
 
 	-- Create Canvas
