@@ -5,28 +5,28 @@ platforms:
         context:
             flags: ["-std=c++14", "-Ofast", "-ffunction-sections", "-fdata-sections"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_DSOUND"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_DSOUND"]
 
     arm64-android:
         context:
             flags: ["-std=c++11", "-Ofast", "-ffunction-sections", "-fdata-sections", "-flto"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_AAUDIO"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_AAUDIO"]
 
     x86_64-osx:
         context:
             flags: ["-std=c++11", "-Ofast", "-ffunction-sections", "-fdata-sections", "-flto", "-Wno-deprecated-declarations"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
 
     arm64-osx:
         context:
             flags: ["-std=c++11", "-Ofast", "-ffunction-sections", "-fdata-sections", "-flto", "-Wno-deprecated-declarations"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
 
     arm64-ios:
         context:
             flags: ["-std=c++11", "-Ofast", "-ffunction-sections", "-fdata-sections", "-flto", "-Wno-deprecated-declarations"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_COREAUDIO"]
