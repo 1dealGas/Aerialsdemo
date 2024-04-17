@@ -14,7 +14,9 @@ Have a try at the level ~~τo βe ίncluded~~ in `Aerials` :
 
 2. Download `OPlusSans3-Regular.ttf` from [**ColorOS Official**](http://static01.coloros.com/www/public/img/topic7/font-opposans.zip) , and then put it into the `Reference` folder of the project.
 
-3. Open `game.project` in the root of the project, with `Defold Editor` **v1.7.0 or Upper**.
+3. Open `game.project` in the root of the project, with `Defold Editor` **v1.7.0 or upper**.
+   
+   *If you are using `Defold` **v1.8.0 or upper**, you need to change the value of the option item `Native Extension -> App Manifest` into `/System/v18.appmanifest` .*
 
 4. Use the menu choice `Project -> Bundle` to build the Demo.
    

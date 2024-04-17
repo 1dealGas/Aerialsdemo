@@ -40,7 +40,7 @@ game_binding = /System/Ar.input_bindingc
 gamepads = /System/Ar.gamepadsc
 
 [native_extension]
-app_manifest = /System/Ar.appmanifest
+app_manifest = /System/v17.appmanifest
 
 [resource]
 max_resources = 128
