@@ -319,7 +319,6 @@ end
 --
 local tween_cache, tween_capacity = {}, 0
 local STRING, ENABLE, DISABLE = "string", hash("enable"), hash("disable")
-
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
@@ -333,32 +332,34 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 				--
 				tween_cache[1], tween_capacity = decl[1], 2
 				if decl[4] then
-					local tovalue, easetype, delta_second = decl[2], decl[3], (decl[4]-decl[1])/1000
+					local initvalue, easetype, tovalue, delta_second = decl[2], decl[3], decl[5], (decl[4]-decl[1])/1000
 					tween_cahce[2] = function(canvas)
 						url = ( type(url)==STRING and msg.url(url) ) or url or canvas
+						go.set(url, property, initvalue)
 						go_cancel_animations(url, property)
 						go_animate(url, property, 1, tovalue, easetype, delta_second)
 					end
 				else
+					local finalvalue = decl[2]
 					tween_cahce[2] = function(canvas)
 						url = ( type(url)==STRING and msg.url(url) ) or url or canvas
 						go_cancel_animations(url, property)
-						go.set(url, property, decl[2])   -- Final Value.
+						go.set(url, property, finalvalue)
 					end
 				end
-
 				for i=4, decllen, 3 do
 					tween_cache[tween_capacity+1] = decl[i]
 					if decl[i+3] then
-						local tovalue, easetype, delta_second = decl[i+1], decl[i+2], (decl[i+3]-decl[i])/1000
+						local tovalue, easetype, delta_second = decl[i+4], decl[i+2], (decl[i+3]-decl[i])/1000
 						tween_cahce[tween_capacity+2] = function()
 							go_cancel_animations(url, property)
 							go_animate(url, property, 1, tovalue, easetype, delta_second)
 						end
 					else
+						local finalvalue = decl[i+1]
 						tween_cahce[tween_capacity+2] = function()
 							go_cancel_animations(url, property)
-							go.set(url, property, decl[i+1])   -- Final Value.
+							go.set(url, property, finalvalue)
 						end
 					end
 						tween_capacity = tween_capacity + 2
@@ -459,7 +460,6 @@ do
 		}
 		sys.save(SAVE_PATH, Save)
 	end
-
 	OffsetType, HapticFeedbackEnabled, HitSoundEnabled = Save.Options.OffsetType, Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
 	InputDelta = Save.Options.InputDelta				Arf2.SetIDelta(InputDelta)
