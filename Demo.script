@@ -9,7 +9,8 @@ function init(self)
 
 	-- Create Canvas
 	--
-	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {Arf=sys.load_buffer("/Arf/2001.ar"), options=true, display_losts=true})
+	CurrentFumenBuf = sys.load_buffer("/Arf/2001.ar")
+	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
 	-- Do Demo-Specific Settings
 	--

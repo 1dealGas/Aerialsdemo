@@ -44,6 +44,7 @@ CurrentTrackIndex = 0           -- Unused in the Demo
 CurrentAudioRes = nil
 CurrentAudioUnit = nil
 CurrentFumenScript = nil        -- Unused in the Demo
+-- CurrentFumenBuf = nil        -- Temporary
 
 
 -- Fumen Context & Scoring
@@ -85,7 +86,6 @@ function ImportSave()
 		return false
 	end
 end
-
 function SyncSave(options_updated)
 	if options_updated then
 		Save.Options.OffsetType = OffsetType

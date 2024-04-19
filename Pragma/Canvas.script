@@ -1,4 +1,3 @@
-go.property("Arf", resource.buffer())
 go.property("x_scale", 1)
 go.property("y_scale", 1)
 go.property("x_delta", 0)
@@ -63,11 +62,13 @@ local Afac = msg_url("Ar", "/Pragma", "1 Anim")
 -- Init & Update Functions
 --
 function init(self)
+	local track_id_str = tostring(CurrentTrackId)
+
 	-- Load Arf
 	--
-	local track_id_str, wgo_required, hgo_required = tostring(CurrentTrackId)
-	Before, TotalJud, wgo_required, hgo_required = Arf2.InitArf(self.Arf, false, CurrentAudioUnit)
-	self.Arf = nil
+	local wgo_required, hgo_required = 0, 0
+		  Before, TotalJud, wgo_required, hgo_required = Arf2.InitArf(CurrentFumenBuf, false, CurrentAudioUnit)
+		  CurrentFumenBuf = nil
 
 	-- Load Context
 	--
@@ -114,9 +115,7 @@ function init(self)
 
 	--  Load Externals
 	--
-	if self.options then
-		-- No "CurrentCanvas" right now. We need to pass the Canvas URL to
-		-- the UI Node to be created as a script property here.
+	if self.options then   -- Pass the Canvas URL to the new UI Node as a script property here
 		self.options = factory_create("Ar:/Pragma#1 Options", nil, nil, {current_canvas = msg_url("#")})
 	else
 		label_set_text(ButtonLabel, "Exit「×」")
@@ -130,6 +129,7 @@ function init(self)
 end
 
 function update(self, dt)
+
 	-- Update ContextTime
 	--
 	if ContextTime then
@@ -297,9 +297,8 @@ local message_callbacks = {
 
 	[SHOW_SCORE] = function(self)
 		self.show_score = true
+		local percent, current_nonhit = (Hit / TotalJud), (Early + Late)
 
-		local percent = Hit / TotalJud
-		local current_nonhit = Early + Late
 		if Hit ~= LastHit or current_nonhit ~= LastNonHit then
 			LastHit, LastNonHit = Hit, current_nonhit
 			if self.display_losts then
@@ -345,6 +344,7 @@ end
 -- Clear Function
 --
 function final(self)
+
 	-- Score Clean-up
 	--
 	Arf2.FinalArf()
