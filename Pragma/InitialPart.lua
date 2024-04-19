@@ -29,7 +29,6 @@ function AppendNode(url)
 	Nodes[NodeMaxIndex]	= url or msg.url("#")
 	return NodeMaxIndex
 end
-
 function RemoveNode(idx)
 	NodeCount, Nodes[idx] = NodeCount-1, false
 	if NodeCount==0 then NodeMaxIndex=0 end
@@ -44,8 +43,6 @@ CurrentTrackIndex = 0            -- Unused in the Demo
 
 CurrentAudioRes = nil
 CurrentAudioUnit = nil
-
-CurrentPlate = nil               -- Unused in the Demo
 CurrentFumenScript = nil         -- Unused in the Demo
 
 
@@ -75,15 +72,12 @@ function ExportSave() clipboard.copy( B64.encode( sys.serialize(Save) ) ) end
 function ImportSave()
 	local OK, SaveStr = pcall( B64.decode, clipboard.paste() )
 	local OK, SaveTable = pcall(sys.deserialize, SaveStr)
-
 	if OK and SaveTable.Aerials and SaveTable.Aerials=="Save" then
 		ExportSave()
 		Save = SaveTable
-
 		OffsetType = Save.Options.OffsetType
 		AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
 		HapticFeedbackEnabled, HitSoundEnabled = Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
-
 		InputDelta = Save.Options.InputDelta
 		Arf2.SetIDelta(InputDelta)
 		return true
@@ -449,13 +443,9 @@ do
 		Save = {   -- "Challenges" is a series of functions; "Attainments" is a series of Tags
 			Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {}, Attainments = {},
 			Options = {
-				OffsetType = 1, 
-				AudioLatency1 = 0,
-				AudioLatency2 = 0,
-				AudioLatency3 = 0,
-				InputDelta = 0,
-				HapticFeedbackEnabled = true,
-				HitSoundEnabled = false
+				OffsetType = 1, 						InputDelta = 0,
+				AudioLatency1 = 0,						AudioLatency2 = 0,						AudioLatency3 = 0,
+				HapticFeedbackEnabled = true,			HitSoundEnabled = true
 			}
 		}
 		sys.save(SAVE_PATH, Save)
