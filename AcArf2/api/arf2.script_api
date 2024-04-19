@@ -96,6 +96,12 @@
     - name: is_daymode
       type: boolean
 
+  - name: SetAllowAnmitsu
+    type: function
+    parameters:
+    - name: is_anmitsu_allowed
+      type: boolean
+
   - name: SetJudgeRange
     type: function
     parameters:

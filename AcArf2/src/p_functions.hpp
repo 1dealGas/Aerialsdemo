@@ -44,7 +44,7 @@ static uint8_t judge_range = 37;
 
 static float hint_size_x = 360.0f, hint_size_y = 450.0f;
 static float xscale, yscale, xdelta, ydelta, rotsin, rotcos;
-static bool daymode;
+static bool daymode, allow_anmitsu;
 
 // Internals
 static float SIN, COS;
@@ -70,15 +70,15 @@ static int InitArf(lua_State* L) {
 	if(before) return 0;
 
 	// Reset Params
-	daymode = false;
+	daymode = false;					allow_anmitsu = true;
 	xdelta = ydelta = rotsin = 0.0f;
 	xscale = yscale = rotcos = 1.0f;
 	last_ms = dt_p1 = dt_p2 = 0;
 
 	// Reset Judge Params
-	judge_range = 37;						hint_size_x = 360.0f;						hint_size_y = 450.0f;
-	mindt = idelta - judge_range;			mindt = (mindt < -100) ? -100 : mindt;
-	maxdt = idelta + judge_range;			maxdt = (maxdt >  100) ?  100 : maxdt;
+	judge_range = 37;					hint_size_x = 360.0f;						hint_size_y = 450.0f;
+	mindt = idelta - judge_range;		mindt = (mindt < -100) ? -100 : mindt;
+	maxdt = idelta + judge_range;		maxdt = (maxdt >  100) ?  100 : maxdt;
 
 	// Ensure a clean Initialization
 	last_wgo.clear();
@@ -374,8 +374,9 @@ inline bool has_touch_near(const ArHint& hint, const ab* valid_fingers, const ui
 	return false;
 }
 inline bool is_safe_when_anmitsu(ArHint& hint) {
-	const float hl = hint.c_dx - hint_size_x, hd = hint.c_dy - hint_size_y;
-	const float hr = hint.c_dx + hint_size_x, hu = hint.c_dy + hint_size_y;
+	if( !allow_anmitsu )			return false;
+	const float hl = hint.c_dx - hint_size_x,  hd = hint.c_dy - hint_size_y;
+	const float hr = hint.c_dx + hint_size_x,  hu = hint.c_dy + hint_size_y;
 
 	// Iterate blocked blocks
 	for(const auto i : blocked)
@@ -1174,18 +1175,23 @@ static int UpdateArf(lua_State* L) {
 
 // Sundries
 static int FinalArf(lua_State *L) {
-	Arf::clear();		before = 0;
+	Arf::clear();						before = 0;
 	return 0;
 }
 static int SetCam(lua_State *L) {
 	xscale = luaL_checknumber(L, 1);		yscale = luaL_checknumber(L, 2);
 	xdelta = luaL_checknumber(L, 3);		ydelta = luaL_checknumber(L, 4);
+
 	GetSINCOS( luaL_checknumber(L, 5) );
 	rotsin = SIN;	rotcos = COS;
 	return 0;
 }
 static int SetDaymode(lua_State *L) {
 	daymode = lua_toboolean(L, 1);
+	return 0;
+}
+static int SetAllowAnmitsu(lua_State* L) {
+	allow_anmitsu = lua_toboolean(L, 1);
 	return 0;
 }
 static int SetJudgeRange(lua_State *L) {
@@ -1200,10 +1206,12 @@ static int SetHintSize(lua_State* L) {
 	lua_Number hint_size_y_script = hint_size_x_script;
 	if( lua_isnumber(L,2) )
 		hint_size_y_script = luaL_checknumber(L, 2);
+
 	hint_size_x_script = (hint_size_x_script > 3.0) ? hint_size_x_script : 3.0 ;
 	hint_size_x_script = (hint_size_x_script < 48.0) ? hint_size_x_script : 48.0 ;
 	hint_size_y_script = (hint_size_y_script > 3.0) ? hint_size_y_script : 3.0 ;
 	hint_size_y_script = (hint_size_y_script < 24.0) ? hint_size_y_script : 24.0 ;
+
 	hint_size_x = hint_size_x_script * 112.5f;
 	hint_size_y = hint_size_y_script * 112.5f;
 	return 0;

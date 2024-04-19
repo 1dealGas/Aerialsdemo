@@ -6,8 +6,8 @@
 #include "p_functions.hpp"
 static const luaL_reg Arf2[] =   // Considering Adding a "JudgeArfController" Function.
 {
-	{"InitArf", InitArf}, {"UpdateArf", UpdateArf}, {"FinalArf", FinalArf},
-	{"SetIDelta", SetIDelta}, {"SetJudgeRange", SetJudgeRange}, {"SetHintSize", SetHintSize}, {"JudgeArf", JudgeArf},
+	{"InitArf", InitArf}, {"JudgeArf", JudgeArf}, {"UpdateArf", UpdateArf}, {"FinalArf", FinalArf},
+	{"SetIDelta", SetIDelta}, {"SetAllowAnmitsu", SetAllowAnmitsu}, {"SetJudgeRange", SetJudgeRange}, {"SetHintSize", SetHintSize},
 	{"SetCam", SetCam}, {"SetDaymode", SetDaymode}, {nullptr, nullptr}
 };
 
