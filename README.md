@@ -22,7 +22,7 @@ Have a try at the level ~~τo βe ίncluded~~ in `Aerials` :
    
    Currently this demo works with `Android / iOS / macOS / Windows` .
 
-5. Install the bundle you builded, and you should be ready to go. *(You need to **self-sign** the iOS bundle before installing it)*
+5. Install the bundle you built, and you should be ready to go. *(You need to **self-sign** the iOS bundle before installing it)*
    
    We'll also publish official releases aperiodically.
 
