@@ -14,7 +14,7 @@ LayoutModeLandscape = false
 
 CurrentGuiX = 0
 CurrentGuiY = 0
-CurrentGuiPhase = nil            -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
+CurrentGuiPhase = nil           -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
 
 Nodes = AcUtil.NewTable(8, 0)
 NodeMaxIndex = 0
@@ -37,19 +37,19 @@ end
 
 -- Track Managing & Resources Related
 --
-CurrentTrackId = 1011            -- Track: {Id, ExpToShow, Meta{}, Loader} / Loader will be called only when no record exists in the save
-CurrentTrackMeta = nil           -- Unused in the Demo / {Fumenby, Artworkby, Artworkcolor, withbutton(nil/button_name_str), buttonfunc}
-CurrentTrackIndex = 0            -- Unused in the Demo
+CurrentTrackId = 1011           -- Track: {Id, ExpToShow, Meta{}, Loader} / Loader will be called only when no record exists in the save
+CurrentTrackMeta = nil          -- Unused in the Demo / {Fumenby, Artworkby, Artworkcolor, withbutton(nil/button_name_str), buttonfunc}
+CurrentTrackIndex = 0           -- Unused in the Demo
 
 CurrentAudioRes = nil
 CurrentAudioUnit = nil
-CurrentFumenScript = nil         -- Unused in the Demo
+CurrentFumenScript = nil        -- Unused in the Demo
 
 
 -- Fumen Context & Scoring
 --
-ContextTime = nil                -- msTime or nil
-WishSprites = nil                -- No need to expose other context info here
+ContextTime = nil               -- msTime or nil
+WishSprites = nil               -- No need to expose other context info here
 Hit, Early, Late = 0, 0, 0
 TotalJud = 0
 
@@ -138,7 +138,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 	local trigger_tables = nt(trigger_count, 0)
 	for i=1, #TriggerFns, 2 do
 		if is_callable(TriggerFns[i+1]) then
-			trigger_tables[cnt] = { TriggerFns[i], TriggerFns[i+1] }      -- TriggerMs, TriggerFn
+			trigger_tables[cnt] = { TriggerFns[i], TriggerFns[i+1] }   -- TriggerMs, TriggerFn
 			cnt = cnt + 1
 		end
 	end
@@ -212,14 +212,14 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		if task_count > 0 then
 			UPDATE = function(canvas)   -- Will be called only when ContextTime exists
 				local ContextTime = ContextTime
-				local current_trigger_time = Trigger[TriggerWhich]                             -- Trigger
+				local current_trigger_time = Trigger[TriggerWhich]                              -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
 					TriggerWhich = TriggerWhich + 2
 					Trigger[TriggerWhich - 1](canvas)
 					current_trigger_time = Trigger[TriggerWhich]
 				end
 
-				local current_register_time = Register[RegisterWhich]                          -- Register
+				local current_register_time = Register[RegisterWhich]                           -- Register
 				while (current_register_time  and  ContextTime > current_register_time) do
 					TaskCount = TaskCount + 1
 					TaskMaxIndex = TaskMaxIndex + 1
@@ -228,13 +228,13 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 					current_register_time = Register[RegisterWhich]
 				end
 
-				for i=TaskMaxIndex, 1, -1 do                                                   -- Do Tasks
+				for i=TaskMaxIndex, 1, -1 do                                                    -- Do Tasks
 					if Tasks[i] then					Tasks[i](canvas)
 					elseif i == TaskMaxIndex then		TaskMaxIndex = i - 1
 					end
 				end
 
-				local current_unregister_time = Unregister[UnregisterWhich]                    -- Unregister
+				local current_unregister_time = Unregister[UnregisterWhich]                     -- Unregister
 				while (current_unregister_time  and  ContextTime > current_unregister_time) do
 					TaskCount = TaskCount - 1
 					UnregisterWhich = UnregisterWhich + 2
@@ -245,7 +245,7 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 			end
 		else
 			UPDATE = function(canvas)
-				local ContextTime, current_trigger_time = ContextTime, Trigger[TriggerWhich]                             -- Trigger
+				local ContextTime, current_trigger_time = ContextTime, Trigger[TriggerWhich]    -- Trigger
 				while (current_trigger_time  and  ContextTime > current_trigger_time) do
 					TriggerWhich = TriggerWhich + 2
 					Trigger[TriggerWhich - 1](canvas)
