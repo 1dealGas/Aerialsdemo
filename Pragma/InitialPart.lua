@@ -38,8 +38,8 @@ end
 -- Track Managing & Resources Related
 --
 CurrentTrackId = 1011           -- Track: {Id, ExpToShow, Meta{}, Loader} / Loader will be called only when no record exists in the save
-CurrentTrackMeta = nil          -- Unused in the Demo / {Fumenby, Artworkby, Artworkcolor, withbutton(nil/button_name_str), buttonfunc}
-CurrentTrackIndex = 0           -- Unused in the Demo
+CurrentTrackMeta = nil          -- Unused in the Demo / {Artworkby, Artworkcolor, FumenBy, ExFumen?, ExFumenScript?, ExFumenBy?}
+CurrentTrackIndex = 0           -- Unused in the Demo / TrackList is not shared
 
 CurrentAudioRes = nil
 CurrentAudioUnit = nil
@@ -441,7 +441,7 @@ do
 	Save = sys.load(SAVE_PATH)
 	if not Save.Aerials then
 		Save = {   -- "Challenges" is a series of functions; "Attainments" is a series of Tags
-			Aerials = "Save",  Wish = 0,  Hint = {},  Challenges = {}, Attainments = {},
+			Aerials = "Save",  Wish = 0,  Hint = {},  HintEX = {},  Challenges = {},  Attainments = {},
 			Options = {
 				OffsetType = 1, 						InputDelta = 0,
 				AudioLatency1 = 0,						AudioLatency2 = 0,						AudioLatency3 = 0,
