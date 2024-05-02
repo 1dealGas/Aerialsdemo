@@ -42,9 +42,9 @@ embedded_components {
 embedded_components {
   id: "Helper"
   type: "sprite"
-  data: "default_animation: \"Anim\"\n"
+  data: "default_animation: \"Icon\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
-  "blend_mode: BLEND_MODE_ALPHA\n"
+  "blend_mode: BLEND_MODE_SCREEN\n"
   "slice9 {\n"
   "  x: 15.0\n"
   "  y: 15.0\n"

@@ -156,8 +156,8 @@ function update(self, dt)
 		end
 
 		for i = 1, hgo_used do
-			local helper_tintw = HintTints[i].x * 1.73
-			go_set( HintHelpers[i], TINTW, (helper_tintw>0.37) and 0.37 or helper_tintw )
+			-- local helper_tintw = HintTints[i].x * 1.73
+			-- go_set( HintHelpers[i], TINTW, (helper_tintw>0.37) and 0.37 or helper_tintw )
 			go_set(HintSprites[i], TINT, HintTints[i])
 		end
 
