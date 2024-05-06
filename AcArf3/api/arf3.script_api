@@ -1,0 +1,208 @@
+- name: Arf3
+  type: table
+  members:
+
+  - name: MakeArf
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is defined
+    parameters:
+    - name: offset
+      type: number
+    - name: wgo_required
+      type: number
+    - name: ego_required
+      type: number
+    - name: special_hint_id
+      type: number
+    - name: bpms
+      type: table
+    - name: sc_layer1
+      type: table
+    - name: sc_layer2
+      type: table
+    - name: wish_prototypes
+      type: table
+    - name: hint_prototypes
+      type: table
+    - name: echo_prototypes
+      type: table
+    returns:
+    - name: before
+      type: number
+    - name: object_count
+      type: number
+    - name: hgo_required
+      type: number
+
+  - name: DumpArf
+    type: function
+    desc: Included when the macro "AR_BUILD_VIEWER" or "AR_WITH_EXPORTER" is defined
+    parameters:
+    - name: with_judge_info
+      type: boolean
+    returns:
+    - name: buf
+      type: string
+
+
+  - name: InitArf2
+    type: function
+    desc: Included when the macro "AR_BUILD_VIEWER" or "AR_COMPATIBILITY" is defined
+    parameters:
+    - name: buf
+      type: table
+    - name: is_auto
+      type: boolean
+    returns:
+    - name: before
+      type: number
+    - name: object_count
+      type: number
+    - name: wgo_required
+      type: number
+    - name: hgo_required
+      type: number
+    - name: ego_required
+      type: number
+      desc: Always equal to 0
+
+  - name: InitArf3
+    type: function
+    parameters:
+    - name: buf
+      type: table
+    - name: is_auto
+      type: boolean
+    returns:
+    - name: before
+      type: number
+    - name: object_count
+      type: number
+    - name: wgo_required
+      type: number
+    - name: hgo_required
+      type: number
+    - name: ego_required
+      type: number
+
+  - name: FinalArf
+    type: function
+
+
+  - name: SetDaymode
+    type: function
+    parameters:
+    - name: is_daymode
+      type: boolean
+
+  - name: SetCam
+    type: function
+    parameters:
+    - name: xscale
+      type: number
+    - name: yscale
+      type: number
+    - name: xdelta
+      type: number
+    - name: ydelta
+      type: number
+    - name: rotdeg
+      type: number
+
+  - name: UpdateArf
+    type: function
+    parameters:
+    - name: mstime
+      type: number
+    - name: table_wgo
+      type: table
+    - name: table_hgo
+      type: table
+    - name: table_ego
+      type: table
+    - name: table_agol
+      type: table
+    - name: table_agor
+      type: table
+    - name: table_wtint
+      type: table
+    - name: table_htint
+      type: table
+    - name: table_etint
+      type: table
+    - name: table_atint
+      type: table
+    returns:
+    - name: hit
+      type: number
+    - name: lost
+      type: number
+    - name: wgo_used
+      type: number
+    - name: hgo_used
+      type: number
+    - name: ego_used
+      type: number
+    - name: ago_used
+      type: number
+
+
+  - name: SetAllowAnmitsu
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
+    parameters:
+    - name: is_anmitsu_allowed
+      type: boolean
+
+  - name: SetHintSize
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
+    parameters:
+    - name: x
+      type: number
+    - name: y
+      type: number
+      desc: Optional. y=x if y is not a number
+
+  - name: SetJudgeRange
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
+    parameters:
+    - name: range
+      type: number
+
+  - name: SetIDelta
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
+    parameters:
+    - name: idelta
+      type: number
+
+  - name: JudgeArf
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
+    parameters:
+    - name: table_touch
+      type: table
+    returns:
+    - name: hit
+      type: number
+    - name: early
+      type: number
+    - name: late
+      type: number
+    - name: special_hint_judged
+      type: boolean
+
+
+  - name: NewTable
+    type: function
+    desc: Included only when the macro "AR_BUILD_VIEWER" is defined
+    parameters:
+    - name: narr
+      type: number
+    - name: nrec
+      type: number
+    returns:
+    - name: new_table
+      type: table

@@ -9,7 +9,7 @@ function init(self)
 
 	-- Create Canvas
 	--
-	CurrentFumenBuf = sys.load_buffer("/Arf/2001.ar")
+	CurrentFumenBuf = sys.load_buffer("/Arf/2001.arf")
 	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
 	-- Do Demo-Specific Settings
@@ -25,7 +25,7 @@ function init(self)
 	InterludeOut(
 		function()
 			AcAudio.PlayUnit(CurrentAudioUnit, false)
-			Arf2.SetJudgeRange(84)
+			Arf3.SetJudgeRange(84)
 		end
 	)
 end
