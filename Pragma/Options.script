@@ -473,7 +473,7 @@ local ReleasedFuncs = {
 		InputDelta = (InputDelta>-63) and InputDelta or -63
 		label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
 		sprite.play_flipbook(InputDeltaButton, Offset)
-		Arf2.SetIDelta(InputDelta)
+		Arf3.SetIDelta(InputDelta)
 		SyncSave(true)
 	end,
 
@@ -482,7 +482,7 @@ local ReleasedFuncs = {
 		InputDelta = (InputDelta<63) and InputDelta or 63
 		label_set_text( InputDeltaText, string_format(FMT_MS, InputDelta) )
 		sprite.play_flipbook(InputDeltaButton, Offset)
-		Arf2.SetIDelta(InputDelta)
+		Arf3.SetIDelta(InputDelta)
 		SyncSave(true)
 	end,
 

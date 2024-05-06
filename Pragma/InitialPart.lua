@@ -80,7 +80,7 @@ function ImportSave()
 		AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
 		HapticFeedbackEnabled, HitSoundEnabled = Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 		InputDelta = Save.Options.InputDelta
-		Arf2.SetIDelta(InputDelta)
+		Arf3.SetIDelta(InputDelta)
 		return true
 	else
 		return false
@@ -452,7 +452,7 @@ do
 	end
 	OffsetType, HapticFeedbackEnabled, HitSoundEnabled = Save.Options.OffsetType, Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
-	InputDelta = Save.Options.InputDelta				Arf2.SetIDelta(InputDelta)
+	InputDelta = Save.Options.InputDelta				Arf3.SetIDelta(InputDelta)
 	collectgarbage("setstepmul", 137)					collectgarbage("setpause", 137)
 	FuncConcatEnable(true)
 end

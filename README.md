@@ -30,7 +30,7 @@ Have a try at the level ~~τo βe ίncluded~~ in `Aerials` :
 
 ```
 Aerials Demo
- - AcArf2                        -- Engine Extension "Aerials Player v2"
+ - AcArf3                        -- Engine Extension "Aerials Player v3"
       ···
  - AcAudio                       -- Engine Extension "AcAudio"
       ···
