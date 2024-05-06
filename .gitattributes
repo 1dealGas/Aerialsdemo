@@ -1,7 +1,5 @@
 *.script linguist-language=Lua
 *.render_script linguist-language=Lua
-AcArf2/src/p_singleton.h linguist-language=C++
-AcArf2/include/includes.h linguist-language=C++
 game.project linguist-language=editor-config
 
 ext.manifest linguist-language=YAML
@@ -18,14 +16,13 @@ ext.manifest linguist-language=YAML
 *.input_binding linguist-language=text proto
 *.texture_profiles linguist-language=text proto
 
-AcClipboard/** linguist-vendored
-AcArf2/include/arf2_generated.h linguist-generated
-AcArf2/include/ease_constants.h linguist-generated
-AcArf2/include/flatbuffers/** linguist-vendored
+AcArf3/include/bitsery/** linguist-vendored
+AcArf3/include/ease_constants.h linguist-generated
 AcAudio/src/miniaudio.cpp linguist-vendored
 AcAudio/src/miniaudio.mm linguist-vendored
 AcAudio/src/opusfile/** linguist-vendored
 AcAudio/include/** linguist-vendored
+AcClipboard/** linguist-vendored
 
 System/Ar.render_script linguist-vendored
 Reference/lbase64.lua linguist-vendored
