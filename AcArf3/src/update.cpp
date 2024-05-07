@@ -57,8 +57,8 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 		for( const auto current_echo_id : Arf->index[current_group].eidx ) {
 			auto& current_echo = Arf->echo[current_echo_id];
 			const int32_t dt = mstime - current_echo.ms;
-			if(dt < 0)		break;
-			if(dt > 470)	continue;
+			if(dt < 0  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+			if(dt > 470)					continue;
 
 			if( dt > 100  &&  current_echo.status <= NONJUDGED_LIT )   //  NONJUDGED -> 0   N_L -> 1
 				result.late++, current_echo.status = LOST;
@@ -781,8 +781,8 @@ Arf3_API UpdateArf(lua_State* L) {
 			/* Time & Jump */
 			const auto& hint_c = Arf->hint[hint_cid];
 			const auto dt = (int32_t)mstime - (int32_t)hint_c.ms;
-			if (dt > 470)  continue;
-			if (dt < -510) break;
+			if(dt < -510  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+			if(dt > 470)					continue;
 
 			/* Other Params */
 			const float x = 900.f + (hint_c.c_dx * rotcos - hint_c.c_dy * rotsin) * xscale + xdelta;
@@ -795,8 +795,8 @@ Arf3_API UpdateArf(lua_State* L) {
 			/* Time & Jump */
 			const auto& echo_c = Arf->echo[echo_cid];
 			const auto  dt = (int32_t)mstime - (int32_t)echo_c.ms;
-			if (dt > 470)  continue;
-			if (dt < -510) break;
+			if(dt < -510  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+			if(dt > 470)					continue;
 
 			/* Other Params */
 				  float w = (dt>=-359) ? 1.0f : (-dt-359)*0.006622516556291f;   // As  ms_passed / 151

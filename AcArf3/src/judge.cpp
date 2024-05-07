@@ -43,13 +43,14 @@ inline bool anmitsu_register(const float cdx, const float cdy) {
 
 
 Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pressed, const bool any_released) {
-	JudgeResult result = {};		bool use_min_time_strategy = true;
+	JudgeResult result = {};
 	if( !Arf )						return result;
 	if( any_released )				blocked.clear();
 
 	// Calculate the Context Time
 	const uint64_t judge_microsecond = dmTime::GetTime() - (systime - mstime*1000);
-	const uint32_t mstime = judge_microsecond / 1000;
+	const uint32_t mstime   = judge_microsecond / 1000;
+		  uint32_t min_time = 0;
 
 	// Prepare the Iteration Scale
 	const uint32_t location_group =	mstime >> 9;
@@ -94,7 +95,7 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 				if( current_echo.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100  ) {
 					anmitsu_register(current_wish.current_cdx, current_wish.current_cdy);
 					current_echo.status = JUDGED_LIT;
-					use_min_time_strategy = false;
+					min_time = 4294967295;   // Means that the min_time strategy is banned
 				}
 			}
 		}
@@ -103,8 +104,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 		for( const auto current_echo_id : Arf->index[current_group].eidx ) {
 			auto& current_echo = Arf->echo[current_echo_id];
 			const int32_t dt = mstime - current_echo.ms;
-			if(dt < -370) break;
-			if(dt > 470) continue;
+			if(dt < -370  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+			if(dt > 470)					continue;
 
 			const bool htn = has_touch_near(current_echo.c_dx, current_echo.c_dy, vt, vtcount);
 			switch(current_echo.status) {
@@ -124,18 +125,17 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 			if( current_echo.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100  ) {
 				anmitsu_register(current_echo.c_dx, current_echo.c_dy);
 				current_echo.status = JUDGED_LIT;
-				use_min_time_strategy = false;
+				min_time = 4294967295;   // Means that the min_time strategy is banned
 			}
 		}
 
 		/* Hint */
 		if(any_pressed) {   // Simply set the min_time to a huge value when the min_time strategy is banned
-			uint32_t min_time = use_min_time_strategy ? 0 : 4294967295;
 			for( const auto current_hint_id : Arf->index[current_group].hidx ) {
 				auto& current_hint = Arf->hint[current_hint_id];
 				const int32_t dt = mstime - current_hint.ms;
-				if(dt < -370) break;
-				if(dt > 470) continue;
+				if(dt < -370  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+				if(dt > 470)					continue;
 
 				const bool htn = has_touch_near(current_hint.c_dx, current_hint.c_dy, vt, vtcount);
 				switch(current_hint.status) {
@@ -176,8 +176,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 			for( const auto current_hint_id : Arf->index[current_group].hidx ) {
 				auto& current_hint = Arf->hint[current_hint_id];
 				const int32_t dt = mstime - current_hint.ms;
-				if(dt < -370) break;
-				if(dt > 470) continue;
+				if(dt < -370  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
+				if(dt > 470)					continue;
 
 				const bool htn = has_touch_near(current_hint.c_dx, current_hint.c_dy, vt, vtcount);
 				switch(current_hint.status) {
