@@ -1,6 +1,5 @@
 // Extension Related Stuff for Arf3
 #include <arf3.h>
-using namespace Arf3_APIs;
 #pragma once
 
 
@@ -23,17 +22,9 @@ namespace Arf3 {
 Arf3::Fumen* Arf = nullptr;
 
 
-/* Provide NewTable Func for the Viewer Build */
-#ifdef AR_BUILD_VIEWER
-Arf3_API NewTable(lua_State* L) {
-	lua_createtable( L, (int)luaL_checknumber(L, 1), (int)luaL_checknumber(L, 2) );
-	return 1;
-}
-#endif
-
-
-/* Defold Lifecycle Relateds */
-static const luaL_reg Arf3APIs[] = {
+/* Arf3 APIs */
+using namespace Arf3_APIs;
+static constexpr luaL_reg Arf3APIs[] = {
 	{"InitArf3", InitArf3}, {"FinalArf", FinalArf}, {"UpdateArf", UpdateArf},
 	{"SetDaymode", SetDaymode}, {"SetCam", SetCam},
 #ifndef AR_BUILD_VIEWER
@@ -46,19 +37,24 @@ static const luaL_reg Arf3APIs[] = {
 		{"InitArf2", InitArf2},
 	#endif
 #else
-	{"MakeArf", MakeArf}, {"DumpArf", DumpArf}, {"InitArf2", InitArf2}, {"NewTable", NewTable}
+	{"MakeArf", MakeArf}, {"DumpArf", DumpArf}, {"InitArf2", InitArf2}
 #endif
 };
+
+
+/* Defold Lifecycle Related Stuff */
 inline dmExtension::Result Arf3LuaInit(dmExtension::Params* p) {
-	/* Defold Restriction:
-	 * Must Get the Lua Stack Balanced in the Initiation Process. */
-	luaL_register(p->m_L, "Arf3", Arf3APIs);		lua_pop(p->m_L, 1);
+	luaL_register(p->m_L, "Arf3", Arf3APIs);
+	lua_pop(p->m_L, 1);   // Defold Restriction, Must Get the Lua Stack Balanced in the Initiation Process.
 	return dmExtension::RESULT_OK;
 }
+
 inline dmExtension::Result Arf3APPOK(dmExtension::AppParams* params) {
 	return dmExtension::RESULT_OK;
 }
+
 inline dmExtension::Result Arf3OK(dmExtension::Params* params) {
 	return dmExtension::RESULT_OK;
 }
+
 DM_DECLARE_EXTENSION(AcArf3, "AcArf3", Arf3APPOK, Arf3APPOK, Arf3LuaInit, nullptr, nullptr, Arf3OK)
