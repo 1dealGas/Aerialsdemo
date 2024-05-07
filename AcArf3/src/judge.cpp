@@ -130,7 +130,7 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 		}
 
 		/* Hint */
-		if(any_pressed) {   // Simply set the min_time to a huge value when the min_time strategy is banned
+		if(any_pressed) {
 			for( const auto current_hint_id : Arf->index[current_group].hidx ) {
 				auto& current_hint = Arf->hint[current_hint_id];
 				const int32_t dt = mstime - current_hint.ms;
