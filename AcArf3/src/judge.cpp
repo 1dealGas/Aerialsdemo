@@ -152,8 +152,10 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 				// Judge the Hint
 				if( current_hint.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100 ) {
 					const bool iswa = anmitsu_register(current_hint.c_dx, current_hint.c_dy);
-					if( !min_time || min_time == current_hint.ms )					/* Register */
+					if( !min_time )													/* Register */
 						min_time = current_hint.ms;
+					else if( min_time == current_hint.ms )
+						{  }
 					else if( !iswa )
 						continue;
 
@@ -171,7 +173,6 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 				}
 			}
 		}
-
 		else {
 			for( const auto current_hint_id : Arf->index[current_group].hidx ) {
 				auto& current_hint = Arf->hint[current_hint_id];
@@ -195,7 +196,6 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 	}
 		return result;
 }
-
 
 Arf3_API JudgeArf(lua_State* L) {
 	// Unpack Touches
