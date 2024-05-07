@@ -81,7 +81,7 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 
 
 /* Param Setting Funcs */
-using cfloat = const float&;
+using cfloat = const float;
 inline void UseWgo(lua_State* L, uint16_t& wgo_used, cfloat x, cfloat y, cfloat z, float& w) {
 	if( x>=-36.0f && x<=1836.0f ) {   // X trim
 		if( y>=-36.0f && y<=1116.0f ) {   // Y trim
