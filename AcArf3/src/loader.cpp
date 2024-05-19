@@ -21,6 +21,20 @@ Arf3_API InitArf3(lua_State* L) {
 	Arf = new Fumen;
 	Decode( (uint8_t*)ArfBuf, ArfSize ).object(*Arf);   // uint8_t*, int -> some_ref
 	if( Arf->before ) {
+		uint64_t dx_len = Arf->d1.size();
+		for(uint64_t i=1; i<dx_len; i++) {
+			const auto& node_f = Arf->d1[i-1];
+				  auto& node_c = Arf->d1[i];
+			node_c.base_dt = node_f.base_dt + (node_c.init_ms - node_f.init_ms) * (double)node_f.ratio;
+		}
+
+		dx_len = Arf->d2.size();
+		for(uint64_t i=1; i<dx_len; i++) {
+			const auto& node_f = Arf->d2[i-1];
+				  auto& node_c = Arf->d2[i];
+			node_c.base_dt = node_f.base_dt + (node_c.init_ms - node_f.init_ms) * (double)node_f.ratio;
+		}
+
 		const auto current_status = lua_toboolean(L, 2) ? AUTO : NONJUDGED;
 		for( auto& wish: Arf->wish ) {
 			// PosNodes
@@ -162,14 +176,23 @@ Arf3_API InitArf2(lua_State* L) {
 			const auto d = A -> dts_layer1();
 			const auto d1c = d -> size();   // Must be larger than 0
 
-			Arf->d1.resize(d1c);
-			for(uint64_t i = 0; i < d1c; i++) {
+			Arf->d1.resize(d1c); {
+				const auto	dn = d -> Get(0);
+					  auto& dnobj = Arf->d1[0];
+				dnobj.ratio = (dn >> 50) * 0.00001f;   // For 1st DeltaNode, init_ms and base_dt must be 0
+			}
+
+			for(uint64_t i = 1; i < d1c; i++) {   // Other DeltaNode(s)
 				const auto	dn = d -> Get(i);
 					  auto& dnobj = Arf->d1[i];
+					  auto& former_obj = Arf->d1[i-1];
 
 				dnobj.base_dt = (dn & 0xffffffff) * 0.00002;
 				dnobj.ratio = (dn >> 50) * 0.00001f;
 				dnobj.init_ms = ((dn>>32) & 0x3ffff) * 2;
+
+				if( dnobj.base_dt < former_obj.base_dt )
+					former_obj.ratio = -former_obj.ratio;
 			}
 		}
 
@@ -177,14 +200,23 @@ Arf3_API InitArf2(lua_State* L) {
 			const auto d = A -> dts_layer2();
 			const auto d2c = d -> size();   // Must be larger than 0
 
-			Arf->d2.resize(d2c);
-			for(uint64_t i = 0; i < d2c; i++) {
+			Arf->d2.resize(d2c); {
+				const auto	dn = d -> Get(0);
+					  auto& dnobj = Arf->d2[0];
+				dnobj.ratio = (dn >> 50) * 0.00001f;   // For 1st DeltaNode, init_ms and base_dt must be 0
+			}
+
+			for(uint64_t i = 1; i < d2c; i++) {   // Other DeltaNode(s)
 				const auto	dn = d -> Get(i);
 					  auto& dnobj = Arf->d2[i];
+					  auto& former_obj = Arf->d2[i-1];
 
 				dnobj.base_dt = (dn & 0xffffffff) * 0.00002;
 				dnobj.ratio = (dn >> 50) * 0.00001f;
 				dnobj.init_ms = ((dn>>32) & 0x3ffff) * 2;
+
+				if( dnobj.base_dt < former_obj.base_dt )
+					former_obj.ratio = -former_obj.ratio;
 			}
 		}
 
