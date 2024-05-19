@@ -66,7 +66,7 @@ embedded_components {
   position {
     x: 0.0
     y: 0.0
-    z: 0.06
+    z: 0.03
   }
   rotation {
     x: 0.0
