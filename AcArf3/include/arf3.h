@@ -33,7 +33,7 @@ namespace Arf3 {
 	struct DeltaNode {
 		double		base_dt = 0.0;
 		uint32_t	init_ms = 0;
-		float		ratio = 0.0f;									// BPM * Scale / 15000 -> {-1024, 1024, 1/1024}
+		float		ratio = 0.0f;									// BPM * Scale / 15000 -> {-32, 32, 1/131072}
 	};
 	struct AngleNode {
 		double		dt = 0.0;
@@ -171,8 +171,8 @@ namespace bitsery {
 	static constexpr auto PX = ext::ValueRange<float> {-16200.0f, 16200.0f, P};			// Pos X
 	static constexpr auto PY = ext::ValueRange<float> {-8100.0f, 8100.0f, P};			// Pos Y
 	static constexpr auto MV = ext::ValueRange<float> {0.0f, 16.0f, P};					// Max Visible Distance
-	static constexpr auto DR = ext::ValueRange<float> {-1024.0f, 1024.0f, HP};			// DeltaTime Ratio
-	static constexpr auto DT = ext::ValueRange<double> {0.0, 262144.0, (double)HP};		// DeltaTime
+	static constexpr auto DR = ext::ValueRange<float> {-32.0f, 32.0f, HP};				// DeltaTime Ratio
+	static constexpr auto DT = ext::ValueRange<double> {0.0, 131072.0, (double)HP};		// DeltaTime
 	static constexpr auto CV = ext::CompactValueAsObject {};
 
 	template<typename S> void serialize(S& s, Arf3::DeltaNode& dn) {
