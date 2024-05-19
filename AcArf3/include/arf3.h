@@ -102,14 +102,12 @@ namespace Arf3 {
 	extern	uint64_t	mstime, systime;									// Shared, OK to Clear
 	extern	int8_t		mindt, maxdt, idelta;								// User Settings, Cannot Clear
 
-	// Runtime Params
-	extern	uint8_t		judge_range;
+	extern	uint8_t		judge_range;													/* Runtime Params */
 	extern	float		object_size_x, object_size_y;
 	extern	float		xscale, yscale, xdelta, ydelta, rotsin, rotcos, SIN, COS;
 	extern	bool		daymode, allow_anmitsu;
 
-	// Internals
-	extern	uint64_t												dt_p1, dt_p2;
+	extern	uint64_t												dt_p1, dt_p2;		/* Internals */
 	extern	std::unordered_map<uint32_t, uint16_t>					last_wgo;
 	extern	std::vector<ab>											blocked;
 
@@ -156,12 +154,8 @@ namespace Arf3 {
 		while( dtp < dt_tail ) {
 			const auto& node_c = dt[dtp];
 			const auto& node_n = dt[dtp+1];
-			if( mstime < node_n.init_ms ) {
-				if( node_c.base_dt > node_n.base_dt )
-					return node_c.base_dt - (mstime - node_c.init_ms) * node_c.ratio;
-				else
-					return node_c.base_dt + (mstime - node_c.init_ms) * node_c.ratio;
-			}
+			if( mstime < node_n.init_ms )
+				return node_c.base_dt + (mstime - node_c.init_ms) * node_c.ratio;
 			dtp++;
 		}
 		return 0;
@@ -177,14 +171,14 @@ namespace bitsery {
 	static constexpr auto PX = ext::ValueRange<float> {-16200.0f, 16200.0f, P};			// Pos X
 	static constexpr auto PY = ext::ValueRange<float> {-8100.0f, 8100.0f, P};			// Pos Y
 	static constexpr auto MV = ext::ValueRange<float> {0.0f, 16.0f, P};					// Max Visible Distance
-	static constexpr auto DR = ext::ValueRange<float> {0.0f, 1024.0f, HP};				// DeltaTime Ratio
+	static constexpr auto DR = ext::ValueRange<float> {-1024.0f, 1024.0f, HP};			// DeltaTime Ratio
 	static constexpr auto DT = ext::ValueRange<double> {0.0, 262144.0, (double)HP};		// DeltaTime
 	static constexpr auto CV = ext::CompactValueAsObject {};
 
 	template<typename S> void serialize(S& s, Arf3::DeltaNode& dn) {
 		s.enableBitPacking(
 			[&dn](typename S::BPEnabledType& builder) {
-				builder.ext(dn.base_dt, DT);	builder.ext(dn.init_ms, CV);	builder.ext(dn.ratio, DR);
+				builder.ext(dn.init_ms, CV);	builder.ext(dn.ratio, DR);
 			}
 		);
 	}
@@ -299,8 +293,7 @@ namespace Arf3_APIs {
 namespace Arf3 {
 	struct BSCFG {
 		static constexpr bitsery::EndiannessType Endianness = bitsery::DefaultConfig::Endianness;
-		static constexpr bool CheckAdapterErrors = false,
-							  CheckDataErrors = false;
+		static constexpr bool CheckAdapterErrors = false, CheckDataErrors = false;
 	};
 	using Encoder = bitsery::Serializer< bitsery::OutputBufferAdapter< std::vector<uint8_t>, BSCFG > >;
 	using Decode  = bitsery::Deserializer< bitsery::InputBufferAdapter<const uint8_t*, BSCFG> >;
