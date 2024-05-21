@@ -25,6 +25,7 @@ using namespace Arf3;
 
 
 /* Object sweeping behaviors are gathered here. */
+#ifndef AR_BUILD_VIEWER
 inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond_group) {
 	JudgeResult result = {};
 	for( uint16_t current_group = init_group; current_group < beyond_group; current_group++ ) {
@@ -78,6 +79,7 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 	}
 	return result;
 }
+#endif
 
 
 /* Param Setting Funcs */
@@ -123,8 +125,8 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 	lua_rawgeti(L, HGO, hgo_used+1);		const GO hgo	= dmScript::CheckGOInstance(L, -1);
 	lua_rawgeti(L, AGOL, ago_used+1);		const GO agol	= dmScript::CheckGOInstance(L, -1);
 	lua_rawgeti(L, AGOR, ago_used+1);		const GO agor	= dmScript::CheckGOInstance(L, -1);
-	lua_rawgeti(L, HTINT, hgo_used+1);		const v4 htint	= dmScript::CheckVector4(L, -1);
-	lua_rawgeti(L, ATINT, ago_used+1);		const v4 atint	= dmScript::CheckVector4(L, -1);
+	lua_rawgeti(L, HTINT, hgo_used+1);	const v4 htint	= dmScript::CheckVector4(L, -1);
+	lua_rawgeti(L, ATINT, ago_used+1);	const v4 atint	= dmScript::CheckVector4(L, -1);
 	lua_pop(L, 5);
 
 	/* Pass Hint & Anim Params */
@@ -492,9 +494,12 @@ Arf3_API UpdateArf(lua_State* L) {
 					beyond_group	= beyond_group < index_size ? beyond_group : index_size ;
 
 	/* Misc Preparations */
+#ifdef AR_BUILD_VIEWER
+	constexpr		JudgeResult    sweep_result = {};
+#else
 	const auto		sweep_result = SweepObjects(init_group, beyond_group);
-	const double	dt1	= QueryDt(mstime, Arf->d1, dt_p1);
-	const double	dt2	= QueryDt(mstime, Arf->d2, dt_p2);
+#endif
+	const double	dt1 = QueryDt(mstime, Arf->d1, dt_p1), dt2 = QueryDt(mstime, Arf->d2, dt_p2);
 		  uint16_t  wgo_used = 0, hgo_used = 0, ego_used = 0, ago_used = 0;
 
 
