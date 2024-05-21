@@ -125,8 +125,8 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 	lua_rawgeti(L, HGO, hgo_used+1);		const GO hgo	= dmScript::CheckGOInstance(L, -1);
 	lua_rawgeti(L, AGOL, ago_used+1);		const GO agol	= dmScript::CheckGOInstance(L, -1);
 	lua_rawgeti(L, AGOR, ago_used+1);		const GO agor	= dmScript::CheckGOInstance(L, -1);
-	lua_rawgeti(L, HTINT, hgo_used+1);	const v4 htint	= dmScript::CheckVector4(L, -1);
-	lua_rawgeti(L, ATINT, ago_used+1);	const v4 atint	= dmScript::CheckVector4(L, -1);
+	lua_rawgeti(L, HTINT, hgo_used+1);		const v4 htint	= dmScript::CheckVector4(L, -1);
+	lua_rawgeti(L, ATINT, ago_used+1);		const v4 atint	= dmScript::CheckVector4(L, -1);
 	lua_pop(L, 5);
 
 	/* Pass Hint & Anim Params */
