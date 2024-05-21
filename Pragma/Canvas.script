@@ -16,7 +16,7 @@ local WishTints, HintTints, EchoTints, AnimTints
 local HintSprites, EchoSprites, AlSprites, ArSprites
 
 local ButtonPressed, ButtonInsertIndex = false, 0
-local LastContextTime, LastWgoUsed, LastHgoUsed, LastEgoUsed, LastAgoUsed = 0, 0, 0, 0, 0
+local LastWgoUsed, LastHgoUsed, LastEgoUsed, LastAgoUsed = 0, 0, 0, 0
 local LastHit, LastNonHit, LastStr = 0, 0, ""
 -- TotalJud, Early, Late, Hit
 
@@ -244,7 +244,6 @@ function update(self, dt)
 					LastHit, LastNonHit = Hit, current_nonhit
 			end
 		end
-			LastContextTime = ContextTime
 	else
 		go.delete()   -- Won't be cached
 	end
@@ -370,7 +369,8 @@ function final(self)
 	for i = 1, #WGOs do		go_delete(WGOs[i])							end
 	for i = 1, #HGOs do		go_delete(HGOs[i])							end
 	for i = 1, #EGOs do		go_delete(EGOs[i])							end
-	for i = 1, #AlGOs do	go_delete(AlGOs[i])	go_delete(ArGOs[i])		end
+	for i = 1, #AlGOs do	go_delete(AlGOs[i])
+							go_delete(ArGOs[i])							end
 
 	-- Param Clean-up
 	-- No need to manually nullify Tables.
