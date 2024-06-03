@@ -6,7 +6,6 @@ local TOUCH, TOUCH_MULTI = hash("touch"), hash("touch_multi")
 
 local v3 = vmath.vector3
 local JudgeArf = Arf3.JudgeArf
-local AcAudioGetTime = AcAudio.GetTime
 local DoHapticFeedback = AcUtil.DoHapticFeedback
 local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
 local socket_gettime, msg_post = socket.gettime, msg.post
