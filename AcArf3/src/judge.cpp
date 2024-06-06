@@ -95,7 +95,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 				if( current_echo.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100  ) {
 					anmitsu_register(current_wish.current_cdx, current_wish.current_cdy);
 					current_echo.status = JUDGED_LIT;
-					min_time = 4294967295;   // Means that the min_time strategy is banned
+					if( !min_time  ||  min_time >= current_echo.ms )
+						min_time = current_echo.ms;
 				}
 			}
 		}
@@ -125,7 +126,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 			if( current_echo.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100  ) {
 				anmitsu_register(current_echo.c_dx, current_echo.c_dy);
 				current_echo.status = JUDGED_LIT;
-				min_time = 4294967295;   // Means that the min_time strategy is banned
+				if( !min_time  ||  min_time >= current_echo.ms )
+					min_time = current_echo.ms;
 			}
 		}
 
@@ -152,10 +154,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 				// Judge the Hint
 				if( current_hint.status == NONJUDGED_LIT  &&  dt > -100  &&  dt < 100 ) {
 					const bool iswa = anmitsu_register(current_hint.c_dx, current_hint.c_dy);
-					if( !min_time )													/* Register */
+					if( !min_time  ||  min_time >= current_hint.ms )				/* Register */
 						min_time = current_hint.ms;
-					else if( min_time == current_hint.ms )
-						{  }
 					else if( !iswa )
 						continue;
 
