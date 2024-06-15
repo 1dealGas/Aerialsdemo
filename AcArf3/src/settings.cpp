@@ -39,9 +39,9 @@ Arf3_API SetCam(lua_State *L) {
 		if( lua_isnumber(L,2) )
 			object_size_y_script = luaL_checknumber(L, 2);
 
-		object_size_x_script = (object_size_x_script > 3.0) ? object_size_x_script : 3.0 ;
+		object_size_x_script = (object_size_x_script > 2.88) ? object_size_x_script : 2.88 ;
 		object_size_x_script = (object_size_x_script < 48.0) ? object_size_x_script : 48.0 ;
-		object_size_y_script = (object_size_y_script > 3.0) ? object_size_y_script : 3.0 ;
+		object_size_y_script = (object_size_y_script > 2.88) ? object_size_y_script : 2.88 ;
 		object_size_y_script = (object_size_y_script < 24.0) ? object_size_y_script : 24.0 ;
 
 		object_size_x = object_size_x_script * 112.5f;

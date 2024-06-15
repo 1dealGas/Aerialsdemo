@@ -40,7 +40,7 @@ Arf3_API InitArf3(lua_State* L) {
 			// PosNodes
 			for( auto& pobj : wish.nodes )
 				if( pobj.easetype > LINEAR  &&  (pobj.ci != 0.0f  ||  pobj.ce != 1.0f) ) {
-					float ci = pobj.ci,  ce = pobj.ce;
+					const float ci = pobj.ci,  ce = pobj.ce;
 					switch(pobj.easetype) {
 						case LCIRC:   /*  x -> ESIN   y -> ECOS  */
 							pobj.x_fci = ESIN[ (uint16_t)(1000*ci) ], pobj.y_fci = ECOS[ (uint16_t)(1000*ci) ];
@@ -60,9 +60,8 @@ Arf3_API InitArf3(lua_State* L) {
 							pobj.x_dnm = pobj.y_dnm = (float)( 1.0 / (pobj.x_fce - pobj.x_fci) );
 							break;
 						case OUTQUAD:
-							ci = 1.0f-ci, ce = 1.0f-ce;
-							pobj.x_fci = pobj.y_fci = (1.0f - ci*ci);
-							pobj.x_fce = pobj.y_fce = (1.0f - ce*ce);
+							pobj.x_fci = pobj.y_fci = ( ci * (2.0f-ci) );
+							pobj.x_fce = pobj.y_fce = ( ce * (2.0f-ce) );
 							pobj.x_dnm = pobj.y_dnm = (float)( 1.0 / (pobj.x_fce - pobj.x_fci) );
 						default:;   // break omitted
 					}
@@ -109,12 +108,13 @@ Arf3_API FinalArf(lua_State *L) {
 	mstime = systime = dt_p1 = dt_p2 = 0;
 
 	// Reset Judge Params
-	judge_range = 37;					object_size_x = 360.0f;						object_size_y = 450.0f;
+	judge_range = 37;					object_size_x = object_size_y = 324.0f;
 	mindt = idelta - judge_range;		mindt = (mindt < -100) ? -100 : mindt;
 	maxdt = idelta + judge_range;		maxdt = (maxdt >  100) ?  100 : maxdt;
 
 	return (delete Arf, Arf = nullptr, 0);
 }
+
 
 #if defined(AR_BUILD_VIEWER) || defined(AR_WITH_EXPORTER)
 Arf3_API DumpArf(lua_State* L) {
@@ -142,6 +142,7 @@ Arf3_API DumpArf(lua_State* L) {
 	return 0;
 }
 #endif
+
 
 #if defined(AR_BUILD_VIEWER) || defined(AR_COMPATIBILITY)
 #include <arf2.h>
@@ -299,9 +300,8 @@ Arf3_API InitArf2(lua_State* L) {
 							pobj.easetype = OUTQUAD;
 
 							if( ce != 0.0f  ||  ci != 1.0f ) {   // Reversed
-								ci = 1.0f-ci, ce = 1.0f-ce;
-								pobj.x_fci = pobj.y_fci = (1.0f - ce*ce);   // Reversed
-								pobj.x_fce = pobj.y_fce = (1.0f - ci*ci);   // Reversed
+								pobj.x_fci = pobj.y_fci = ( ce * (2.0f-ce) );   // Reversed
+								pobj.x_fce = pobj.y_fce = ( ci * (2.0f-ci) );   // Reversed
 								pobj.x_dnm = pobj.y_dnm = (float)( 1.0 / (pobj.x_fce - pobj.x_fci) );
 							}
 						}

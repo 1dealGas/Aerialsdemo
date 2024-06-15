@@ -551,8 +551,7 @@ Arf3_API UpdateArf(lua_State* L) {
 									xfr = yfr = (ratio * ratio);
 									break;
 								case OUTQUAD:
-									ratio = 1.0f - ratio;
-									xfr = yfr = (1.0f - ratio * ratio);
+									xfr = yfr = ( ratio * (2.0f-ratio) );
 								default:;   // break omitted
 							}
 
@@ -652,8 +651,7 @@ Arf3_API UpdateArf(lua_State* L) {
 												ratio *= ratio;
 												break;
 											case OUTQUAD:
-												ratio = 1.0f - ratio;
-												ratio = (1.0f - ratio * ratio);
+												ratio = ( ratio * (2.0f-ratio) );
 											default:;   // Break omitted
 										}
 										angle = anode_n.degree - anode_c.degree;   // As dx
@@ -744,8 +742,7 @@ Arf3_API UpdateArf(lua_State* L) {
 												ratio *= ratio;
 												break;
 											case OUTQUAD:
-												ratio = 1.0f - ratio;
-												ratio = (1.0f - ratio * ratio);
+												ratio = ( ratio * (2.0f-ratio) );
 											default:;   // Break omitted
 										}
 										angle = anode_n.degree - anode_c.degree;   // As dx
@@ -833,6 +830,7 @@ Arf3_API UpdateArf(lua_State* L) {
 			}
 		}
 	}
+
 
 	/* Do Returns */
 	lua_pushnumber(L, sweep_result.hit);		lua_pushnumber(L, sweep_result.late);

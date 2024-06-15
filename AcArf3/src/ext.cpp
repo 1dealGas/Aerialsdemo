@@ -10,7 +10,7 @@ namespace Arf3 {
 
 	// Runtime Params
 	uint8_t		judge_range = 37;
-	float		object_size_x = 360.0f, object_size_y = 450.0f;
+	float		object_size_x = 324.0f, object_size_y = 324.0f;
 	float		xscale, yscale, xdelta, ydelta, rotsin, rotcos, SIN, COS;
 	bool		daymode, allow_anmitsu;
 
