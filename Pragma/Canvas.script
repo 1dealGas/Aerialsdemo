@@ -212,7 +212,9 @@ function update(self, dt)
 
 		if CurrentFumenScript then
 			msg_post(CurrentFumenScript, AR_UPDATE)
-			if sh_judged then msg_post(CurrentFumenScript, AR_SHJ) end
+			if sh_judged then
+				msg_post(CurrentFumenScript, AR_SHJ)
+			end
 		end
 
 		if self.show_score then
