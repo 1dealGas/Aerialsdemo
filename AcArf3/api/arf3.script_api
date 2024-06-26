@@ -6,25 +6,17 @@
     type: function
     desc: Included only when the macro "AR_BUILD_VIEWER" is defined
     parameters:
-    - name: offset
-      type: number
+    - name: merged_time_layer_1
+      type: table
+    - name: merged_time_layer_2
+      type: table
     - name: wgo_required
       type: number
     - name: ego_required
       type: number
-    - name: special_hint_id
-      type: number
-    - name: bpms
+    - name: wishes
       type: table
-    - name: sc_layer1
-      type: table
-    - name: sc_layer2
-      type: table
-    - name: wish_prototypes
-      type: table
-    - name: hint_prototypes
-      type: table
-    - name: echo_prototypes
+    - name: echoes
       type: table
     returns:
     - name: before
@@ -85,9 +77,6 @@
     - name: ego_required
       type: number
 
-  - name: FinalArf
-    type: function
-
 
   - name: SetDaymode
     type: function
@@ -135,8 +124,12 @@
     returns:
     - name: hit
       type: number
+    - name: early
+      type: number
     - name: lost
       type: number
+    - name: special_hint_judged
+      type: boolean
     - name: wgo_used
       type: number
     - name: hgo_used
@@ -147,14 +140,7 @@
       type: number
 
 
-  - name: SetAllowAnmitsu
-    type: function
-    desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
-    parameters:
-    - name: is_anmitsu_allowed
-      type: boolean
-
-  - name: SetHintSize
+  - name: SetObjectSize
     type: function
     desc: Included only when the macro "AR_BUILD_VIEWER" is not defined
     parameters:
@@ -206,3 +192,7 @@
     returns:
     - name: new_table
       type: table
+
+
+  - name: FinalArf
+    type: function

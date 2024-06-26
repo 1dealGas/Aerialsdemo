@@ -1,7 +1,7 @@
 -- Caches & Local Variables
 --
 local PG = hash("ar_process_gui")
-local SHJ = hash("ar_special_hint_judged")
+local AR_SHJ = hash("ar_special_hint_judged")
 local TOUCH, TOUCH_MULTI = hash("touch"), hash("touch_multi")
 
 local v3 = vmath.vector3
@@ -157,7 +157,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 				-- Send message to FumenScript if needed
 				--
 				if s and CurrentFumenScript then
-					msg_post(CurrentFumenScript, SHJ)
+					msg_post(CurrentFumenScript, AR_SHJ)
 				end
 			end
 
@@ -218,7 +218,7 @@ else
 				-- Send message to FumenScript if needed
 				--
 				if s and CurrentFumenScript then
-					msg_post(CurrentFumenScript, SHJ)
+					msg_post(CurrentFumenScript, AR_SHJ)
 				end
 			end
 
