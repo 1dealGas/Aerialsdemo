@@ -25,7 +25,7 @@ function init(self)
 	InterludeOut(
 		function()
 			AcAudio.PlayUnit(CurrentAudioUnit, false)
-			Arf3.SetObjectSize(3.2, 4)
+			Arf3.SetObjectSize(4.8, 4.8)
 			Arf3.SetJudgeRange(84)
 		end
 	)
