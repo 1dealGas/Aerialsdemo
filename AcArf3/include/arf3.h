@@ -105,7 +105,7 @@ namespace Arf3 {
 	extern	uint8_t		judge_range;													/* Runtime Params */
 	extern	float		object_size_x, object_size_y;
 	extern	float		xscale, yscale, xdelta, ydelta, rotsin, rotcos, SIN, COS;
-	extern	bool		daymode, allow_anmitsu;
+	extern	bool		daymode;
 
 	extern	uint64_t												dt_p1, dt_p2;		/* Internals */
 	extern	std::unordered_map<uint32_t, uint16_t>					last_wgo;
@@ -283,8 +283,7 @@ namespace Arf3_APIs {
 #endif
 #ifndef AR_BUILD_VIEWER
 	Arf3::JudgeResult	JudgeArf			(const Arf3::ab*, uint8_t, bool, bool);
-	int					SetAllowAnmitsu		(lua_State*);
-	int					SetHintSize			(lua_State*);
+	int					SetObjectSize		(lua_State*);
 	int					SetJudgeRange		(lua_State*);
 	int					SetIDelta			(lua_State*);
 	int					JudgeArf			(lua_State*);

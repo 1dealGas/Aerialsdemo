@@ -10,9 +10,9 @@ namespace Arf3 {
 
 	// Runtime Params
 	uint8_t		judge_range = 37;
-	float		object_size_x = 324.0f, object_size_y = 324.0f;
+	float		object_size_x = 360.0f, object_size_y = 360.0f;
 	float		xscale, yscale, xdelta, ydelta, rotsin, rotcos, SIN, COS;
-	bool		daymode, allow_anmitsu;
+	bool		daymode;
 
 	// Internals
 	uint64_t												dt_p1, dt_p2;
@@ -36,8 +36,8 @@ static const luaL_reg Arf3APIs[] = {
 	{"InitArf3", InitArf3}, {"FinalArf", FinalArf}, {"UpdateArf", UpdateArf},
 	{"SetDaymode", SetDaymode}, {"SetCam", SetCam},
 #ifndef AR_BUILD_VIEWER
-	{"SetHintSize", SetHintSize}, {"SetIDelta", SetIDelta}, {"JudgeArf", JudgeArf},
-	{"SetJudgeRange", SetJudgeRange}, {"SetAllowAnmitsu", SetAllowAnmitsu},
+	{"SetObjectSize", SetObjectSize}, {"SetIDelta", SetIDelta}, {"JudgeArf", JudgeArf},
+	{"SetJudgeRange", SetJudgeRange},
 	#ifdef AR_WITH_EXPORTER
 		{"DumpArf", DumpArf},
 	#endif

@@ -51,7 +51,7 @@ CurrentFumenScript = nil        -- Unused in the Demo
 --
 ContextTime = nil               -- msTime or nil
 WishSprites = nil               -- No need to expose other context info here
-Hit, Early, Late = 0, 0, 0
+Hit, Early, Late, Lost = 0, 0, 0, 0
 TotalJud = 0
 
 

@@ -103,12 +103,12 @@ Arf3_API FinalArf(lua_State *L) {
 
 	// Reset Runtime Params
 	blocked.clear();					last_wgo.clear();
-	daymode = false;					allow_anmitsu = true;
 	xdelta = ydelta = rotsin = 0.0f;	xscale = yscale = rotcos = 1.0f;
 	mstime = systime = dt_p1 = dt_p2 = 0;
+	daymode = false;
 
 	// Reset Judge Params
-	judge_range = 37;					object_size_x = object_size_y = 324.0f;
+	judge_range = 37;					object_size_x = object_size_y = 360.0f;
 	mindt = idelta - judge_range;		mindt = (mindt < -100) ? -100 : mindt;
 	maxdt = idelta + judge_range;		maxdt = (maxdt >  100) ?  100 : maxdt;
 
