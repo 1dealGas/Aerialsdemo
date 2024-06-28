@@ -25,6 +25,7 @@ inline bool has_touch_near(const float cdx, const float cdy, const ab* valid_fin
 }
 
 inline bool anmitsu_register(const float cdx, const float cdy) {
+	if( !allow_anmitsu ) return false;
 	const float l = cdx - object_size_x, d = cdy - object_size_y;
 	const float r = cdx + object_size_x, u = cdy + object_size_y;
 
@@ -155,19 +156,8 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 					const bool iswa = anmitsu_register(current_hint.c_dx, current_hint.c_dy);
 					if( !min_time  ||  min_time >= current_hint.ms )				/* Register */
 						min_time = current_hint.ms;
-					else if( !iswa  ||  dt < mindt ) {   // Update: Prohibit Anmitsu Early Judging.
-						if(dt <= maxdt) {					// Update: Record the Pseudo Judged-Ms.
-							if(current_hint.judged_ms) {
-								const int32_t abs_dt	  = dt<0 ? -dt : dt;
-									  int32_t last_abs_dt = current_hint.judged_ms - current_hint.ms;
-											  last_abs_dt = last_abs_dt<0 ? -last_abs_dt : last_abs_dt;
-								if(abs_dt <= last_abs_dt)
-									current_hint.judged_ms = mstime;
-							}
-							else	current_hint.judged_ms = mstime;
-						}
+					else if( !iswa )
 						continue;
-					}
 
 					current_hint.judged_ms = mstime;								/* Status Update */
 					current_hint.status = JUDGED_LIT;
