@@ -86,14 +86,14 @@ end
 -- Platform Specific Functions
 --
 local system_name = sys.get_sys_info().system_name
-if (system_name == "Android") or (system_name == "iPhone OS") then
+if system_name=="Android" or system_name=="iPhone OS" then
 
 	function GuiDoFeedback(with_hitsound)
 		local current_time = socket_gettime()
 
 		-- Do Haptic Feedback
 		--
-		if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
+		if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
 			LastHapticTime = current_time
 			DoHapticFeedback()
 		end
@@ -108,17 +108,15 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 	end
 
 	function on_input(self, action_id, action)
-		if WindowActive and (not WithinInterlude) and action_id == TOUCH_MULTI then
+		if WindowActive and (not WithinInterlude) and action_id==TOUCH_MULTI then
 
 			-- Motion Update
 			--
-			local cx, cy, pd = CenterX, CenterY, PosDnm
-			local TouchMsgs = action.touch
-
 			for i = 1, 10 do
 				TouchTable[i].z = 0
 			end
 
+			local TouchMsgs = action.touch
 			for i = 1, #TouchMsgs do
 				local touchmsg = TouchMsgs[i]
 				local touchvec = TouchTable[touchmsg.id + 1]
@@ -133,21 +131,21 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 			--
 			if ContextTime then
 				local hit, early, late, s = JudgeArf(TouchTable)
-				Hit, Early, Late = Hit + hit, Early + early, Late + late
+				Hit, Early, Late = Hit+hit, Early+early, Late+late
 
 				if (hit+early+late) > 0 then
 					local current_time = socket_gettime()
 
 					-- Do Haptic Feedback
 					--
-					if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
+					if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
 						LastHapticTime = current_time
 						DoHapticFeedback()
 					end
 
 					-- Play HitSound
 					--
-					if HitSoundEnabled and AudioLatency < 51 then
+					if HitSoundEnabled and AudioLatency<51 then
 						PlayUnit(HitSoundUnits[HsWhich], false)
 						HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
 						StopUnit(HitSoundUnits[HsWhich], true)
@@ -176,6 +174,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 				end
 			end
 		end
+			return true
 	end
 else
 	function GuiDoFeedback(with_hitsound)
@@ -189,7 +188,7 @@ else
 	end
 
 	function on_input(self, action_id, action)
-		if WindowActive and (not WithinInterlude) and action_id == TOUCH then
+		if WindowActive and (not WithinInterlude) and action_id==TOUCH then
 
 			-- Cursor Update
 			--
@@ -205,11 +204,11 @@ else
 			--
 			if ContextTime then
 				local hit, early, late, s = JudgeArf(TouchTable)
-				Hit, Early, Late = Hit + hit, Early + early, Late + late
+				Hit, Early, Late = Hit+hit, Early+early, Late+late
 
 				-- Play HitSound
 				--
-				if (hit+early+late) > 0 and HitSoundEnabled and AudioLatency < 51 then
+				if (hit+early+late)>0 and HitSoundEnabled and AudioLatency<51 then
 					PlayUnit(HitSoundUnits[HsWhich], false)
 					HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
 					StopUnit(HitSoundUnits[HsWhich], true)
@@ -233,5 +232,6 @@ else
 				end
 			end
 		end
+			return true
 	end
 end
