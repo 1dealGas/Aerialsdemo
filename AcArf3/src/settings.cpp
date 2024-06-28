@@ -14,6 +14,9 @@ Arf3_API SetCam(lua_State *L) {
 }
 
 #ifndef AR_BUILD_VIEWER
+	Arf3_API SetAllowAnmitsu(lua_State* L) {
+		return (allow_anmitsu = lua_toboolean(L,1), 0);
+	}
 
 	Arf3_API SetIDelta(lua_State* L) {
 		idelta = luaL_checknumber(L, 1);
@@ -30,7 +33,7 @@ Arf3_API SetCam(lua_State *L) {
 		return 0;
 	}
 
-	Arf3_API SetObjectSize(lua_State* L) {
+	Arf3_API SetHintSize(lua_State* L) {
 		lua_Number object_size_x_script = luaL_checknumber(L, 1);
 		lua_Number object_size_y_script = object_size_x_script;
 		if( lua_isnumber(L,2) )

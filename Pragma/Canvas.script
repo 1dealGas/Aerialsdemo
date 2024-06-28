@@ -45,7 +45,7 @@ local FMT_PO = "◇  Perfection Obtained · %d"
 local TINT, TINTW, COLOR = hash("tint"), hash("tint.w"), hash("color")
 local SHOW_SCORE, HIDE_SCORE = hash("ar_show_score"), hash("ar_hide_score")
 local SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = hash("ar_show_options"), hash("ar_hide_options"), hash("ar_process_gui")
-local AR_INIT, AR_UPDATE, AR_SHJ, AR_FINAL = hash("ar_init"), hash("ar_update"), hash("ar_special_hint_judged"), hash("ar_final")
+local AR_INIT, AR_UPDATE, AR_FINAL = hash("ar_init"), hash("ar_update"), hash("ar_final")
 local ENABLE, DISABLE = hash("enable"), hash("disable")
 
 local TEXT_RED = vmath.vector4(1, 0.62890625, 0.62890625, 0.937)
@@ -148,7 +148,7 @@ function update(self, dt)
 	--
 	if ContextTime < Before then
 		if self.update_camera then SetCam(self.x_scale, self.y_scale, self.x_delta, self.y_delta, self.euler_z) end
-		local hit, early, lost, sh_judged, wgo_used, hgo_used, ego_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, EGOs, AlGOs, ArGOs, WishTints, HintTints, EchoTints, AnimTints)
+		local hit, lost, wgo_used, hgo_used, ego_used, ago_used = UpdateArf(ContextTime, WGOs, HGOs, EGOs, AlGOs, ArGOs, WishTints, HintTints, EchoTints, AnimTints)
 
 		-- Mutate Tints
 		--
@@ -207,18 +207,16 @@ function update(self, dt)
 
 		-- Update Externals & Score
 		--
-		Hit, Early, Lost = Hit+hit, Early+early, Lost+lost
+		Hit, Late = Hit+hit, Late+lost
 		LastWgoUsed, LastHgoUsed, LastEgoUsed, LastAgoUsed = wgo_used, hgo_used, ego_used, ago_used
 
 		if CurrentFumenScript then
 			msg_post(CurrentFumenScript, AR_UPDATE)
-			if sh_judged then
-				msg_post(CurrentFumenScript, AR_SHJ)
-			end
 		end
 
 		if self.show_score then
-			local percent, current_nonhit = (Hit / TotalJud), (Early + Late + Lost)
+			local percent = Hit / TotalJud
+			local current_nonhit = Early + Late
 			if Hit ~= LastHit or current_nonhit ~= LastNonHit then
 				if self.display_losts then
 					if percent < 0.963 then
@@ -301,7 +299,7 @@ local message_callbacks = {
 
 	[SHOW_SCORE] = function(self)
 		self.show_score = true
-		local percent, current_nonhit = (Hit / TotalJud), (Early + Late + Lost)
+		local percent, current_nonhit = (Hit / TotalJud), (Early + Late)
 
 		if Hit ~= LastHit or current_nonhit ~= LastNonHit then
 			LastHit, LastNonHit = Hit, current_nonhit
@@ -352,7 +350,7 @@ function final(self)
 	-- Score Clean-up
 	--
 	Arf3.FinalArf()
-	Lost = TotalJud - Hit - Early - Late
+	Late = TotalJud - Hit - Early
 	message_callbacks[SHOW_SCORE](self)
 
 	-- External Clean-up
@@ -378,7 +376,7 @@ function final(self)
 	-- No need to manually nullify Tables.
 	--
 	Before, ContextTime = 0, nil
-	TotalJud, Hit, Early, Late, Lost = 0, 0, 0, 0, 0
+	TotalJud, Hit, Early, Late = 0, 0, 0, 0
 
 	ButtonPressed, ButtonInsertIndex = false, 0
 	LastContextTime, LastWgoUsed, LastHgoUsed, LastAgoUsed, LastEgoUsed = 0, 0, 0, 0, 0
