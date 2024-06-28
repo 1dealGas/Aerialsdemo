@@ -93,7 +93,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 
 		-- Do Haptic Feedback
 		--
-		if HapticFeedbackEnabled and current_time-LastHapticTime > 0.037 then
+		if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
 			LastHapticTime = current_time
 			DoHapticFeedback()
 		end
@@ -108,15 +108,17 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 	end
 
 	function on_input(self, action_id, action)
-		if WindowActive and (not WithinInterlude) and action_id==TOUCH_MULTI then
+		if WindowActive and (not WithinInterlude) and action_id == TOUCH_MULTI then
 
 			-- Motion Update
 			--
+			local cx, cy, pd = CenterX, CenterY, PosDnm
+			local TouchMsgs = action.touch
+
 			for i = 1, 10 do
 				TouchTable[i].z = 0
 			end
 
-			local TouchMsgs = action.touch
 			for i = 1, #TouchMsgs do
 				local touchmsg = TouchMsgs[i]
 				local touchvec = TouchTable[touchmsg.id + 1]
@@ -138,7 +140,7 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 
 					-- Do Haptic Feedback
 					--
-					if HapticFeedbackEnabled and current_time-LastHapticTime > 0.037 then
+					if HapticFeedbackEnabled and current_time - LastHapticTime > 0.037 then
 						LastHapticTime = current_time
 						DoHapticFeedback()
 					end
@@ -174,7 +176,6 @@ if (system_name == "Android") or (system_name == "iPhone OS") then
 				end
 			end
 		end
-			return true
 	end
 else
 	function GuiDoFeedback(with_hitsound)
@@ -232,6 +233,5 @@ else
 				end
 			end
 		end
-			return true
 	end
 end
