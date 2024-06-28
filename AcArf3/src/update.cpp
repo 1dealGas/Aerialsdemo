@@ -71,10 +71,25 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 		for( const auto current_hint_id : Arf->index[current_group].hidx ) {
 			auto& current_hint = Arf->hint[current_hint_id];
 			const int32_t dt = mstime - current_hint.ms;
-			if( dt<100 )
+
+			if(dt < maxdt)													/* A. Sweep Done in this Group */
 				break;
-			if( current_hint.status <= NONJUDGED_LIT )   //  NONJUDGED -> 0   N_L -> 1
-				result.late++, current_hint.status = LOST;
+			if(current_hint.status <= NONJUDGED_LIT) {
+				if(current_hint.judged_ms) {								/* B. Sweep Hit/Early */
+					// Status Update
+					current_hint.status = current_hint.status ? JUDGED_LIT : JUDGED;   // N:0, NL:1; Again
+					if(current_hint_id == Arf->special_hint)
+						result.sh_judged = (bool)(Arf->special_hint);
+
+					// Classify
+					if(current_hint.judged_ms-current_hint.ms < mindt)
+						result.early++,	current_hint.elstatus = EARLY;
+					else
+						result.hit++;
+				}
+				else if(dt > 100)											/* C. Sweep Lost */
+					result.late++, current_hint.status = LOST;
+			}
 		}
 	}
 	return result;
@@ -833,8 +848,9 @@ Arf3_API UpdateArf(lua_State* L) {
 
 
 	/* Do Returns */
-	lua_pushnumber(L, sweep_result.hit);		lua_pushnumber(L, sweep_result.late);
+	lua_pushnumber(L, sweep_result.hit);		lua_pushnumber(L, sweep_result.early);
+	lua_pushnumber(L, sweep_result.late);		lua_pushboolean(L, sweep_result.sh_judged);
 	lua_pushnumber(L, wgo_used);				lua_pushnumber(L, hgo_used);
 	lua_pushnumber(L, ego_used);				lua_pushnumber(L, ago_used);
-	return last_wgo.clear(), 6;
+	return last_wgo.clear(), 8;
 }
