@@ -198,25 +198,24 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 }
 
 Arf3_API JudgeArf(lua_State* L) {
-	// Unpack Touches
-	ab vt[10];
+	ab vt[10];																		/* Unpack Touches */
 	uint8_t vtcount = 0, any_pressed = false, any_released = false;
 	for( uint8_t i=0; i<10; i++ ) {
-		const dmVMath::Vector3* f = (lua_rawgeti(L, 1, i+1), dmScript::CheckVector3(L, -1));
-		switch( lua_pop(L,1), (uint8_t)f->getZ() ) {
-			case 1:
-				any_pressed = true;   // No break here
-			case 2:
-				vt[vtcount].a = f->getX();		vt[vtcount].b = f->getY();		vtcount++;
-				break;
-			case 3:
-				any_released = true;
-			default:;   // break omitted
+		const dmVMath::Vector3* touch = ( lua_rawgeti(L, 1, i+1), dmScript::CheckVector3(L, -1) );
+		const uint8_t touch_phase = ( lua_pop(L,1), (uint8_t)touch->getZ() );
+		if(touch_phase) {
+			vt[vtcount].a = touch->getX();		vt[vtcount].b = touch->getY();		vtcount++;
+			switch(touch_phase) {
+				case 1:   // Pressed
+					any_pressed = true;			break;
+				case 3:   // Released
+					any_released = true;		// break omitted
+				default:;						// break omitted
+			}
 		}
 	}
 
-	// Do Returns
-	const auto result = JudgeArf(vt, vtcount, any_pressed, any_released);
+	const auto result = JudgeArf(vt, vtcount, any_pressed, any_released);			/* Do Returns */
 	lua_pushnumber(L, result.hit);			lua_pushnumber(L, result.early);
 	lua_pushnumber(L, result.late);			lua_pushboolean(L, result.sh_judged);
 	return 4;
