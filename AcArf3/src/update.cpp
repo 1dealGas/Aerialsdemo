@@ -14,7 +14,7 @@ using namespace Arf3;
 	static constexpr auto A_HIT_R = 1.0f, A_HIT_G = 0.85546875f, A_HIT_B = 0.62890625f;
 
 	/* Here we use some typedefs to simplify our codes. */
-	typedef dmGameObject::HInstance GO;
+	typedef dmGameObject::HInstance GO;					using cfloat = const float;
 	typedef dmVMath::Vector3 v3i, *v3;					typedef dmVMath::Point3 p3;
 	typedef dmVMath::Vector4 v4i, *v4;					typedef dmVMath::Quat Qt;
 
@@ -47,7 +47,7 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 				if( dt > 470 )		{ entry = ei; continue; }
 				if( dt < 0 )		  break;
 
-				if( dt > 100  &&  current_echo.status <= NONJUDGED_LIT )   //  NONJUDGED -> 0   N_L -> 1
+				if( dt > 100  &&  !current_echo.status )   //  NONJUDGED -> 0   N_L -> 1
 					result.late++, current_echo.status = LOST;
 				else if( current_echo.status==JUDGED_LIT )
 					result.hit++, current_echo.status = JUDGED, current_echo.judged_ms = mstime;
@@ -61,7 +61,7 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 			if(dt < 0  ||  dt > 982)		break;   // when dt>982, all objs in this group meet dt>470
 			if(dt > 470)					continue;
 
-			if( dt > 100  &&  current_echo.status <= NONJUDGED_LIT )   //  NONJUDGED -> 0   N_L -> 1
+			if( dt > 100  &&  !current_echo.status )   //  NONJUDGED -> 0   N_L -> 1
 				result.late++, current_echo.status = LOST;
 			else if( current_echo.status==JUDGED_LIT )
 				result.hit++, current_echo.status = JUDGED, current_echo.judged_ms = mstime;
@@ -98,7 +98,6 @@ inline JudgeResult SweepObjects(const uint16_t init_group, const uint16_t beyond
 
 
 /* Param Setting Funcs */
-using cfloat = const float;
 inline void UseWgo(lua_State* L, uint16_t& wgo_used, cfloat x, cfloat y, cfloat z, float& w) {
 	if( x>=-36.0f && x<=1836.0f ) {   // X trim
 		if( y>=-36.0f && y<=1116.0f ) {   // Y trim
@@ -179,8 +178,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 			}
 			hgo_used++;
 		case JUDGED:
-			if(jdt <= 370) {
-				// Anim Settings
+			if(jdt <= 370) {   // Anim Only
 				ago_used++;
 
 				/* Position */ {
@@ -238,7 +236,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 			{
 				SetPosition( hgo, p3(x, y, -0.02f + dt*0.00001f) );
 				float color = 0.437f - dt*0.00037f;			htint -> setX(color);
-				color *= 0.51f;								htint -> setY(color).setZ(color);
+					  color *= 0.51f;						htint -> setY(color).setZ(color);
 				hgo_used++;
 			}
 			break;
@@ -272,12 +270,12 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 				/* tint.w */
 				if(dt < 73) {
 					float tintw = dt * 0.01f;
-					tintw = 0.637f * tintw * (2.0f - tintw);
+						  tintw = 0.637f * tintw * (2.0f - tintw);
 					atint -> setW( 0.17199f + tintw );
 				}
 				else {
 					float tintw = (dt - 73) * 0.003367003367003367f;   // 1/297 = 0.003367···
-					tintw = 0.637f * tintw * (2.0f - tintw);
+						  tintw = 0.637f * tintw * (2.0f - tintw);
 					atint -> setW(0.637f - tintw);
 				}
 
@@ -322,7 +320,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 
 		/* tint.w */ {   // jdt must be larger than 270
 			float tintw = (jdt - 73) * 0.003367003367003367f;   // 1/297 = 0.003367···
-			tintw = 0.637f * tintw * (2.f - tintw);
+				  tintw = 0.637f * tintw * (2.f - tintw);
 			atint -> setW(0.637f - tintw);
 		}
 
@@ -331,7 +329,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 			SetScale(agol, 1.637f);
 
 			double anim_calculate = jdt * 0.002702702702702;   // 1/370
-			anim_calculate = anim_calculate * (2.0 - anim_calculate);
+				   anim_calculate = anim_calculate * (2.0 - anim_calculate);
 			SetRotation( agor, GetZQuad(45.0 - 8.0*anim_calculate) );
 			SetScale( agor, 1.0 + 0.637 * anim_calculate );
 		}
@@ -376,7 +374,7 @@ inline void UseEgo(lua_State* L, uint16_t& ego_used, cfloat dt, const uint8_t st
 			{
 				SetPosition(ego, ego_pos);
 				float color = 0.437f - dt*0.00037f;			etint -> setX(color);
-				color *= 0.51f;								etint -> setY(color).setZ(color);
+					  color *= 0.51f;						etint -> setY(color).setZ(color);
 				ego_used++;
 			}
 			break;
@@ -412,8 +410,7 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 		case AUTO:
 			if( dt < 0 )  break;
 			jdt = dt;
-		case JUDGED_LIT:
-		case JUDGED:
+		case JUDGED:   // Actually "JUDGED_LIT" is the pending status.
 			if(jdt <= 370) {
 				ago_used++;
 
@@ -428,12 +425,12 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 				/* tint.w */
 				if(jdt < 73) {
 					float tintw = jdt * 0.01f;
-					tintw = 0.637f * tintw * (2.0f - tintw);
+						  tintw = 0.637f * tintw * (2.0f - tintw);
 					atint -> setW( 0.17199f + tintw );
 				}
 				else {
 					float tintw = (jdt - 73) * 0.003367003367003367f;   // 1/297 = 0.003367···
-					tintw = 0.637f * tintw * (2.0f - tintw);
+						  tintw = 0.637f * tintw * (2.0f - tintw);
 					atint -> setW(0.637f - tintw);
 				}
 
@@ -457,7 +454,7 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 			}
 		default:;   // break omitted
 	}
-	else if( jdt<=370 && (status==JUDGED || status==JUDGED_LIT) ) {
+	else if( jdt <= 370  &&  status == JUDGED ) {
 		ago_used++;
 
 		/* Position */ {
@@ -472,7 +469,7 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 		}
 		/* tint.w */ {   // jdt must be larger than 270
 			float tintw = (jdt - 73) * 0.003367003367003367f;   // 1/297 = 0.003367···
-			tintw = 0.637f * tintw * (2.f - tintw);
+				  tintw = 0.637f * tintw * (2.f - tintw);
 			atint -> setW(0.637f - tintw);
 		}
 
@@ -481,7 +478,7 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 			SetScale(agol, 1.637f);
 
 			double anim_calculate = jdt * 0.002702702702702;   // 1/370
-			anim_calculate = anim_calculate * (2.0 - anim_calculate);
+				   anim_calculate = anim_calculate * (2.0 - anim_calculate);
 			SetRotation( agor, GetZQuad(45.0 - 8.0*anim_calculate) );
 			SetScale( agor, 1.0 + 0.637 * anim_calculate );
 		}
@@ -494,14 +491,12 @@ inline void UseAgoForEgo(lua_State* L, uint16_t& ago_used, cfloat dt, float jdt,
 Arf3_API UpdateArf(lua_State* L) {
 	if( !Arf )	return 0;
 
-	/* Time */
+	/* Time & Group */
+	systime = dmTime::GetTime();
 	mstime	= (uint32_t)luaL_checknumber(L, 1); {
 		if(mstime < 2)							mstime = 2;
 		else if(mstime >= Arf->before)			return 0;
 	}
-	systime = dmTime::GetTime();
-
-	/* Group */
 	const uint32_t	location_group	= mstime >> 9;
 	const uint16_t	index_size		= Arf -> index.size();
 	const uint16_t  init_group		= location_group > 1 ? (location_group - 1) : 0 ;
