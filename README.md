@@ -38,7 +38,7 @@ Aerials Demo
       ···
  - Ar                            -- Game Object (*.go) files
       ···
- - Arf                           -- Aerials Chart[Fumen] (*.ar) files
+ - Arf                           -- Aerials Chart[Fumen] (*.arf) files
       ···
  - Atlas                         -- Atlas (*.atlas) files
       ···
@@ -59,10 +59,10 @@ Aerials Demo
       [OPlusSans3-Regular.ttf]   -- Put the Default Font File Here!
  - System                        -- Config & Platform-Specific files
       ···
-   Ar.collection                 -- Bootstrap Collection
+   Ar.collection                 -- Bootstrap Collection File
    Ar.license                    -- License file to be included
    Demo.script                   -- Logics of the Demo
-   game.project                  -- Defold Game Project
+   game.project                  -- Defold Game Project File
 ```
 
 ### Complying with Licenses
