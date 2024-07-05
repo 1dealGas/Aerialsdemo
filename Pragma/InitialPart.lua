@@ -5,6 +5,16 @@
 --  Copyright (c) 2024- 1dealGas, under the MIT License.
 --------------------------------------------------------------------------------------
 
+-- Hashes
+--
+local hash = hash
+ENABLE, DISABLE = hash("enable"), hash("disable")
+SHOW_SCORE, HIDE_SCORE = hash("ar_show_score"), hash("ar_hide_score")
+SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = hash("ar_show_options"), hash("ar_hide_options"), hash("ar_process_gui")
+AR_INIT, AR_UPDATE, AR_SHJ, AR_FINAL = hash("ar_init"), hash("ar_update"), hash("ar_special_hint_judged"), hash("ar_final")
+COLOR, COLORW, TINT, TINTW = hash("color"), hash("color.w"), hash("tint"), hash("tint.w")
+AR, EULERZ = hash("Ar"), hash("euler.z")
+
 
 -- Input & GUI System
 --
@@ -113,7 +123,7 @@ end
 --        12000, 24000, function(canvas) end
 --    }
 --
-local hash, type, gm, F = hash, type, debug.getmetatable, "function"
+local type, gm, F = type, debug.getmetatable, "function"
 local function is_callable(x)
 	if x then
 		if type(x) == F then									return true
@@ -254,10 +264,10 @@ function DeclareFumenScript(FmInitFn, FmFinalFn, TriggerFns, TaskFns, SpecialHin
 		end
 
 		local MSG_FUNCS = {
-			[hash("ar_init")] = is_callable(FmInitFn) and FmInitFn or nil,
-			[hash("ar_special_hint_judged")] = is_callable(SpecialHintJudgedFn) and SpecialHintJudgedFn or nil,
-			[hash("ar_update")] = UPDATE,
-			[hash("ar_final")] = FINAL
+			[AR_INIT] = is_callable(FmInitFn) and FmInitFn or nil,
+			[AR_SHJ] = is_callable(SpecialHintJudgedFn) and SpecialHintJudgedFn or nil,
+			[AR_UPDATE] = UPDATE,
+			[AR_FINAL] = FINAL
 		}
 
 		if is_callable(init) then
@@ -311,7 +321,7 @@ end
 --  which should be safe when TriggerFns == nil.
 --
 local tween_cache, tween_capacity = {}, 0
-local STRING, ENABLE, DISABLE = "string", hash("enable"), hash("disable")
+local STRING, ENABLE, DISABLE = "string", ENABLE, DISABLE
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property

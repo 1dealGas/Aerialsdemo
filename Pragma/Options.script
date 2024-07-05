@@ -23,10 +23,10 @@ local FpsSamples, FpsSampleTick = AcUtil.NewTable(30, 0), 0
 
 -- Constants
 --
-local Ar = hash("Ar")
-local TINTW, COLOR, COLORW = hash("tint.w"), hash("color"), hash("color.w")
-local SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = hash("ar_show_options"), hash("ar_hide_options"), hash("ar_process_gui")
-local ENABLE, DISABLE, AR_FINAL = hash("enable"), hash("disable"), hash("ar_final")
+local Ar = AR
+local TINTW, COLOR, COLORW = TINTW, COLOR, COLORW
+local SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI = SHOW_OPTIONS, HIDE_OPTIONS, PROCESS_GUI
+local ENABLE, DISABLE, AR_FINAL = ENABLE, DISABLE, AR_FINAL
 
 local FMT_MS, FMT_FPS = "%d ms", "%d fps"
 local STR_SHOW, STR_HIDE = "Options  ◎", "Apply  ○"

@@ -39,8 +39,8 @@ inline void AcAudioMakeMetatableForUnit(lua_State* L) {		// Buffer -> AcAudioUni
 	/*T*/	lua_insert(L, 1);							// AcAudioUnit -> Buffer
 			lua_newtable(L);								// AcAudioUnit -> Buffer -> uMetatable
 	/*A*/	lua_insert(L, 2);							// AcAudioUnit -> uMetatable -> Buffer
-			lua_setfield(L, 2, "ACAUDIO_UNIT");		// AcAudioUnit -> uMetatable
-			lua_getfield(L, 2, "ACAUDIO_UNIT");		// AcAudioUnit -> uMetatable -> Buffer
+			lua_rawseti(L, 2, 0xACA8D10);				// AcAudioUnit -> uMetatable
+			lua_rawgeti(L, 2, 0xACA8D10);				// AcAudioUnit -> uMetatable -> Buffer
 			lua_insert(L, 1);							// Buffer -> AcAudioUnit -> uMetatable
 	/*B*/	lua_pushcfunction(L, AcAudioUnitGcMethod);		// Buffer -> AcAudioUnit -> uMetatable -> uGcMethod
 			lua_setfield(L, 3, "__gc");				// Buffer -> AcAudioUnit -> uMetatable
@@ -48,12 +48,13 @@ inline void AcAudioMakeMetatableForUnit(lua_State* L) {		// Buffer -> AcAudioUni
 }
 
 inline bool AcAudioIsUnit(lua_State* L) {					// (Unit, ···)    Initially
-	if(! lua_getmetatable(L, 1) )					// (Unit, ···) -> uMetaTable
-		return false;
-
-	lua_getfield(L, -1, "ACAUDIO_UNIT");				// (Unit, ···) -> uMetaTable -> Tag
-	const bool is_unit = lua_toboolean(L, -1);
-	return lua_pop(L,2), is_unit;							// (Unit, ···)    Finally
+#ifdef ACAUDIO_NOCHECK
+	return true;
+#else
+	if(! lua_getmetatable(L, 1) )					return false;
+	const bool is_unit = ( lua_rawgeti(L, -1, 0xACA8D10), lua_toboolean(L, -1) );
+	return lua_pop(L, 2), is_unit;							// (Unit, ···)    Finally
+#endif
 }
 
 
@@ -67,7 +68,7 @@ static int AcAudioCreateUnit(lua_State* L) {
 
 	// Prepare the Buffer if needed
 	lua_getmetatable(L, 1);													// Buffer -> bMetatable
-	if( lua_getfield(L, 2, "ACAUDIO_SOURCE"), lua_isuserdata(L, 3) ) {		// Buffer -> bMetatable -> Source?
+	if( lua_rawgeti(L, 2, 0xACA8D10), lua_isuserdata(L, 3) ) {				// Buffer -> bMetatable -> Source?
 		source_ptr = (ma_resource_manager_data_source*)lua_touserdata(L, 3);
 		lua_pop(L, 2);																// Buffer
 	}
@@ -111,7 +112,7 @@ static int AcAudioCreateUnit(lua_State* L) {
 		lua_getfield(L, 2, "__gc");				// Buffer -> bMetatable -> Source -> mMetatable -> bGcMethod
 		lua_setfield(L, 4, "__gc");				// Buffer -> bMetatable -> Source -> mMetatable
 		lua_insert(L, 3);							// Buffer -> bMetatable -> mMetatable -> Source
-		lua_setfield(L, 3, "ACAUDIO_SOURCE");		// Buffer -> bMetatable -> mMetatable
+		lua_rawseti(L, 3, 0xACA8D10);				// Buffer -> bMetatable -> mMetatable
 		lua_setmetatable(L, 1);					// Buffer -> bMetatable
 		lua_pop(L, 1);									// Buffer
 	}
@@ -268,6 +269,5 @@ inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) 
 inline dmExtension::Result AcAudioFinal(dmExtension::Params* p)		  { return dmExtension::RESULT_OK; }
 inline dmExtension::Result AcAudioAPPInit(dmExtension::AppParams* p)  { return dmExtension::RESULT_OK; }
 inline dmExtension::Result AcAudioAPPFinal(dmExtension::AppParams* p) { // We assume this func to be called
-	return ma_engine_uninit(&acaudio_engine), dmExtension::RESULT_OK;   // With the lua_State closed.
-}
+	return ma_engine_uninit(&acaudio_engine), dmExtension::RESULT_OK; } // With the lua_State closed.
 DM_DECLARE_EXTENSION(AcAudio, "AcAudio", AcAudioAPPInit, AcAudioAPPFinal, AcAudioInit, nullptr, AcAudioOnEvent, AcAudioFinal)
