@@ -2,31 +2,19 @@ CurrentTrackId = 2001
 local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
 local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 function init(self)
-	-- Load Audio
-	--
-	_, CurrentAudioRes = AcAudio.CreateResource( sys.load_buffer("/Reference/Audio/2001.opus") )
-	_, CurrentAudioUnit = AcAudio.CreateUnit(CurrentAudioRes)
-
-	-- Create Canvas
-	--
-	CurrentFumenBuf = sys.load_buffer("/Arf/2001.arf")
+	_, CurrentAudioUnit = AcAudio.CreateUnit( sys.load_buffer("/Reference/Audio/2001.opus") )		-- Create Canvas
+	   CurrentFumenBuf = sys.load_buffer("/Arf/2001.arf")
 	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
-	-- Do Demo-Specific Settings
-	--
-	go.set("Ar:/Demo#DemoBG", "tint", IllustTint)
+	go.set("Ar:/Demo#DemoBG", "tint", IllustTint)													-- Do Demo-Specific Settings
 	go.set("Ar:/Demo#DemoLeft", "tint", CoverTint)
 	go.set("Ar:/Demo#DemoRight", "tint", CoverTint)
 	go.set("Ar:/Demo#DemoTop", "tint", CoverTint)
 	go.set("Ar:/Demo#DemoBottom", "tint", CoverTint)
 
-	-- Interlude Out
-	--
-	InterludeOut(
-		function()
-			AcAudio.PlayUnit(CurrentAudioUnit, false)
-			Arf3.SetObjectSize(4.8, 4.8)
-			Arf3.SetJudgeRange(84)
-		end
-	)
+	InterludeOut( function()
+		AcAudio.PlayUnit(CurrentAudioUnit, false)
+		Arf3.SetObjectSize(4.8, 4.8)
+		Arf3.SetJudgeRange(84)
+	end )
 end

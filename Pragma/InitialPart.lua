@@ -41,7 +41,6 @@ CurrentTrackId = 1011           -- Track: {Id, ExpToShow, Meta{}, Loader} / Load
 CurrentTrackMeta = nil          -- Unused in the Demo / {Artworkby, Artworkcolor, FumenBy, ExFumen?, ExFumenScript?, ExFumenBy?}
 CurrentTrackIndex = 0           -- Unused in the Demo / TrackList is not shared
 
-CurrentAudioRes = nil
 CurrentAudioUnit = nil
 CurrentFumenScript = nil        -- Unused in the Demo
 -- CurrentFumenBuf = nil        -- Temporary
@@ -450,6 +449,7 @@ do
 		}
 		sys.save(SAVE_PATH, Save)
 	end
+
 	OffsetType, HapticFeedbackEnabled, HitSoundEnabled = Save.Options.OffsetType, Save.Options.HapticFeedbackEnabled, Save.Options.HitSoundEnabled
 	AudioLatency = (OffsetType==1 and Save.Options.AudioLatency1) or (OffsetType==2 and Save.Options.AudioLatency2) or Save.Options.AudioLatency3
 	InputDelta = Save.Options.InputDelta				Arf3.SetIDelta(InputDelta)

@@ -2,8 +2,7 @@
   type: table
   members:
 
-
-  - name: CreateResource
+  - name: CreateUnit
     type: function
     parameters:
     - name: buf
@@ -11,46 +10,24 @@
     returns:
     - name: OK
       type: boolean
-    - name: resource_handle_or_msg
-      type: [table, string]
-
-  - name: ReleaseResource
-    type: function
-    desc: DO NOT release a resource refed by some unit(s).
-    parameters:
-    - name: resource_handle
-      type: table
-    returns:
-    - name: OK
-      type: boolean
-
-
-  - name: CreateUnit
-    type: function
-    parameters:
-    - name: resource_handle
-      type: table
-    returns:
-    - name: OK
-      type: boolean
     - name: unit_handle_or_msg
       type: [table, string]
-    - name: audio_length
-      type: number
+    - name: ms_length_or_nil
+      type: [number, nil]
 
-  - name: ReleaseUnit
+  - name: CheckPlaying
     type: function
     parameters:
-    - name: unit_handle
+    - name: unit
       type: table
     returns:
-    - name: OK
+    - name: status
       type: boolean
 
   - name: PlayUnit
     type: function
     parameters:
-    - name: unit_handle
+    - name: unit
       type: table
     - name: is_looping
       type: boolean
@@ -61,7 +38,7 @@
   - name: StopUnit
     type: function
     parameters:
-    - name: unit_handle
+    - name: unit
       type: table
     - name: rewind_to_start
       type: boolean
@@ -69,32 +46,23 @@
     - name: OK
       type: boolean
 
-  - name: CheckPlaying
-    type: function
-    parameters:
-    - name: unit_handle
-      type: table
-    returns:
-    - name: status
-      type: boolean
-
-  - name: GetTime
-    type: function
-    parameters:
-    - name: unit_handle
-      type: table
-    returns:
-    - name: actual_ms_or_nil
-      type: number
-
   - name: SetTime
     type: function
     desc: This API is an ASYNC one, and only makes sense when the unit is NOT playing.
     parameters:
-    - name: unit_handle
+    - name: unit
       type: table
     - name: mstime
       type: number
     returns:
     - name: OK
       type: boolean
+
+  - name: GetTime
+    type: function
+    parameters:
+    - name: unit
+      type: table
+    returns:
+    - name: actual_ms_or_nil
+      type: number

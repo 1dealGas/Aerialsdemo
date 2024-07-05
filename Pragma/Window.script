@@ -61,12 +61,9 @@ function init()
 
 	-- Prepare HitSounds
 	--
-	local CreateUnit = AcAudio.CreateUnit
-	local hitsoundbuf = sys.load_buffer("Reference/maou_se_system14.wav")
-	local _, hitsoundres = AcAudio.CreateResource(hitsoundbuf)
+	local hitsoundres = sys.load_buffer("Reference/maou_se_system14.wav")
 	for i = 1, 6 do
-		local _, u = CreateUnit(hitsoundres)
-		HitSoundUnits[i] = u
+		_, HitSoundUnits[i] = AcAudio.CreateUnit(hitsoundres)
 	end
 end
 
