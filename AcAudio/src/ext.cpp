@@ -14,7 +14,7 @@ ma_resource_manager acaudio_manager;
 ma_engine acaudio_engine;
 
 
-/* Lua API Preparations */
+/* Lua API Preparations & Implementations */
 static int AcAudioSourceGcMethod(lua_State* L) {
 	return
 		ma_resource_manager_data_source_uninit(
@@ -57,8 +57,6 @@ inline bool AcAudioIsUnit(lua_State* L) {					// (Unit, ···)    Initially
 #endif
 }
 
-
-/* Lua API Implementations */
 static int AcAudioCreateUnit(lua_State* L) {
 	/* Usage:
 	 * local buf = sys.load_buffer(some_path)
@@ -82,7 +80,7 @@ static int AcAudioCreateUnit(lua_State* L) {
 		dmBuffer::GetBytes( dmScript::CheckBuffer(L,1)->m_Buffer, &addr, &size );
 
 		// Register the Buffer into the miniaudio Resource Manager
-		char vfs_path[128];		sprintf( vfs_path, "%llu", (unsigned long long)dmTime::GetTime() );
+		char vfs_path[128];			sprintf( vfs_path, "%llu", (unsigned long long)dmTime::GetTime() );
 		ma_resource_manager_register_encoded_data( &acaudio_manager, vfs_path, addr, size );
 
 		// Create Resource
@@ -99,10 +97,8 @@ static int AcAudioCreateUnit(lua_State* L) {
 			return 2;
 		}
 
-		// Create Source Metatable
-		lua_newtable(L);								// Buffer -> bMetatable -> Source -> sMetatable
-		lua_pushcfunction(L, AcAudioSourceGcMethod);	// Buffer -> bMetatable -> Source -> sMetatable -> sGcMethod
-		lua_setfield(L, 4, "__gc");				// Buffer -> bMetatable -> Source -> sMetatable
+		// Set Source Metatable
+		luaL_getmetatable(L, "AcAudioSource");			// Buffer -> bMetatable -> Source -> sMetatable
 		lua_setmetatable(L, 3);					// Buffer -> bMetatable -> Source
 
 		// Monkeypatch Buffer Metatble
@@ -126,8 +122,7 @@ static int AcAudioCreateUnit(lua_State* L) {
 
 	// Do Returns
 	if(unit_init_result != MA_SUCCESS) {
-		lua_pushboolean(L, false);
-		lua_pushstring(L, "[!] Failed to Initialize the Unit Created");
+		lua_pushboolean(L, false), lua_pushstring(L, "[!] Failed to Initialize the Unit Created");
 		return 2;
 	}
 
@@ -252,8 +247,13 @@ inline dmExtension::Result AcAudioInit(dmExtension::Params* p) {
 	}
 	ma_engine_uninit(&PseudoEngine);
 
-	return luaL_register(p->m_L, "AcAudio", AcAudioAPIs), lua_pop(p->m_L, 1),
-		   dmExtension::RESULT_OK;
+	// Lua: Create API Table & tname Metable for AcAudio Source
+	const auto L = p->m_L ;
+	luaL_register(L, "AcAudio", AcAudioAPIs);			// AcAudioAPIs
+	luaL_newmetatable(L, "AcAudioSource");				// AcAudioAPIs -> sMetatable
+	lua_pushcfunction(L, AcAudioSourceGcMethod);				// AcAudioAPIs -> sMetatable -> sGcMethod
+	lua_setfield(L, 2, "__gc");							// AcAudioAPIs -> sMetatable
+	return lua_pop(L,2), dmExtension::RESULT_OK;
 }
 
 inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
