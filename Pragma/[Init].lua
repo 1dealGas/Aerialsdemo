@@ -91,8 +91,6 @@ function ImportSave()
 		InputDelta = Save.Options.InputDelta
 		Arf3.SetIDelta(InputDelta)
 		return true
-	else
-		return false
 	end
 end
 function SyncSave(options_updated)
@@ -123,7 +121,7 @@ end
 --        12000, 24000, function(canvas) end
 --    }
 --
-local type, gm, F = type, debug.getmetatable, "function"
+local msg_post, type, gm, F = msg.post, type, debug.getmetatable, "function"
 local function is_callable(x)
 	if x then
 		if type(x) == F then									return true
@@ -308,25 +306,24 @@ end
 
 -- Tween based on FumenScript & go.animate
 -- Declare Tween Keyframes & Inject them like this:
---     Tween(url, property)(   -- Supports all Defold-Style Syntax for arg url & property
+--     Tween(url, property) {   -- Supports all Defold-Style Syntax for arg url & property
 --         ms1, value1, et1,
 --         ms2, value2, et2,
 --         ···
---     )
+--     }
 --     ···
 --     DeclareFumenScript(···, ···, Tweens / TriggerFns, ···, ···)
 --
 -- The Singleton "Tween" is NOT A TABLE, so passing it directly will cause all tweens declared above INVALID
---  and FAILED TO GET RESETED PROPERLY. Just keep the "Tween / TriggerFns" clause if no TriggerFns needed,
---  which should be safe when TriggerFns == nil.
+--     and FAILED TO GET RESETED PROPERLY. Just keep the "Tweens / TriggerFns" clause if no TriggerFns needed,
+--     which should be safe when TriggerFns==nil .
 --
 local tween_cache, tween_capacity = {}, 0
 local STRING, ENABLE, DISABLE = "string", ENABLE, DISABLE
 Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 	__call = function(url, property)   -- Declare a Tween
 		property = (type(property)==STRING) and hash(property) or property
-		return function(...)
-			local decl = {...}
+		return function(decl)
 			local decllen, go_animate, go_cancel_animations = #decl, go.animate, go.cancel_animations
 			if decllen > 2 then
 				--
@@ -369,8 +366,10 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 				end
 			end
 		end
-	end,
+	end
+})
 
+Tweens = debug.setmetatable( AcUtil.PushNullptr(), {
 	__div = function(lnum, rnum)   -- Merge Tweens
 		local merge_target = (type(lnum)=="table" and lnum) or (type(rnum)=="table" and rnum) or AcUtil.NewTable(#tween_cache, 0)
 		local merge_target_size = #merge_target
@@ -386,44 +385,35 @@ Tween = debug.setmetatable( AcUtil.PushNullptr(), {
 --     TriggerFns = { 666, TriggerEnable("#x", "#y") }
 --     TriggerFns = { 114514, TriggerPlayFlipbook("#m","#n")("some_anim", NO_CALLBACK, {playback_rate=2}) }
 --
-local msg_post, sprite_play_flipbook = msg.post
-local function tpf_rtn_1(url)
-	return function(u,v,w)				return function()	sprite_play_flipbook(url,u,v,w) end									end
-end
-local function tpf_rtn_m(urls, urllen)
-	return function(u,v,w)	u=hash(u)	return function()	for i=1, urllen do sprite_play_flipbook(urls[i],u,v,w) end  end		end
-end                      -- Cache the Flipbook Hash for there is a loop.
-local function tpf_common(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return tpf_rtn_1(urls[1])
-	else						return tpf_rtn_m(urls, urllen)
-	end
-end
-local function tpf_1st(...)
-	sprite_play_flipbook = sprite.play_flipbook
-	TriggerPlayFlipbook = tpf_common
-	return tpf_common(...)
-end
 function TriggerEnable(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return function() msg_post(urls[1], ENABLE) end
-	else						return function() for i=1, urllen do msg_post(urls[i], ENABLE) end end
+	local urls = {...}			local ulen = #urls
+	if ulen == 1 then			return function() 						msg_post(urls[1], ENABLE)		end
+	else						return function()	for i=1, ulen do	msg_post(urls[i], ENABLE)	end	end
 	end
 end
 function TriggerDisable(...)
-	local urls = {...}			local urllen = #urls
-	if urllen == 1 then			return function() msg_post(urls[1], DISABLE) end
-	else						return function() for i=1, urllen do msg_post(urls[i], DISABLE) end end
+	local urls = {...}			local ulen = #urls
+	if ulen == 1 then			return function()						msg_post(urls[1], DISABLE)		end
+	else						return function()	for i=1, ulen do	msg_post(urls[i], DISABLE)	end	end
 	end
 end
-Tweens, TriggerPlayFlipbook = Tween, tpf_1st
+function TriggerPlayFlipbook(...)
+	local sprite_play_flipbook = sprite.play_flipbook
+	function TriggerPlayFlipbook(...)
+		local urls = {...}		local ulen, url_1st = #urls, urls[1]
+		if ulen == 1 then		return function(u,v,w)				return function()						sprite_play_flipbook(url_1st,u,v,w)		end	end
+		else					return function(u,v,w)	u=hash(u)	return function()	for i=1, ulen do	sprite_play_flipbook(urls[i],u,v,w)	end	end	end
+		end
+	end
+	return TriggerPlayFlipbook(...)
+end
 
 
 -- Function Concat Operator
 --
 function FuncConcatDisable()  debug.setmetatable(type, nil)  end
 function FuncConcatEnable(trigger_only)
-	local assert = assert
+	local assert = sys.get_engine_info().is_debug and assert or (function() end)
 	if trigger_only then
 		debug.setmetatable(assert, {
 			__concat = function(l, r)
