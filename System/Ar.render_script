@@ -20,11 +20,10 @@
 --     Strip Several Encapsulations We Considered Useless
 --
 --
-local hash, pairs = hash, pairs
+local hash = hash
 local vmath_vector4 = vmath.vector4
 local vmath_matrix4 = vmath.matrix4
 local vmath_matrix4_orthographic = vmath.matrix4_orthographic
-local sys_get_config_number = sys.get_config_number
 local render_predicate = render.predicate
 local render_get_window_width = render.get_window_width
 local render_get_window_height = render.get_window_height
@@ -197,4 +196,5 @@ function on_message(self, message_id, message)
 	end
 end
 
-require("Pragma/InitialPart")
+
+require("Pragma/[Init]")

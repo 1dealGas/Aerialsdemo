@@ -8,180 +8,58 @@ embedded_instances {
   data: "components {\n"
   "  id: \"Window\"\n"
   "  component: \"/Pragma/Window.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   "components {\n"
   "  id: \"Interlude\"\n"
   "  component: \"/Pragma/Interlude.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"1 Anim\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/Ar/Anim.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"1 Wish\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/Ar/Wish.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"1 Hint\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/Ar/Hint.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"1 Canvas\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/Ar/Canvas.go\\\"\\n"
-  "load_dynamically: false\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"1 Options\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/Ar/Options.go\\\"\\n"
   "load_dynamically: true\\n"
-  "dynamic_prototype: false\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }
 embedded_instances {
   id: "Demo"
   data: "components {\n"
   "  id: \"Demo\"\n"
   "  component: \"/Demo.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "  property_decls {\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"DemoBG\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"2001\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 1796.0\\n"
   "  y: 1076.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -194,24 +72,15 @@ embedded_instances {
   "    y: 540.0\n"
   "    z: -0.999\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"DemoLeft\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"2001\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 1796.0\\n"
   "  y: 1076.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -224,24 +93,15 @@ embedded_instances {
   "    y: 540.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"DemoRight\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"2001\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 1796.0\\n"
   "  y: 1076.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -254,24 +114,15 @@ embedded_instances {
   "    y: 540.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"DemoTop\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"2001\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 1796.0\\n"
   "  y: 1076.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -284,24 +135,15 @@ embedded_instances {
   "    y: 1620.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"DemoBottom\"\n"
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"2001\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 1796.0\\n"
   "  y: 1076.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -314,30 +156,8 @@ embedded_instances {
   "    y: -540.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }
 embedded_instances {
   id: "Texts"
@@ -345,34 +165,12 @@ embedded_instances {
   "  id: \"NorthWest\"\n"
   "  type: \"label\"\n"
   "  data: \"size {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "color {\\n"
-  "  x: 1.0\\n"
-  "  y: 1.0\\n"
-  "  z: 1.0\\n"
   "  w: 0.94\\n"
   "}\\n"
-  "outline {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 1.0\\n"
-  "}\\n"
-  "shadow {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 1.0\\n"
-  "}\\n"
   "leading: 0.0\\n"
-  "tracking: 0.0\\n"
   "pivot: PIVOT_NW\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
-  "line_break: false\\n"
   "text: \\\"||\\\\342\\\\227\\\\207||   2001: memoir \\\\316\\\\265\\\\316\\\\274\\\\316\\\\262\\\\316\\\\261r\\\\316\\\\272\\\"\\n"
   "font: \\\"/System/Ar.font\\\"\\n"
   "material: \\\"/System/Af.material\\\"\\n"
@@ -382,51 +180,21 @@ embedded_instances {
   "    y: 1043.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "  scale {\n"
   "    x: 0.5\n"
   "    y: 0.5\n"
-  "    z: 1.0\n"
   "  }\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"SouthEast\"\n"
   "  type: \"label\"\n"
   "  data: \"size {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "color {\\n"
-  "  x: 1.0\\n"
-  "  y: 1.0\\n"
-  "  z: 1.0\\n"
   "  w: 0.94\\n"
   "}\\n"
-  "outline {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 1.0\\n"
-  "}\\n"
-  "shadow {\\n"
-  "  x: 0.0\\n"
-  "  y: 0.0\\n"
-  "  z: 0.0\\n"
-  "  w: 1.0\\n"
-  "}\\n"
   "leading: 0.0\\n"
-  "tracking: 0.0\\n"
   "pivot: PIVOT_SE\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
-  "line_break: false\\n"
-  "text: \\\"\\\"\\n"
   "font: \\\"/System/Ar.font\\\"\\n"
   "material: \\\"/System/Af.material\\\"\\n"
   "\"\n"
@@ -435,35 +203,12 @@ embedded_instances {
   "    y: 37.0\n"
   "    z: 0.996\n"
   "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "  scale {\n"
   "    x: 0.5\n"
   "    y: 0.5\n"
-  "    z: 1.0\n"
   "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
 }
 embedded_instances {
   id: "InterludeDimmer"
@@ -472,12 +217,9 @@ embedded_instances {
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"Panel\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "size {\\n"
   "  x: 5400.0\\n"
   "  y: 3240.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -485,34 +227,12 @@ embedded_instances {
   "  texture: \\\"/Atlas/UI.atlas\\\"\\n"
   "}\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   ""
   position {
     x: 900.0
     y: 540.0
     z: 0.997
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
   }
 }
 embedded_instances {
@@ -522,7 +242,6 @@ embedded_instances {
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"Icon\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "slice9 {\\n"
   "  x: 15.0\\n"
   "  y: 15.0\\n"
@@ -532,8 +251,6 @@ embedded_instances {
   "size {\\n"
   "  x: 64.0\\n"
   "  y: 64.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -541,17 +258,6 @@ embedded_instances {
   "  texture: \\\"/Atlas/UI.atlas\\\"\\n"
   "}\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   ""
   position {
@@ -560,15 +266,8 @@ embedded_instances {
     z: 0.998
   }
   rotation {
-    x: 0.0
-    y: 0.0
     z: 0.38268343
     w: 0.9238795
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
   }
 }
 embedded_instances {
@@ -578,7 +277,6 @@ embedded_instances {
   "  type: \"sprite\"\n"
   "  data: \"default_animation: \\\"Icon\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "blend_mode: BLEND_MODE_ALPHA\\n"
   "slice9 {\\n"
   "  x: 15.0\\n"
   "  y: 15.0\\n"
@@ -588,8 +286,6 @@ embedded_instances {
   "size {\\n"
   "  x: 64.0\\n"
   "  y: 64.0\\n"
-  "  z: 0.0\\n"
-  "  w: 0.0\\n"
   "}\\n"
   "size_mode: SIZE_MODE_MANUAL\\n"
   "textures {\\n"
@@ -597,17 +293,6 @@ embedded_instances {
   "  texture: \\\"/Atlas/UI.atlas\\\"\\n"
   "}\\n"
   "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
   "}\n"
   ""
   position {
@@ -616,14 +301,7 @@ embedded_instances {
     z: 0.999
   }
   rotation {
-    x: 0.0
-    y: 0.0
     z: 0.38268343
     w: 0.9238795
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
   }
 }

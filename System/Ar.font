@@ -1,17 +1,5 @@
 font: "/Reference/OPlusSans3-Regular.ttf"
 material: "/System/Af.material"
 size: 51
-antialias: 1
-alpha: 1.0
-outline_alpha: 0.0
 outline_width: 3.0
-shadow_alpha: 0.0
-shadow_blur: 0
-shadow_x: 0.0
-shadow_y: 0.0
-extra_characters: "\302\267\342\227\207\342\227\216\343\200\210\343\200\211\343\200\214\343\200\215\342\226\275\342\226\263\342\227\206\342\227\213\303\227\344\270\250\316\265\316\274\316\262\316\261\316\272"
-output_format: TYPE_BITMAP
-all_chars: false
-cache_width: 0
-cache_height: 0
-render_mode: MODE_SINGLE_LAYER
+characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\302\267\342\227\207\342\227\216\343\200\210\343\200\211\343\200\214\343\200\215\342\226\275\342\226\263\342\227\206\342\227\213\303\227\344\270\250\316\265\316\274\316\262\316\261\316\272"

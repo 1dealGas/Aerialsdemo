@@ -25,7 +25,7 @@ manifest = /System/AndroidManifest.xml
 
 [project]
 title = Aerials Demo
-version = 2.5.5
+version = 2.5.6
 publisher = 1dealGas
 developer = 1dealGas
 custom_resources = Arf, Reference/Audio, Reference/maou_se_system14.wav, Ar.license
