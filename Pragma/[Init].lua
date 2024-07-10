@@ -314,7 +314,7 @@ end
 --     ···
 --     DeclareFumenScript(···, ···, Tweens / TriggerFns, ···, ···)
 --
--- The Singleton "Tween" is NOT A TABLE, so passing it directly will cause all tweens declared above INVALID
+-- The Singleton "Tweens" is NOT A TABLE, so passing it directly will cause all tweens declared above INVALID
 --     and FAILED TO GET RESETED PROPERLY. Just keep the "Tweens / TriggerFns" clause if no TriggerFns needed,
 --     which should be safe when TriggerFns==nil .
 --
