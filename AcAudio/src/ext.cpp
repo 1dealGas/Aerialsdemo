@@ -1,50 +1,52 @@
 /* Aerials Audio System */
 #pragma once
 #include <dmsdk/sdk.h>
-#include <dmsdk/dlib/time.h>
-#include <dmsdk/dlib/buffer.h>
-#include <dmsdk/script/script.h>
+#include <dmsdk/dlib/hashtable.h>
 #include <miniaudio/miniaudio_all.h>
-#include <dmsdk/dlib/log.h>
 #include <unordered_map>
 
-using AcAudioBufAddr = void*;
-std::unordered_map<ma_sound*, uint8_t> acaudio_sounds;   // unordered_map with unordered_set-like behaviors
-ma_resource_manager acaudio_manager;
-ma_engine acaudio_engine;
+struct PseudoContext {
+	struct Module {
+		char*       m_Script;
+		uint32_t    m_ScriptSize;
+		char*       m_Name;
+		void*       m_Resource;
+		char*       m_Filename;
+	};
+	dmConfigFile::HConfig       m_ConfigFile;
+	dmResource::HFactory        m_ResourceFactory;
+	dmGraphics::HContext        m_GraphicsContext;
+	dmHashTable64<Module>       m_Modules;
+	dmHashTable64<Module*>      m_PathToModule;
+	dmHashTable64<int>          m_HashInstances;
+	dmArray<void*>				m_ScriptExtensions;
+	lua_State*                  m_LuaState;
+	int                         m_ContextTableRef;
+};
+struct AcAudioSource {
+	ma_resource_manager_data_source source;
+	uint8_t* pBuf;
+};
+
+std::unordered_map<ma_sound*, uint8_t> AcAudioSounds;   // unordered_map with unordered_set-like behaviors
+ma_resource_manager AcAudioManager;
+ma_engine AcAudioEngine;
 
 
-/* Lua API Preparations & Implementations */
+/* Lua API Preparations */
 static int AcAudioSourceGcMethod(lua_State* L) {
-	return
-		ma_resource_manager_data_source_uninit(
-			(ma_resource_manager_data_source*)lua_touserdata(L, 1)
-		),
-	0;
-}
-
-static int AcAudioUnitGcMethod(lua_State* L) {
-	const auto sound_ptr = (ma_sound*)lua_touserdata(L, 1);
-	ma_sound_stop(sound_ptr), ma_sound_uninit(sound_ptr);
-	if( acaudio_sounds.count(sound_ptr) )
-		acaudio_sounds.erase(sound_ptr) ;
+	const auto pSource = (AcAudioSource*)lua_touserdata(L, 1);
+	if( pSource->pBuf )
+		ma_resource_manager_data_source_uninit(& pSource->source ), free( pSource->pBuf );
 	return 0;
 }
 
-inline void AcAudioMakeMetatableForUnit(lua_State* L) {		// Buffer -> AcAudioUnit    Initially
-	/* The metatable of an unit should include:
-	 * A. A ref of the original Defold Buffer, to prevent the inappropriate GC;  ->  Also function as a tag
-	 * B. __gc metamethod.
-	 */
-	/*T*/	lua_insert(L, 1);							// AcAudioUnit -> Buffer
-			lua_newtable(L);								// AcAudioUnit -> Buffer -> uMetatable
-	/*A*/	lua_insert(L, 2);							// AcAudioUnit -> uMetatable -> Buffer
-			lua_rawseti(L, 2, 0xACA8D10);				// AcAudioUnit -> uMetatable
-			lua_rawgeti(L, 2, 0xACA8D10);				// AcAudioUnit -> uMetatable -> Buffer
-			lua_insert(L, 1);							// Buffer -> AcAudioUnit -> uMetatable
-	/*B*/	lua_pushcfunction(L, AcAudioUnitGcMethod);		// Buffer -> AcAudioUnit -> uMetatable -> uGcMethod
-			lua_setfield(L, 3, "__gc");				// Buffer -> AcAudioUnit -> uMetatable
-	/*M*/	lua_setmetatable(L, 2);					// Buffer -> AcAudioUnit    Finally
+static int AcAudioUnitGcMethod(lua_State* L) {
+	const auto pSound = (ma_sound*)lua_touserdata(L, 1);
+	ma_sound_stop(pSound), ma_sound_uninit(pSound);
+	if( AcAudioSounds.count(pSound) )
+		AcAudioSounds.erase(pSound) ;
+	return 0;
 }
 
 inline bool AcAudioIsUnit(lua_State* L) {					// (Unit, ···)    Initially
@@ -52,88 +54,127 @@ inline bool AcAudioIsUnit(lua_State* L) {					// (Unit, ···)    Initially
 	return true;
 #else
 	if(! lua_getmetatable(L, 1) )					return false;
-	const bool is_unit = ( lua_rawgeti(L, -1, 0xACA8D10), lua_toboolean(L, -1) );
-	return lua_pop(L, 2), is_unit;							// (Unit, ···)    Finally
+	const bool isUnit = ( lua_rawgeti(L, -1, 0xACA8D10), lua_toboolean(L, -1) );
+	return lua_pop(L, 2), isUnit;							// (Unit, ···)    Finally
 #endif
+}
+
+
+/* Lua API Implementations */
+static int AcAudioGetDeviceName(lua_State* L) {
+	/* Usage:
+	 * local device_name = AcAudio.GetDeviceName()
+	 */
+	char deviceName[1024];
+	size_t deviceNameLen = 0;
+	ma_device* pDevice = ma_engine_get_device( &AcAudioEngine );
+	if( ma_device_get_name(pDevice, ma_device_type_playback, deviceName, 1024, &deviceNameLen) != MA_SUCCESS )
+		return lua_pushnil(L), 1;
+	lua_pushlstring(L, deviceName, deviceNameLen);
+	return 1;
+}
+
+static int AcAudioCreateSource(lua_State* L) {
+	/* Usage:
+	 * local ok, src_or_msg = AcAudio.CreateSource(path)
+	 */
+
+	// Args
+	lua_pushinteger(L, 2744634527);									// Path -> hash"__script_context"
+	lua_gettable(L, LUA_GLOBALSINDEX);								// Path -> context
+	const auto pContext = (PseudoContext*)lua_touserdata(L, 2);
+	const auto path = luaL_checkstring(L, 1);
+	lua_pop(L, 2);
+
+	// Vars
+	uint32_t bufSize;
+	const auto lSource = (AcAudioSource*)lua_newuserdata( L, sizeof(AcAudioSource) );
+
+	// Load Buffer
+	const auto loadResult = dmResource::GetRaw( pContext->m_ResourceFactory, path, (void**)&lSource->pBuf, &bufSize );
+	if( loadResult != dmResource::RESULT_OK ) {						/* 2nd Attempt, Load from Disk */
+		FILE* pFile = fopen(path, "rb");				// Open
+		if( pFile == nullptr) {
+			lua_pushboolean(L, false);
+			lua_pushstring(L, "[!] Audio file not found");
+			return 2;
+		}
+
+		fseek(pFile, 0, SEEK_END);									// Size
+		bufSize = ftell(pFile);
+		fseek(pFile, 0, SEEK_SET);
+
+		lSource->pBuf = (uint8_t*)malloc(bufSize);					// Copying
+		if( fread( lSource->pBuf, 1, bufSize, pFile ) != bufSize ) {
+			lua_pushboolean(L, false);
+			lua_pushstring(L, "[!] Failed to read file");
+			lSource->pBuf = ( fclose(pFile), free( lSource->pBuf ), nullptr );
+			return 2;
+		}
+		fclose(pFile);
+	}
+
+	// Register Buffer
+	char vfsPath[128];			sprintf( vfsPath, "%llu", dmTime::GetTime() );
+	ma_resource_manager_register_encoded_data( &AcAudioManager, vfsPath, lSource->pBuf, bufSize );
+
+	// Init Resource
+	const auto N = ma_resource_manager_pipeline_notifications_init();
+	const auto initResult = ma_resource_manager_data_source_init(
+		&AcAudioManager, vfsPath,
+		MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE,
+		&N, &lSource->source);
+	ma_resource_manager_unregister_data( &AcAudioManager, vfsPath );
+
+	// Failure
+	if( initResult != MA_SUCCESS ) {
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Audio format not supported by miniaudio");
+		lSource->pBuf = ( free( lSource->pBuf ), nullptr );
+		return 2;
+	}
+
+	// Success
+	luaL_getmetatable(L, "AcAudioSource");			// Source -> MetaTable
+	lua_setmetatable(L, 1);					// Source
+	lua_pushboolean(L, true);						// Source -> True
+	lua_insert(L, 1);							// True -> Source
+	return 2;
 }
 
 static int AcAudioCreateUnit(lua_State* L) {
 	/* Usage:
-	 * local buf = sys.load_buffer(some_path)
-	 * local ok, unit, len = AcAudio.NewUnit(buf)   -- Or false, error_msg
+	 * local unit, len = AcAudio.NewUnit( src )   -- Or nil, error_msg
 	 */
-	ma_resource_manager_data_source* source_ptr;
+	const auto lSource = (AcAudioSource*)luaL_checkudata(L, 1, "AcAudioSource");   // Src
+	const auto pSound = (ma_sound*)lua_newuserdata( L, sizeof(ma_sound) );				// Src -> Unit
 
-	// Prepare the Buffer if needed
-	lua_getmetatable(L, 1);													// Buffer -> bMetatable
-	if( lua_rawgeti(L, 2, 0xACA8D10), lua_isuserdata(L, 3) ) {				// Buffer -> bMetatable -> Source?
-		source_ptr = (ma_resource_manager_data_source*)lua_touserdata(L, 3);
-		lua_pop(L, 2);																// Buffer
-	}
-	else {
-		lua_pop(L, 1);																// Buffer -> bMetatable
-		source_ptr = (ma_resource_manager_data_source*)								// Buffer -> bMetatable -> Source
-					 lua_newuserdata( L, sizeof(ma_resource_manager_data_source) );
-
-		// Acquire Buffer
-		AcAudioBufAddr addr;		uint32_t size;
-		dmBuffer::GetBytes( dmScript::CheckBuffer(L,1)->m_Buffer, &addr, &size );
-
-		// Register the Buffer into the miniaudio Resource Manager
-		char vfs_path[128];			sprintf( vfs_path, "%llu", (unsigned long long)dmTime::GetTime() );
-		ma_resource_manager_register_encoded_data( &acaudio_manager, vfs_path, addr, size );
-
-		// Create Resource
-		const auto N = ma_resource_manager_pipeline_notifications_init();
-		const auto buf_prep_result = ma_resource_manager_data_source_init(
-			&acaudio_manager, vfs_path,
-			MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_WAIT_INIT | MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE,
-			&N, source_ptr);
-		ma_resource_manager_unregister_data( &acaudio_manager, vfs_path );
-
-		// Process Failure
-		if( buf_prep_result != MA_SUCCESS ) {
-			lua_pushboolean(L, false), lua_pushstring(L, "[!] Audio format not supported by miniaudio");
-			return 2;
-		}
-
-		// Set Source Metatable
-		luaL_getmetatable(L, "AcAudioSource");			// Buffer -> bMetatable -> Source -> sMetatable
-		lua_setmetatable(L, 3);					// Buffer -> bMetatable -> Source
-
-		// Monkeypatch Buffer Metatble
-		lua_newtable(L);								// Buffer -> bMetatable -> Source -> mMetatable
-		lua_pushnumber(L, 2177270482);				// Buffer -> bMetatable -> Source -> mMetatable -> hash"buffer"
-		lua_rawseti(L, 4, 2296269367);				// Buffer -> bMetatable -> Source -> mMetatable
-		lua_getfield(L, 2, "__gc");				// Buffer -> bMetatable -> Source -> mMetatable -> bGcMethod
-		lua_setfield(L, 4, "__gc");				// Buffer -> bMetatable -> Source -> mMetatable
-		lua_insert(L, 3);							// Buffer -> bMetatable -> mMetatable -> Source
-		lua_rawseti(L, 3, 0xACA8D10);				// Buffer -> bMetatable -> mMetatable
-		lua_setmetatable(L, 1);					// Buffer -> bMetatable
-		lua_pop(L, 1);									// Buffer
-	}
-
-	const auto sound_ptr = (ma_sound*)lua_newuserdata( L, sizeof(ma_sound) );	// Buffer -> AcAudioUnit
-	const auto unit_init_result = ma_sound_init_from_data_source(
-		&acaudio_engine, source_ptr,
+	// Init & Get Length
+	const auto initResult = ma_sound_init_from_data_source(
+		&AcAudioEngine, &lSource->source,
 		MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION,
-		nullptr, sound_ptr
+		nullptr, pSound
 	);
-
-	// Do Returns
-	if(unit_init_result != MA_SUCCESS) {
-		lua_pushboolean(L, false), lua_pushstring(L, "[!] Failed to Initialize the Unit Created");
+	if( initResult != MA_SUCCESS ) {
+		lua_pushnil(L);
+		lua_pushstring(L, "[!] Failed to Initialize the Unit Created");
 		return 2;
 	}
-
 	float len = 0;   // The length getter needs to return a ma_result value
-	ma_sound_get_length_in_seconds(sound_ptr, &len);
-	acaudio_sounds[sound_ptr] = 1;
+	ma_sound_get_length_in_seconds(pSound, &len);
 
-	AcAudioMakeMetatableForUnit(L);						// Should be:  Buffer -> AcAudioUnit
-	lua_pushboolean(L, true), lua_insert(L, 2);				// Buffer -> true -> AcAudioUnit
-	lua_pushnumber( L, (uint64_t)(len * 1000.0) );					// Buffer -> true -> AcAudioUnit -> len
-	return 3;
+	// Return
+	lua_newtable(L);								// Src -> Unit -> MetaTable
+	lua_pushcfunction(L, AcAudioUnitGcMethod);		// Src -> Unit -> MetaTable -> GcMethod
+	lua_setfield(L, 3, "__gc");				// Src -> Unit -> MetaTable
+	lua_insert(L, 1);							// MetaTable -> Src -> Unit
+	lua_insert(L, 1);							// Unit -> MetaTable -> Src
+	lua_rawseti(L, 2, 0xACA8D10);				// Unit -> MetaTable
+	lua_setmetatable(L, 1);					// Unit
+	lua_pushinteger( L, len * 1000.0 );			// Unit -> Len
+
+	AcAudioSounds[pSound] = 1;
+	return 2;
 }
 
 static int AcAudioPlayUnit(lua_State* L) {
@@ -142,10 +183,11 @@ static int AcAudioPlayUnit(lua_State* L) {
 	 */
 	if(! AcAudioIsUnit(L) )
 		return lua_pushboolean(L, false), 1;
-	const auto unit_handle = (ma_sound*)lua_touserdata(L, 1);
+	const auto pSound = (ma_sound*)lua_touserdata(L, 1);
 
-	ma_sound_set_looping( unit_handle, lua_toboolean(L, 2) );
-	return lua_pushboolean( L, ma_sound_start(unit_handle)==MA_SUCCESS ), 1;
+	// Added a sleep session, trying to let the play method available immediately after setting the playback time progress.
+	ma_sound_set_looping( pSound, lua_toboolean(L, 2) );
+	return dmTime::Sleep(1000), lua_pushboolean( L, ma_sound_start(pSound)==MA_SUCCESS ), 1;
 }
 
 static int AcAudioStopUnit(lua_State* L) {
@@ -154,11 +196,11 @@ static int AcAudioStopUnit(lua_State* L) {
 	 */
 	if(! AcAudioIsUnit(L) )
 		return lua_pushboolean(L, false), 1;
-	const auto unit_handle = (ma_sound*)lua_touserdata(L, 1);
+	const auto pSound = (ma_sound*)lua_touserdata(L, 1);
 
-	if( ma_sound_stop(unit_handle) == MA_SUCCESS ) {
+	if( ma_sound_stop(pSound) == MA_SUCCESS ) {
 		if( lua_toboolean(L, 2) )
-			ma_sound_seek_to_pcm_frame(unit_handle, 0);   // Rewind to Start
+			ma_sound_seek_to_pcm_frame(pSound, 0);   // Rewind to Start
 		return lua_pushboolean(L, true), 1;
 	}
 	return lua_pushboolean(L, false), 1;
@@ -175,26 +217,26 @@ static int AcAudioCheckPlaying(lua_State* L) {
 
 static int AcAudioSetTime(lua_State* L) {
 	/* Usage:
-	 * local ok = AcAudio.SetTime(unit, ms)   -- Keep in mind that this is NOT A SYNC API.
+	 * local ok = AcAudio.SetTime(unit, ms)
 	 */
 	if(! AcAudioIsUnit(L) )
 		return lua_pushboolean(L, false), 1;
 
 	// Check if Playing
-	const auto unit_handle = (ma_sound*)lua_touserdata(L, 1);
-	if( ma_sound_is_playing(unit_handle) )
+	const auto pSound = (ma_sound*)lua_touserdata(L, 1);
+	if( ma_sound_is_playing(pSound) )
 		return lua_pushboolean(L, false), 1;
 
 	// Acquire Sound Length & Attempt Ms
 	float len = 0;
-	ma_sound_get_length_in_seconds(unit_handle, &len);		len *= 1000.0f;
+	ma_sound_get_length_in_seconds(pSound, &len);		len *= 1000.0f;
 	auto attempt_ms = (int64_t)luaL_checknumber(L, 2);
 		 attempt_ms = (attempt_ms > 0) ? attempt_ms : 0;
 		 attempt_ms = (attempt_ms < len-2.0) ? attempt_ms : (len-2.0) ;
 
 	// Return the Result
 	return lua_pushboolean(L, MA_SUCCESS ==
-		ma_sound_seek_to_pcm_frame( unit_handle, (uint64_t)(attempt_ms * ma_engine_get_sample_rate(&acaudio_engine) / 1000.0) )
+		ma_sound_seek_to_pcm_frame( pSound, (uint64_t)(attempt_ms * ma_engine_get_sample_rate(&AcAudioEngine) / 1000.0) )
 	), 1;
 }
 
@@ -210,7 +252,8 @@ static int AcAudioGetTime(lua_State* L) {
 
 /* Binding Stuff */
 constexpr luaL_reg AcAudioAPIs[] = {
-	{"CreateUnit", AcAudioCreateUnit}, {"CheckPlaying", AcAudioCheckPlaying},
+	{"CreateSource", AcAudioCreateSource}, {"CreateUnit", AcAudioCreateUnit},
+	{"CheckPlaying", AcAudioCheckPlaying}, {"GetDeviceName", AcAudioGetDeviceName},
 	{"PlayUnit", AcAudioPlayUnit}, {"StopUnit", AcAudioStopUnit},
 	{"SetTime", AcAudioSetTime}, {"GetTime", AcAudioGetTime},
 	{nullptr, nullptr}
@@ -233,19 +276,13 @@ inline dmExtension::Result AcAudioInit(dmExtension::Params* p) {
 		 rm_config.decodedSampleRate				= device -> sampleRate;
 		 rm_config.customDecodingBackendCount		= sizeof(vo_binding) / sizeof(vo_binding[0]);
 		 rm_config.ppCustomDecodingBackendVTables	= vo_binding;
-	if( ma_resource_manager_init(&rm_config, &acaudio_manager) != MA_SUCCESS) {
-		dmLogFatal("Failed to Init the miniaudio Engine.");
-		return dmExtension::RESULT_INIT_ERROR;
-	}
+	ma_resource_manager_init(&rm_config, &AcAudioManager);
+	ma_engine_uninit(&PseudoEngine);
 
 	// Init the Player Engine: a custom engine config
 	auto engine_config			= ma_engine_config_init();
-		 engine_config.pResourceManager			= &acaudio_manager;
-	if( ma_engine_init(&engine_config, &acaudio_engine) != MA_SUCCESS ) {
-		dmLogFatal("Failed to Init the miniaudio Engine.");
-		return dmExtension::RESULT_INIT_ERROR;
-	}
-	ma_engine_uninit(&PseudoEngine);
+		 engine_config.pResourceManager			= &AcAudioManager;
+	ma_engine_init(&engine_config, &AcAudioEngine);
 
 	// Lua: Create API Table & tname Metable for AcAudio Source
 	const auto L = p->m_L ;
@@ -253,14 +290,14 @@ inline dmExtension::Result AcAudioInit(dmExtension::Params* p) {
 	luaL_newmetatable(L, "AcAudioSource");				// AcAudioAPIs -> sMetatable
 	lua_pushcfunction(L, AcAudioSourceGcMethod);				// AcAudioAPIs -> sMetatable -> sGcMethod
 	lua_setfield(L, 2, "__gc");							// AcAudioAPIs -> sMetatable
-	return lua_pop(L,2), dmExtension::RESULT_OK;
+	return lua_pop(L, 2), dmExtension::RESULT_OK;
 }
 
 inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
 	switch(e->m_Event) {   // You may want to check the "playing" status manually if needed.
 		case dmExtension::EVENT_ID_ICONIFYAPP:
 		case dmExtension::EVENT_ID_DEACTIVATEAPP:
-			for( const auto it : acaudio_sounds )
+			for( const auto it : AcAudioSounds )
 				ma_sound_stop( it.first );   // Sounds won't rewind when "stopping"
 		default:;   // break omitted
 	}
@@ -269,5 +306,5 @@ inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) 
 inline dmExtension::Result AcAudioFinal(dmExtension::Params* p)		  { return dmExtension::RESULT_OK; }
 inline dmExtension::Result AcAudioAPPInit(dmExtension::AppParams* p)  { return dmExtension::RESULT_OK; }
 inline dmExtension::Result AcAudioAPPFinal(dmExtension::AppParams* p) { // We assume this func to be called
-	return ma_engine_uninit(&acaudio_engine), dmExtension::RESULT_OK; } // With the lua_State closed.
+	return ma_engine_uninit(&AcAudioEngine), dmExtension::RESULT_OK;  } // With the lua_State closed.
 DM_DECLARE_EXTENSION(AcAudio, "AcAudio", AcAudioAPPInit, AcAudioAPPFinal, AcAudioInit, nullptr, AcAudioOnEvent, AcAudioFinal)

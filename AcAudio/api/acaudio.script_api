@@ -2,18 +2,27 @@
   type: table
   members:
 
+  - name: CreateSource
+    type: function
+    parameters:
+    - name: path
+      type: string
+      desc: Absolute path, for example "/main/bgm.wav" "/Users/AcAudioUser/bgm.wav"
+    returns:
+    - name: src_or_msg
+      type: [table, string]
+
   - name: CreateUnit
     type: function
     parameters:
-    - name: buf
+    - name: src
       type: table
+      desc: Source handle created from AcAudio.CreateSource()
     returns:
-    - name: OK
-      type: boolean
-    - name: unit_handle_or_msg
-      type: [table, string]
-    - name: ms_length_or_nil
-      type: [number, nil]
+    - name: unit
+      type: [table, nil]
+    - name: mslen_or_errmsg
+      type: [number, string]
 
   - name: CheckPlaying
     type: function
@@ -23,6 +32,12 @@
     returns:
     - name: status
       type: boolean
+
+  - name: GetDeviceName
+    type: function
+    returns:
+    - name: device_name
+      type: string
 
   - name: PlayUnit
     type: function
@@ -48,7 +63,6 @@
 
   - name: SetTime
     type: function
-    desc: This API is an ASYNC one, and only makes sense when the unit is NOT playing.
     parameters:
     - name: unit
       type: table

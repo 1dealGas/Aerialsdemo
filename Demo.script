@@ -2,8 +2,8 @@ CurrentTrackId = 2001
 local IllustTint = vmath.vector4(0.273, 0.273, 0.273, 1)
 local CoverTint = vmath.vector4(0.151, 0.151, 0.151, 1)
 function init(self)
-	_, CurrentAudioUnit = AcAudio.CreateUnit( sys.load_buffer("/Reference/Audio/2001.opus") )		-- Create Canvas
-	   CurrentFumenBuf = sys.load_buffer("/Arf/2001.arf")
+	local _, src = AcAudio.CreateSource("/Reference/Audio/2001.opus")								-- Create Canvas
+	CurrentAudioUnit, CurrentFumenBuf = AcAudio.CreateUnit(src), sys.load_buffer("/Arf/2001.arf")
 	factory.create("Ar:/Pragma#1 Canvas", nil, nil, {options=true, display_losts=true})
 
 	go.set("Ar:/Demo#DemoBG", "tint", IllustTint)													-- Do Demo-Specific Settings
