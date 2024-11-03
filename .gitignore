@@ -1,9 +1,11 @@
+/.editor_settings
 /.internal
 /.vscode
 /.idea
 
 /build
 Thumbs.db
+MSVCRT.lib
 .DS_Store
 
 debug.keystore
@@ -14,5 +16,3 @@ manifest.public.der
 LICENSE
 README.md
 OPlusSans3-Regular.ttf
-
-MSVCRT.lib
