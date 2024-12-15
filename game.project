@@ -25,7 +25,7 @@ manifest = /System/AndroidManifest.xml
 
 [project]
 title = Aerials Demo
-version = 2.5.8
+version = 2.6
 publisher = 1dealGas
 developer = 1dealGas
 custom_resources = Arf, Reference/Audio, Reference/maou_se_system14.wav, Ar.license
@@ -82,7 +82,7 @@ max_emitter_count = 0
 max_particle_count = 0
 
 [model]
-max_count = 0
+max_count = 1
 
 [mesh]
 max_count = 0

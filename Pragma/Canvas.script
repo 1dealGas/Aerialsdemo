@@ -152,9 +152,9 @@ function update(self, dt)
 		-- Mutate Tints
 		--
 		local WishSprites = WishSprites
-		for i = 1, wgo_used do	go_set(WishSprites[i], TINTW, WishTints[i])	end
-		for i = 1, hgo_used do	go_set(HintSprites[i], TINT, HintTints[i])	end
-		for i = 1, ego_used do	go_set(EchoSprites[i], TINT, EchoTints[i])	end
+		for i = 1, wgo_used do	go_set(WishSprites[i], TINTW, WishTints[i])		end
+		for i = 1, hgo_used do	go_set(HintSprites[i], TINT, HintTints[i]*1.37)	end
+		for i = 1, ego_used do	go_set(EchoSprites[i], TINT, EchoTints[i])		end
 		for i = 1, ago_used do
 			go_set(AlSprites[i], TINT, AnimTints[i])
 			go_set(ArSprites[i], TINT, AnimTints[i])

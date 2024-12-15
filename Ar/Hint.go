@@ -2,7 +2,7 @@ embedded_components {
   id: "Sprite"
   type: "sprite"
   data: "default_animation: \"Hint\"\n"
-  "material: \"/builtins/materials/sprite.material\"\n"
+  "material: \"/System/Hint.material\"\n"
   "slice9 {\n"
   "  x: 15.0\n"
   "  y: 15.0\n"
@@ -33,7 +33,7 @@ embedded_components {
   type: "sprite"
   data: "default_animation: \"Icon\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
-  "blend_mode: BLEND_MODE_SCREEN\n"
+  "blend_mode: BLEND_MODE_ADD\n"
   "slice9 {\n"
   "  x: 15.0\n"
   "  y: 15.0\n"
@@ -50,9 +50,6 @@ embedded_components {
   "  texture: \"/Atlas/UI.atlas\"\n"
   "}\n"
   ""
-  position {
-    z: 0.03
-  }
   rotation {
     z: 0.38268343
     w: 0.9238795
