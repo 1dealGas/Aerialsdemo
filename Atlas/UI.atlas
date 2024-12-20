@@ -10,3 +10,4 @@ images {
 images {
   image: "/Reference/Visual/Panel.png"
 }
+margin: 1

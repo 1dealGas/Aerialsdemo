@@ -5,9 +5,9 @@ using namespace Arf3;
 
 //
 	/* Here we store some tint values, which are changed rarely. */
-	static constexpr auto H_EARLY_R = 0.275f, H_EARLY_G = 0.495f, H_EARLY_B = 0.5603125f;
-	static constexpr auto H_LATE_R = 0.5603125f, H_LATE_G = 0.3403125f, H_LATE_B = 0.275f;
-	static constexpr auto H_HIT_R = 0.73f, H_HIT_G = 0.6244921875f, H_HIT_B = 0.4591015625f;
+	static constexpr auto H_EARLY_R = 0.37675f, H_EARLY_G = 0.67815f, H_EARLY_B = 0.767628125f;
+	static constexpr auto H_LATE_R = 0.767628125f, H_LATE_G = 0.466228125f, H_LATE_B = 0.37675f;
+	static constexpr auto H_HIT_R = 0.88f, H_HIT_G = 0.7528125f, H_HIT_B = 0.5534375f;
 
 	static constexpr auto A_EARLY_R = 0.3125f, A_EARLY_G = 0.5625f, A_EARLY_B = 0.63671875f;
 	static constexpr auto A_LATE_R = 0.63671875f, A_LATE_G = 0.38671875f, A_LATE_B = 0.3125f;
@@ -147,18 +147,18 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 	// Specify all tint.w as 1 in the initialization
 	if( dt < -370 ) {
 		SetPosition( hgo, p3(x, y, dt*0.00001f - 0.04f) );
-		const float color = 0.1337f + (float)(0.0005 * (510+dt) );   // As 0.07/140
+		const float color = 0.3f + (float)(0.0005 * (510+dt) );   // As 0.07/140
 		htint -> setX(color).setY(color).setZ(color);
 		hgo_used++;
 	}
 	else if( dt <= 370 ) switch(status) {
 		case NONJUDGED:
-			htint -> setX(0.2037f).setY(0.2037f).setZ(0.2037f);
+			htint -> setX(0.37f).setY(0.37f).setZ(0.37f);
 			SetPosition( hgo, p3(x, y, -0.04f) );
 			hgo_used++;
 			break;
 		case NONJUDGED_LIT:
-			htint -> setX(0.3737f).setY(0.3737f).setZ(0.3737f);
+			htint -> setX(0.573f).setY(0.573f).setZ(0.573f);
 			SetPosition( hgo, p3(x, y, -0.037f) );
 			hgo_used++;
 			break;
@@ -235,7 +235,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 		case LOST:
 			{
 				SetPosition( hgo, p3(x, y, -0.02f + dt*0.00001f) );
-				float color = 0.437f - dt*0.00037f;			htint -> setX(color);
+				float color = 0.573f - dt*0.00037f;			htint -> setX(color);
 					  color *= 0.51f;						htint -> setY(color).setZ(color);
 				hgo_used++;
 			}
@@ -243,7 +243,7 @@ inline void UseHgo(lua_State* L, uint16_t& hgo_used, uint16_t& ago_used, cfloat 
 		case AUTO:
 			// Hint
 			if(dt < 0) {
-				htint -> setX(0.2037f).setY(0.2037f).setZ(0.2037f);
+				htint -> setX(0.37f).setY(0.37f).setZ(0.37f);
 				SetPosition( hgo, p3(x, y, -0.04f) );
 				hgo_used++;
 			}
@@ -349,18 +349,18 @@ inline void UseEgo(lua_State* L, uint16_t& ego_used, cfloat dt, const uint8_t st
 	/* Hint-like Behaviors: Pass Echo Params */
 	if( dt < -370 ) {
 		SetPosition(ego, ego_pos);
-		const float color = 0.1337f + (float)( dt<-510 ? 0 : 0.0005 * (510+dt) );
+		const float color = 0.3f + (float)( dt<-510 ? 0 : 0.0005 * (510+dt) );
 		etint -> setX(color).setY(color).setZ(color);
 		ego_used++;
 	}
 	else if( dt <= 370 ) switch(status) {
 		case NONJUDGED:
-			etint -> setX(0.2037f).setY(0.2037f).setZ(0.2037f);
+			etint -> setX(0.37f).setY(0.37f).setZ(0.37f);
 			SetPosition(ego, ego_pos);
 			ego_used++;
 			break;
 		case NONJUDGED_LIT:
-			etint -> setX(0.3737f).setY(0.3737f).setZ(0.3737f);
+			etint -> setX(0.573f).setY(0.573f).setZ(0.573f);
 			SetPosition(ego, ego_pos);
 			ego_used++;
 			break;
@@ -373,7 +373,7 @@ inline void UseEgo(lua_State* L, uint16_t& ego_used, cfloat dt, const uint8_t st
 		case LOST:
 			{
 				SetPosition(ego, ego_pos);
-				float color = 0.437f - dt*0.00037f;			etint -> setX(color);
+				float color = 0.573f - dt*0.00037f;			etint -> setX(color);
 					  color *= 0.51f;						etint -> setY(color).setZ(color);
 				ego_used++;
 			}
@@ -381,7 +381,7 @@ inline void UseEgo(lua_State* L, uint16_t& ego_used, cfloat dt, const uint8_t st
 		case AUTO:
 			SetPosition(ego, ego_pos);
 			if(dt < 0)
-				etint -> setX(0.2037f).setY(0.2037f).setZ(0.2037f);
+				etint -> setX(0.37f).setY(0.37f).setZ(0.37f);
 			else if(dt < 101) {
 				if(daymode)		etint -> setX(H_HIT_R).setY(H_HIT_G).setZ(H_HIT_B);
 				else 			etint -> setX(H_HIT_R).setY(H_HIT_R).setZ(H_HIT_R);   // 0.73f

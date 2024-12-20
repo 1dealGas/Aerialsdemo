@@ -3,9 +3,9 @@ name: "AcAudio"
 platforms:
     x86_64-win32:
         context:
-            flags: ["-std=c++14", "-Ofast", "-ffunction-sections", "-fdata-sections"]
+            flags: ["-std=c++14", "-Ofast", "-ffunction-sections", "-fdata-sections", "-flto"]
             linkFlags: ["-flto"]
-            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_DSOUND", "ACAUDIO_NOCHECK"]
+            defines: ["MINIAUDIO_IMPLEMENTATION", "MA_NO_MP3", "MA_NO_FLAC", "MA_NO_OPUS", "MA_NO_VORBIS", "MA_NO_ENCODING", "MA_NO_GENERATION", "MA_ENABLE_ONLY_SPECIFIC_BACKENDS", "MA_ENABLE_WASAPI", "ACAUDIO_NOCHECK"]
 
     arm64-android:
         context:

@@ -1,27 +1,12 @@
 /* Aerials Audio System */
 #pragma once
 #include <dmsdk/sdk.h>
-#include <dmsdk/dlib/hashtable.h>
 #include <miniaudio/miniaudio_all.h>
 #include <unordered_map>
 
 struct PseudoContext {
-	struct Module {
-		char*       m_Script;
-		uint32_t    m_ScriptSize;
-		char*       m_Name;
-		void*       m_Resource;
-		char*       m_Filename;
-	};
 	dmConfigFile::HConfig       m_ConfigFile;
 	dmResource::HFactory        m_ResourceFactory;
-	dmGraphics::HContext        m_GraphicsContext;
-	dmHashTable64<Module>       m_Modules;
-	dmHashTable64<Module*>      m_PathToModule;
-	dmHashTable64<int>          m_HashInstances;
-	dmArray<void*>				m_ScriptExtensions;
-	lua_State*                  m_LuaState;
-	int                         m_ContextTableRef;
 };
 struct AcAudioSource {
 	ma_resource_manager_data_source source;
@@ -293,7 +278,7 @@ inline dmExtension::Result AcAudioInit(dmExtension::Params* p) {
 	return lua_pop(L, 2), dmExtension::RESULT_OK;
 }
 
-inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) {
+inline void AcAudioOnEvent(dmExtension::Params*, const dmExtension::Event* e) {
 	switch(e->m_Event) {   // You may want to check the "playing" status manually if needed.
 		case dmExtension::EVENT_ID_ICONIFYAPP:
 		case dmExtension::EVENT_ID_DEACTIVATEAPP:
@@ -303,8 +288,13 @@ inline void AcAudioOnEvent(dmExtension::Params* p, const dmExtension::Event* e) 
 	}
 }
 
-inline dmExtension::Result AcAudioFinal(dmExtension::Params* p)		  { return dmExtension::RESULT_OK; }
-inline dmExtension::Result AcAudioAPPInit(dmExtension::AppParams* p)  { return dmExtension::RESULT_OK; }
-inline dmExtension::Result AcAudioAPPFinal(dmExtension::AppParams* p) { // We assume this func to be called
-	return ma_engine_uninit(&AcAudioEngine), dmExtension::RESULT_OK;  } // With the lua_State closed.
+inline dmExtension::Result AcAudioFinal(dmExtension::Params*) {
+	return dmExtension::RESULT_OK;
+}
+inline dmExtension::Result AcAudioAPPInit(dmExtension::AppParams*) {
+	return dmExtension::RESULT_OK;
+}
+inline dmExtension::Result AcAudioAPPFinal(dmExtension::AppParams*) {   // We assume this func to be called
+	return ma_engine_uninit(&AcAudioEngine), dmExtension::RESULT_OK;	// With the lua_State closed.
+}
 DM_DECLARE_EXTENSION(AcAudio, "AcAudio", AcAudioAPPInit, AcAudioAPPFinal, AcAudioInit, nullptr, AcAudioOnEvent, AcAudioFinal)
