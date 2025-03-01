@@ -2,6 +2,12 @@
 #include <arf3.h>
 using namespace Arf3;
 
+#ifdef DM_PLATFORM_ANDROID
+	constexpr uint8_t INPUT_STACK_SIZE = 32;
+#else
+	constexpr uint8_t INPUT_STACK_SIZE = 10;
+#endif
+
 
 #ifndef AR_BUILD_VIEWER
 inline bool has_touch_near(const float cdx, const float cdy, const ab* valid_fingers, const uint8_t vf_count) {
@@ -209,9 +215,9 @@ Arf3_JUD JudgeArf(const ab* const vt, const uint8_t vtcount, const bool any_pres
 
 Arf3_API JudgeArf(lua_State* L) {
 	// Unpack Touches
-	ab vt[10];
+	ab vt[INPUT_STACK_SIZE];
 	uint8_t vtcount = 0, any_pressed = false, any_released = false;
-	for( uint8_t i=0; i<10; i++ ) {
+	for( uint8_t i=0; i<INPUT_STACK_SIZE; i++ ) {
 		const dmVMath::Vector3* f = (lua_rawgeti(L, 1, i+1), dmScript::CheckVector3(L, -1));
 		switch( lua_pop(L,1), (uint8_t)f->getZ() ) {
 			case 1:

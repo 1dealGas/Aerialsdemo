@@ -61,9 +61,7 @@ local Panel, Titles, Message
 
 -- Help Functions: Button Picker
 --
-local function ExpandedOnWhich()
-	local x, y = CurrentGuiX, CurrentGuiY
-
+local function ExpandedOnWhich(x, y)
 	if x >= 1627 and x <= 1800 and y >= 1007 and y <= 1080 then
 		return 0                                                  -- 0.Exit
 	elseif x >= 1627 and x <= 1800 and y >= 0 and y <= 73 then
@@ -547,25 +545,28 @@ local ReleasedFuncs = {
 
 -- Input Handler
 --
-function on_message(self, message_id)
+function on_message(self, message_id, info)
+	local CurrentGuiX, CurrentGuiY = info.x, info.y
+	local CurrentGuiPhase = info.phase
+	
 	if message_id == PROCESS_GUI then
 		if Phase == 0 then   -- Not Loaded (Empty Branch)
 		elseif Phase == 3 then   -- Expanded
 			if CurrentGuiPhase == 2 and ButtonPressed then
-				local ButtonCurrent = ExpandedOnWhich()
+				local ButtonCurrent = ExpandedOnWhich(CurrentGuiX, CurrentGuiY)
 				if ButtonCurrent ~= ButtonPressed then
 					CancelledFuncs[ButtonPressed]()
 					GuiDoFeedback(false)   -- Won't Play SFX
 					ButtonPressed = nil
 				end
 			elseif CurrentGuiPhase == 1 then
-				ButtonPressed = ExpandedOnWhich()
+				ButtonPressed = ExpandedOnWhich(CurrentGuiX, CurrentGuiY)
 				if ButtonPressed then
 					PressedFuncs[ButtonPressed]()
 					GuiDoFeedback(true)   -- Play SFX
 				end
 			elseif ButtonPressed then
-				local ButtonCurrent = ExpandedOnWhich()
+				local ButtonCurrent = ExpandedOnWhich(CurrentGuiX, CurrentGuiY)
 
 				if ButtonCurrent == ButtonPressed then
 					ReleasedFuncs[ButtonPressed](self)
@@ -601,6 +602,7 @@ function on_message(self, message_id)
 				end
 			end
 		end
-	elseif message_id == AR_FINAL then PreFinal()
+	elseif message_id == AR_FINAL then
+		PreFinal()
 	end
 end

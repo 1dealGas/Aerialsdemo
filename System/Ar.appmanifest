@@ -3,10 +3,7 @@ platforms:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
-      symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      frameworks: []
-      linkFlags: []
   arm64-ios:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
@@ -14,33 +11,23 @@ platforms:
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
       frameworks: []
-      linkFlags: []
   x86_64-ios:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
-      symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      frameworks: []
-      linkFlags: []
   armv7-android:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
-      excludeJars: []
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      linkFlags: []
-      jetifier: true
   arm64-android:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
-      excludeJars: []
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      linkFlags: []
-      jetifier: true
   arm64-osx:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
@@ -48,7 +35,6 @@ platforms:
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
       frameworks: []
-      linkFlags: []
   x86_64-osx:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
@@ -56,7 +42,6 @@ platforms:
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
       frameworks: []
-      linkFlags: []
   x86_64-linux:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
@@ -64,34 +49,36 @@ platforms:
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
       dynamicLibs: []
-      linkFlags: []
+  arm64-linux:
+    context:
+      excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
+      excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
+      symbols: []
+      libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
+      dynamicLibs: []
   x86-win32:
     context:
       excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, libscript_box2d, librecord, vpx, libprofilerext, libsound, libtremolo, libliveupdate, libimage]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [libphysics_null.lib, librecord_null.lib, libprofilerext_null.lib, libsound_null.lib, libliveupdate_null.lib, libimage_null.lib]
-      linkFlags: []
   x86_64-win32:
     context:
       excludeLibs: [libphysics, libLinearMath, libBulletDynamics, libBulletCollision, libBox2D, libscript_box2d, librecord, vpx, libprofilerext, libsound, libtremolo, libliveupdate, libimage]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [libphysics_null.lib, librecord_null.lib, libprofilerext_null.lib, libsound_null.lib, libliveupdate_null.lib, libimage_null.lib]
-      linkFlags: []
   js-web:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
-      excludeJsLibs: []
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      linkFlags: []
+      emscriptenLinkFlags: []
   wasm-web:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
-      excludeJsLibs: []
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
       libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
-      linkFlags: []
+      emscriptenLinkFlags: []

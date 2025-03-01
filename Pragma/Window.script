@@ -12,16 +12,30 @@ local socket_gettime, msg_post = socket.gettime, msg.post
 
 local CenterX, CenterY, PosDnm = 0, 0, 0
 local NodeProgress, LastHapticTime = 0, 0
-local TouchTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }
-local HitSoundUnits, HsWhich = AcUtil.NewTable(6,0), 1
+local HitSoundUnits, HsWhich = {}, 1
+
+local WsAddr
+local TouchTable, GuiTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }, {}
+local ___ = function() end
 
 
 -- Platform-Independent Functions
 --
+local OnmHandlers = {
+	[PG] = function(self, guiTable)
+		for i = NodeProgress-1, 1, -1 do
+			if Nodes[i] then
+				NodeProgress = i
+				msg_post(Nodes[i], PG, guiTable)
+				break
+			end
+		end
+	end
+}
+
 function init()
-	-- Preparations
+	-- Add Window Resizing Listener
 	--
-	msg_post("#", "acquire_input_focus")
 	window.set_listener(
 		function(self, event, data)
 			if event == 0 then
@@ -65,25 +79,206 @@ function init()
 	for i = 1, 6 do
 		HitSoundUnits[i] = AcAudio.CreateUnit(hitsoundres)
 	end
+
+	-- Prepare Input Pipeline
+	--
+	if AcInput then
+		WsAddr = msg.url("#")
+		TouchTable.guiPhase = 0
+		for  i = 11, 32  do  TouchTable[i] = v3()  end
+		AcInput.Activate()
+	else
+		msg_post("#", "acquire_input_focus")
+	end
 end
 
-function on_message(self, message_id)
-	if message_id == PG then
-		for i = NodeProgress-1, 1, -1 do
-			if Nodes[i] then
-				NodeProgress = i
-				msg_post(Nodes[i], PG)
-				break
-			end
-		end
-	end
+function on_message(self, message_id, message)
+	(OnmHandlers[message_id] or ___) (self, message)
 end
 
 
 -- Platform Specific Functions
 --
 local system_name = sys.get_sys_info().system_name
-if system_name=="Android" or system_name=="iPhone OS" then
+if system_name == "Android" then
+
+	local PROCESS_INPUT = hash("PROCESS_INPUT")
+	local ConsumeInput, UnpackInput = AcInput.Consume, AcInput.Unpack
+	local pTable, rTable, TouchCnt, GuiTouchIdx = {}, {}, 0, false
+
+	function GuiDoFeedback(with_hitsound)
+		local current_time = socket_gettime()
+
+		-- Do Haptic Feedback
+		--
+		if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
+			LastHapticTime = current_time
+			DoHapticFeedback()
+		end
+
+		-- Play HitSound
+		--
+		if HitSoundEnabled and with_hitsound then
+			PlayUnit(HitSoundUnits[HsWhich], false)
+			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+			StopUnit(HitSoundUnits[HsWhich], true)
+		end
+	end
+
+	-- Input Consumer
+	--
+	function update()
+		local mTable = {}
+		local pCnt, rCnt, guiPressed, isCancelled = ConsumeInput(pTable, mTable, rTable)
+
+		-- I. Pressed Dispatching
+		--
+		if pCnt > 0 then
+			for i = 1, pCnt do
+				local x, y, idx = UnpackInput( pTable[i] )
+				local touchVec = TouchTable[idx]
+				touchVec.x = 900 + (x - CenterX) * PosDnm
+				touchVec.y = 540 + (CenterY - y) * PosDnm   -- Android uses (0,0)-at-upper-left coordinate system
+				touchVec.z = 1
+			end
+
+			if guiPressed then
+				local guiTouchVec = TouchTable[guiPressed]
+				TouchTable.guiX, TouchTable.guiY = guiTouchVec.x, guiTouchVec.y
+				GuiTouchIdx, TouchTable.guiPhase = guiPressed, 1
+				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
+				TouchTable.guiPhase = 2
+			else
+				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
+			end
+		end
+
+		-- II. OnScreen Dispatching
+		--
+		TouchCnt = TouchCnt + pCnt
+		if TouchCnt > 0 then
+			for i = 1, 32 do
+				local touchVec = TouchTable[i]
+				if  touchVec.z == 1  then  touchVec.z = 2  end
+
+				local x = mTable[i]
+				if x then
+					local y ; x, y = UnpackInput(x)
+					touchVec.x = 900 + (x - CenterX) * PosDnm
+					touchVec.y = 540 + (CenterY - y) * PosDnm
+
+					if i == GuiTouchIdx then
+						TouchTable.guiX = touchVec.x
+						TouchTable.guiY = touchVec.y
+					end
+				end
+			end
+				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
+		end
+
+		-- III. Released Dispatching
+		--
+		if isCancelled then
+			for i = 1, 32 do
+				local touchVec = TouchTable[i]
+				if touchVec.z > 0 then
+					TouchTable.anyReleased = true
+					touchVec.z = 0
+				end
+			end
+
+			if GuiTouchIdx then
+				TouchTable.guiPhase = 3
+				GuiTouchIdx = false
+			end
+
+			msg_post(WsAddr, PROCESS_INPUT, TouchTable)
+			TouchTable.anyReleased = false
+			TouchTable.guiPhase = 0
+			TouchCnt = 0
+
+		elseif rCnt > 0 then
+			for i = 1, rCnt do
+				local rIdx = rTable[i]
+				if rIdx == GuiTouchIdx then
+					TouchTable.guiPhase = 3
+					GuiTouchIdx = false
+				end
+				TouchTable[rIdx].z = 3
+			end
+
+			TouchTable.anyReleased = true
+			msg_post(WsAddr, PROCESS_INPUT, TouchTable)
+
+			for i = 1, 32 do
+				local touchVec = TouchTable[i]
+				if touchVec.z == 3 then
+					touchVec.z = 0
+				end
+			end
+
+			TouchTable.anyReleased = false
+			if  TouchTable.guiPhase == 3  then  TouchTable.guiPhase = 0  end
+			TouchCnt = TouchCnt - rCnt
+		end
+	end
+
+	-- Input Processor
+	--
+	OnmHandlers[PROCESS_INPUT] = function(self, touchTable)
+		if WindowActive and (not WithinInterlude) then
+
+			-- Judge & Do Feedback
+			--
+			if ContextTime then
+				local hit, early, late, s = JudgeArf(touchTable)
+				Hit, Early, Late = Hit+hit, Early+early, Late+late
+
+				if (hit+early+late) > 0 then
+					local current_time = socket_gettime()
+
+					-- Do Haptic Feedback
+					--
+					if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
+						LastHapticTime = current_time
+						DoHapticFeedback()
+					end
+
+					-- Play HitSound
+					--
+					if HitSoundEnabled and AudioLatency<51 then
+						PlayUnit(HitSoundUnits[HsWhich], false)
+						HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+						StopUnit(HitSoundUnits[HsWhich], true)
+					end
+				end
+
+				-- Send message to FumenScript if needed
+				--
+				if s and CurrentFumenScript then
+					msg_post(CurrentFumenScript, AR_SHJ)
+				end
+			end
+
+			-- Do GUI Stuff
+			--
+			local Phase = touchTable.guiPhase
+			if Phase > 0 then
+				GuiTable.phase = Phase
+				GuiTable.x = touchTable.guiX
+				GuiTable.y = touchTable.guiY
+
+				for i = NodeMaxIndex, 1, -1 do
+					if Nodes[i] then
+						NodeMaxIndex, NodeMaxIndex = i, i
+						msg_post(Nodes[i], PG, GuiTable)
+						break
+					end
+				end
+			end
+		end
+	end
+elseif system_name == "iPhone OS" then
 
 	function GuiDoFeedback(with_hitsound)
 		local current_time = socket_gettime()
@@ -159,13 +354,12 @@ if system_name=="Android" or system_name=="iPhone OS" then
 			-- Do GUI Stuff
 			--
 			local GuiTouch = TouchTable[1]
-			local Phase = GuiTouch.z
-			if Phase > 0 then
-				CurrentGuiX, CurrentGuiY, CurrentGuiPhase = GuiTouch.x, GuiTouch.y, Phase
+			if GuiTouch.z > 0 then				
+				GuiTable.x, GuiTable.y, GuiTable.phase = GuiTouch.x, GuiTouch.y, GuiTouch.z
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
 						NodeMaxIndex, NodeMaxIndex = i, i
-						msg_post(Nodes[i], PG)
+						msg_post(Nodes[i], PG, GuiTable)
 						break
 					end
 				end
@@ -220,11 +414,11 @@ else
 
 			-- Do GUI Stuff
 			--
-			CurrentGuiX, CurrentGuiY, CurrentGuiPhase = x, y, phase
+			GuiTable.x, GuiTable.y, GuiTable.phase = x, y, phase
 			for i = NodeMaxIndex, 1, -1 do
 				if Nodes[i] then
 					NodeMaxIndex, NodeProgress = i, i
-					msg_post(Nodes[i], PG)
+					msg_post(Nodes[i], PG, GuiTable)
 					break
 				end
 			end

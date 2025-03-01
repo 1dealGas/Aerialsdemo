@@ -128,7 +128,6 @@ function init(self)
 end
 
 function update(self, dt)
-
 	-- Update ContextTime
 	--
 	if ContextTime then
@@ -268,7 +267,8 @@ local message_callbacks = {
 		end
 	end,
 
-	[PROCESS_GUI] = function()   -- Button Size: 108*36
+	[PROCESS_GUI] = function(self, info)   -- Button Size: 108*36
+		local CurrentGuiX, CurrentGuiY, CurrentGuiPhase = info.x, info.y, info.phase
 		if CurrentGuiPhase == 2 then   -- OnScreen
 			if not ButtonPressed then return end
 			if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then
@@ -337,9 +337,9 @@ local message_callbacks = {
 	end
 }
 
-function on_message(self, message_id)
+function on_message(self, message_id, message)
 	if message_callbacks[message_id] then
-		message_callbacks[message_id](self)
+		message_callbacks[message_id](self, message)
 	end
 end
 

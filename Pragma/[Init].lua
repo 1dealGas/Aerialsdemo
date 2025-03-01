@@ -17,14 +17,11 @@ AR, EULERZ = hash("Ar"), hash("euler.z")
 
 
 -- Input & GUI System
+-- Phase: [0] Invalid  [1] Pressed  [2] OnScreen  [3] Released
 --
 WindowActive = true
 WithinInterlude = true
-LayoutModeLandscape = false
-
-CurrentGuiX = 0
-CurrentGuiY = 0
-CurrentGuiPhase = nil           -- 0:Pressed, 1:OnScreen, 2:Released, 3:Invalid
+LayoutModeLandscape = false       
 
 Nodes = AcUtil.NewTable(8, 0)
 NodeMaxIndex = 0
