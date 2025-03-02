@@ -55,7 +55,6 @@ Aerials Demo
          ···
     - Wish                       -- Images of each song's Wish
          ···
-      lbase64.lua                -- Lua Module "lbase64"
       [OPlusSans3-Regular.ttf]   -- Put the Default Font File Here!
  - System                        -- Config & Platform-Specific files
       ···

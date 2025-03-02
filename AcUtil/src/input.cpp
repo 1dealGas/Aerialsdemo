@@ -9,7 +9,6 @@ using AndroidApp = android_app;
 #include <android/input.h>
 #include <dmsdk/sdk.h>
 
-
 /* SPSC Task Queue
  * This utilizes arm64 natural atomicity & data dependency to avoid explicit thread safety primitives.
  * 1. Natural atomicity takes effect when assigning / reading an 8-byte-aligned 64b var.
@@ -23,7 +22,6 @@ DM_ALIGNED(64) static struct {
 	volatile uint64_t wIdx, _2_[7];
 			 uint64_t buffer[2048];
 } Queue;
-
 
 /* Producer Side */
 union AcInputEvent {
@@ -39,7 +37,7 @@ union AcInputEvent {
 };
 
 static int32_t (*engineInputCallback)(AndroidApp*, AInputEvent*) = nullptr;
-static int32_t AcInputProduce(AndroidApp* app, AInputEvent* event) noexcept {
+static int32_t AuInputProduce(AndroidApp* app, AInputEvent* event) noexcept {
 	if( AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION ) {
 		uint64_t wIdx = Queue.wIdx;
 		const uint16_t action = AMotionEvent_getAction(event);
@@ -65,21 +63,20 @@ static int32_t AcInputProduce(AndroidApp* app, AInputEvent* event) noexcept {
 			Queue.buffer[( wIdx & QUEUE_MASK )] = ae.val;
 			++wIdx;
 		}
-
 		Queue.wIdx = wIdx;
 	}
 	return engineInputCallback(app, event);
 }
 
 /* Consumer Side */
-static int AcInputConsume(lua_State* L) noexcept {
+int AuInputConsume(lua_State* L) noexcept {
 	/* Usage:
 	 * local pCnt, rCnt, gPrs, isCcl = AcInput.Consume(pTbl, mTbl, rTbl)   -- Don't pass a dirty table into mTbl
 	 */
 	const uint64_t wIdx = Queue.wIdx;
 		  uint64_t rIdx = Queue.rIdx, gPid = 0;
 	uint8_t pressedCnt = 0, releasedCnt = 0, guiPressed = 0, isCancelled = 0;
-	
+
 	while( rIdx != wIdx ) {
 		const AcInputEvent e = { .val = Queue.buffer[( rIdx & QUEUE_MASK )] };
 		switch( e.type ) {
@@ -100,7 +97,6 @@ static int AcInputConsume(lua_State* L) noexcept {
 		}
 		++rIdx;
 	}
-
 	lua_pushinteger(L, pressedCnt), lua_pushinteger(L, releasedCnt);
 	guiPressed ? lua_pushinteger(L, (lua_Integer)gPid) : lua_pushboolean(L, false);
 	lua_pushboolean(L, isCancelled);
@@ -110,7 +106,7 @@ static int AcInputConsume(lua_State* L) noexcept {
 }
 
 constexpr double RCP_4096 = 1.0 / 4096;
-static int AcInputUnpack(lua_State* L) noexcept {
+int AuInputUnpack(lua_State* L) noexcept {
 	/* Usage:
 	 * local x, y, pointerLuaIdx = AcInput.Unpack(packedTouch)
 	 */
@@ -120,39 +116,13 @@ static int AcInputUnpack(lua_State* L) noexcept {
 	return 3;
 }
 
-static int AcInputActivate(lua_State*) noexcept {
+int AuInputActivate(lua_State*) noexcept {
 	/* Usage:
 	 * AcInput.Activate()   -- Ready Then
 	 */
 	const auto app = (AndroidApp*)dmGraphics::GetNativeAndroidApp();
 	engineInputCallback = app->onInputEvent;
-	app->onInputEvent = AcInputProduce;
+	app->onInputEvent = AuInputProduce;
 	return 0;
 }
-
-
-/* Defold Extension Related */
-constexpr luaL_reg AcInputAPIs[] = {
-	{"Activate", AcInputActivate},
-	{"Consume", AcInputConsume},
-	{"Unpack", AcInputUnpack},
-	{nullptr, nullptr}
-};
-static dmExtension::Result AcInputInit(dmExtension::Params* p) noexcept {
-	luaL_register(p->m_L, "AcInput", AcInputAPIs), lua_pop(p->m_L, 1);
-	return dmExtension::RESULT_OK;
-}
-#else
-#include <dmsdk/sdk.h>
-	static dmExtension::Result AcInputInit(dmExtension::Params* p) noexcept {
-		return dmExtension::RESULT_OK;
-	}
 #endif
-
-static dmExtension::Result AcInputOK(dmExtension::Params*) noexcept {
-	return dmExtension::RESULT_OK;
-}
-static dmExtension::Result AcInputAppOK(dmExtension::AppParams*) noexcept {
-	return dmExtension::RESULT_OK;
-}
-DM_DECLARE_EXTENSION(AcInput, "AcInput", AcInputAppOK, AcInputAppOK, AcInputInit, nullptr, nullptr, AcInputOK)

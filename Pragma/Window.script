@@ -13,7 +13,7 @@ local socket_gettime, msg_post = socket.gettime, msg.post
 local CenterX, CenterY, PosDnm = 0, 0, 0
 local TouchTable, GuiTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }, {0, 0, 0, 0}
 local HitSoundUnits, HsWhich, LastHapticTime = {}, 1, 0
-
+local system_name = sys.get_sys_info().system_name
 
 -- Platform-Independent Functions
 --
@@ -66,9 +66,9 @@ function init()
 
 	-- Prepare Input Pipeline
 	--
-	if AcInput then
+	if AcUtil.ActivateInput then
 		for  i = 11, 32  do  TouchTable[i] = v3()  end
-		AcInput.Activate()
+		AcUtil.ActivateInput()
 	else
 		msg_post("#", "acquire_input_focus")
 	end
@@ -86,33 +86,30 @@ function on_message(self, message_id, info)
 	end
 end
 
+function GuiDoFeedback(with_hitsound)
+	local current_time = socket_gettime()
+
+	-- Do Haptic Feedback
+	--
+	if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
+		LastHapticTime = current_time
+		DoHapticFeedback()   -- Takes no effecto on desktop platforms
+	end
+
+	-- Play HitSound
+	--
+	if HitSoundEnabled and with_hitsound then
+		PlayUnit(HitSoundUnits[HsWhich], false)
+		HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
+		StopUnit(HitSoundUnits[HsWhich], true)
+	end
+end
 
 -- Platform Specific Functions
 --
-local system_name = sys.get_sys_info().system_name
 if system_name == "Android" then
-
 	local pTable, mTable, rTable, TouchCnt, GuiTouchIdx = {}, {}, {}, 0, false
-	local ConsumeInput, UnpackInput = AcInput.Consume, AcInput.Unpack
-
-	function GuiDoFeedback(with_hitsound)
-		local current_time = socket_gettime()
-
-		-- Do Haptic Feedback
-		--
-		if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
-			LastHapticTime = current_time
-			DoHapticFeedback()
-		end
-
-		-- Play HitSound
-		--
-		if HitSoundEnabled and with_hitsound then
-			PlayUnit(HitSoundUnits[HsWhich], false)
-			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
-			StopUnit(HitSoundUnits[HsWhich], true)
-		end
-	end
+	local ConsumeInput, UnpackInput = AcUtil.ConsumeInput, AcUtil.UnpackInput
 
 	-- Input Processor
 	--
@@ -235,26 +232,6 @@ if system_name == "Android" then
 		end
 	end
 elseif system_name == "iPhone OS" then
-
-	function GuiDoFeedback(with_hitsound)
-		local current_time = socket_gettime()
-
-		-- Do Haptic Feedback
-		--
-		if HapticFeedbackEnabled and (current_time-LastHapticTime)>0.037 then
-			LastHapticTime = current_time
-			DoHapticFeedback()
-		end
-
-		-- Play HitSound
-		--
-		if HitSoundEnabled and with_hitsound then
-			PlayUnit(HitSoundUnits[HsWhich], false)
-			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
-			StopUnit(HitSoundUnits[HsWhich], true)
-		end
-	end
-
 	function on_input(self, action_id, action)
 		if WindowActive and (not WithinInterlude) and action_id==TOUCH_MULTI then
 
@@ -324,16 +301,6 @@ elseif system_name == "iPhone OS" then
 			return true
 	end
 else
-	function GuiDoFeedback(with_hitsound)
-		-- Play HitSound
-		--
-		if HitSoundEnabled and with_hitsound then
-			PlayUnit(HitSoundUnits[HsWhich], false)
-			HsWhich = (HsWhich==6) and 1 or (HsWhich+1)
-			StopUnit(HitSoundUnits[HsWhich], true)
-		end
-	end
-
 	function on_input(self, action_id, action)
 		if WindowActive and (not WithinInterlude) and action_id==TOUCH then
 

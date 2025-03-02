@@ -2,19 +2,14 @@
   type: table
   members:
 
-  - name: NewTable
+  - name: StrToMd5
     type: function
     parameters:
-    - name: narr
-      type: number
-    - name: nrec
-      type: number
+      - name: input
+        type: string
     returns:
-    - name: table_created
-      type: table
-
-  - name: PushNullptr
-    type: function
+      - name: output
+        type: string
 
   - name: StrToSha1
     type: function
@@ -43,14 +38,77 @@
     - name: output
       type: string
 
-  - name: StrToMd5
+  - name: Base64Encode
     type: function
     parameters:
-    - name: input
-      type: string
+      - name: input
+        type: string
     returns:
-    - name: output
-      type: string
+      - name: output
+        type: string
+
+  - name: Base64Decode
+    type: function
+    parameters:
+      - name: input
+        type: string
+    returns:
+      - name: output
+        type: string
+
 
   - name: DoHapticFeedback
     type: function
+    
+  - name: PushNullptr
+    type: function
+    
+  - name: NewTable
+    type: function
+    parameters:
+      - name: narr
+        type: number
+      - name: nrec
+        type: number
+    returns:
+      - name: table_created
+        type: table
+
+
+  - name: ActivateInput
+    type: function
+    desc: Android Only
+
+  - name: ConsumeInput
+    type: function
+    desc: Android Only
+    parameters:
+      - name: pTable
+        type: table
+      - name: mTable
+        type: table
+      - name: rTable
+        type: number
+    returns:
+      - name: pCnt
+        type: number
+      - name: rCnt
+        type: number
+      - name: guiPressed
+        type: [boolean, number]
+      - name: isCancelled
+        type: boolean
+
+  - name: UnpackInput
+    type: function
+    desc: Android Only
+    parameters:
+      - name: touch
+        type: number
+    returns:
+      - name: x
+        type: number
+      - name: y
+        type: number
+      - name: luaidx
+        type: number

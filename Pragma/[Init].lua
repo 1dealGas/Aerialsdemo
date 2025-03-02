@@ -72,12 +72,11 @@ InputDelta = 0
 
 -- Save(nil before the initialization) & Credits
 --
-local B64 = require("Reference/lbase64")
 local SAVE_PATH = sys.get_save_file("Aerials Demo", "SAVE")
 function CopyCredit() clipboard.copy( sys.load_resource("/Ar.license") ) end
-function ExportSave() clipboard.copy( B64.encode( sys.serialize(Save) ) ) end
+function ExportSave() clipboard.copy( AcUtil.Base64Encode( sys.serialize(Save) ) ) end
 function ImportSave()
-	local OK, SaveStr = pcall( B64.decode, clipboard.paste() )
+	local OK, SaveStr = pcall( AcUtil.Base64Decode, clipboard.paste() )
 	local OK, SaveTable = pcall(sys.deserialize, SaveStr)
 	if OK and SaveTable.Aerials and SaveTable.Aerials=="Save" then
 		ExportSave()
