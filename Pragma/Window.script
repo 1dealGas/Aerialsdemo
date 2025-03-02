@@ -103,8 +103,8 @@ local system_name = sys.get_sys_info().system_name
 if system_name == "Android" then
 
 	local PROCESS_INPUT = hash("PROCESS_INPUT")
+	local pTable, mTable, rTable, TouchCnt, GuiTouchIdx = {}, {}, {}, 0, false
 	local ConsumeInput, UnpackInput = AcInput.Consume, AcInput.Unpack
-	local pTable, rTable, TouchCnt, GuiTouchIdx = {}, {}, 0, false
 
 	function GuiDoFeedback(with_hitsound)
 		local current_time = socket_gettime()
@@ -128,7 +128,6 @@ if system_name == "Android" then
 	-- Input Consumer
 	--
 	function update()
-		local mTable = {}
 		local pCnt, rCnt, guiPressed, isCancelled = ConsumeInput(pTable, mTable, rTable)
 
 		-- I. Pressed Dispatching
@@ -166,6 +165,7 @@ if system_name == "Android" then
 					local y ; x, y = UnpackInput(x)
 					touchVec.x = 900 + (x - CenterX) * PosDnm
 					touchVec.y = 540 + (CenterY - y) * PosDnm
+					mTable[i] = nil   -- Reuse `mTable`
 
 					if i == GuiTouchIdx then
 						TouchTable.guiX = touchVec.x
