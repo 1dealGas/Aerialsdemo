@@ -124,5 +124,5 @@ app_icon_120x120 = /System/Icon/iOS 120x120.png
 app_icon_180x180 = /System/Icon/iOS 180x180.png
 
 [engine]
-fixed_update_frequency = 0
+fixed_update_frequency = 240
 

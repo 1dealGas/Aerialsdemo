@@ -11,28 +11,12 @@ local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
 local socket_gettime, msg_post = socket.gettime, msg.post
 
 local CenterX, CenterY, PosDnm = 0, 0, 0
-local NodeProgress, LastHapticTime = 0, 0
-local HitSoundUnits, HsWhich = {}, 1
-
-local WsAddr
 local TouchTable, GuiTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }, {}
-local ___ = function() end
+local HitSoundUnits, HsWhich, LastHapticTime = {}, 1, 0
 
 
 -- Platform-Independent Functions
 --
-local OnmHandlers = {
-	[PG] = function(self, guiTable)
-		for i = NodeProgress-1, 1, -1 do
-			if Nodes[i] then
-				NodeProgress = i
-				msg_post(Nodes[i], PG, guiTable)
-				break
-			end
-		end
-	end
-}
-
 function init()
 	-- Add Window Resizing Listener
 	--
@@ -83,8 +67,6 @@ function init()
 	-- Prepare Input Pipeline
 	--
 	if AcInput then
-		WsAddr = msg.url("#")
-		TouchTable.guiPhase = 0
 		for  i = 11, 32  do  TouchTable[i] = v3()  end
 		AcInput.Activate()
 	else
@@ -92,8 +74,16 @@ function init()
 	end
 end
 
-function on_message(self, message_id, message)
-	(OnmHandlers[message_id] or ___) (self, message)
+function on_message(self, message_id, info)
+	if message_id == PG then
+		for i = info.nodeProgress-1, 1, -1 do
+			if Nodes[i] then
+				info.nodeProgress = i
+				msg_post(Nodes[i], PG, info)
+				break
+			end
+		end
+	end
 end
 
 
@@ -102,7 +92,6 @@ end
 local system_name = sys.get_sys_info().system_name
 if system_name == "Android" then
 
-	local PROCESS_INPUT = hash("PROCESS_INPUT")
 	local pTable, mTable, rTable, TouchCnt, GuiTouchIdx = {}, {}, {}, 0, false
 	local ConsumeInput, UnpackInput = AcInput.Consume, AcInput.Unpack
 
@@ -125,113 +114,15 @@ if system_name == "Android" then
 		end
 	end
 
-	-- Input Consumer
-	--
-	function update()
-		local pCnt, rCnt, guiPressed, isCancelled = ConsumeInput(pTable, mTable, rTable)
-
-		-- I. Pressed Dispatching
-		--
-		if pCnt > 0 then
-			for i = 1, pCnt do
-				local x, y, idx = UnpackInput( pTable[i] )
-				local touchVec = TouchTable[idx]
-				touchVec.x = 900 + (x - CenterX) * PosDnm
-				touchVec.y = 540 + (CenterY - y) * PosDnm   -- Android uses (0,0)-at-upper-left coordinate system
-				touchVec.z = 1
-			end
-
-			if guiPressed then
-				local guiTouchVec = TouchTable[guiPressed]
-				TouchTable.guiX, TouchTable.guiY = guiTouchVec.x, guiTouchVec.y
-				GuiTouchIdx, TouchTable.guiPhase = guiPressed, 1
-				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
-				TouchTable.guiPhase = 2
-			else
-				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
-			end
-		end
-
-		-- II. OnScreen Dispatching
-		--
-		TouchCnt = TouchCnt + pCnt
-		if TouchCnt > 0 then
-			for i = 1, 32 do
-				local touchVec = TouchTable[i]
-				if  touchVec.z == 1  then  touchVec.z = 2  end
-
-				local x = mTable[i]
-				if x then
-					local y ; x, y = UnpackInput(x)
-					touchVec.x = 900 + (x - CenterX) * PosDnm
-					touchVec.y = 540 + (CenterY - y) * PosDnm
-					mTable[i] = nil   -- Reuse `mTable`
-
-					if i == GuiTouchIdx then
-						TouchTable.guiX = touchVec.x
-						TouchTable.guiY = touchVec.y
-					end
-				end
-			end
-				msg_post(WsAddr, PROCESS_INPUT, TouchTable)
-		end
-
-		-- III. Released Dispatching
-		--
-		if isCancelled then
-			for i = 1, 32 do
-				local touchVec = TouchTable[i]
-				if touchVec.z > 0 then
-					TouchTable.anyReleased = true
-					touchVec.z = 0
-				end
-			end
-
-			if GuiTouchIdx then
-				TouchTable.guiPhase = 3
-				GuiTouchIdx = false
-			end
-
-			msg_post(WsAddr, PROCESS_INPUT, TouchTable)
-			TouchTable.anyReleased = false
-			TouchTable.guiPhase = 0
-			TouchCnt = 0
-
-		elseif rCnt > 0 then
-			for i = 1, rCnt do
-				local rIdx = rTable[i]
-				if rIdx == GuiTouchIdx then
-					TouchTable.guiPhase = 3
-					GuiTouchIdx = false
-				end
-				TouchTable[rIdx].z = 3
-			end
-
-			TouchTable.anyReleased = true
-			msg_post(WsAddr, PROCESS_INPUT, TouchTable)
-
-			for i = 1, 32 do
-				local touchVec = TouchTable[i]
-				if touchVec.z == 3 then
-					touchVec.z = 0
-				end
-			end
-
-			TouchTable.anyReleased = false
-			if  TouchTable.guiPhase == 3  then  TouchTable.guiPhase = 0  end
-			TouchCnt = TouchCnt - rCnt
-		end
-	end
-
 	-- Input Processor
 	--
-	OnmHandlers[PROCESS_INPUT] = function(self, touchTable)
+	local function ProcessInput()
 		if WindowActive and (not WithinInterlude) then
 
 			-- Judge & Do Feedback
 			--
 			if ContextTime then
-				local hit, early, late, s = JudgeArf(touchTable)
+				local hit, early, late, s = JudgeArf(TouchTable)
 				Hit, Early, Late = Hit+hit, Early+early, Late+late
 
 				if (hit+early+late) > 0 then
@@ -262,20 +153,85 @@ if system_name == "Android" then
 
 			-- Do GUI Stuff
 			--
-			local Phase = touchTable.guiPhase
-			if Phase > 0 then
-				GuiTable.phase = Phase
-				GuiTable.x = touchTable.guiX
-				GuiTable.y = touchTable.guiY
-
+			if GuiTouchIdx then
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
-						NodeMaxIndex, NodeMaxIndex = i, i
+						local guiTouchVec = TouchTable[GuiTouchIdx]
+						GuiTable.x, GuiTable.y, GuiTable.phase = guiTouchVec.x, guiTouchVec.y, guiTouchVec.z
+						NodeMaxIndex, GuiTable.nodeProgress = i, i
 						msg_post(Nodes[i], PG, GuiTable)
 						break
 					end
 				end
 			end
+		end
+	end
+
+	-- Input Consumer
+	--
+	function fixed_update()
+		local pCnt, rCnt, guiPressed, isCancelled = ConsumeInput(pTable, mTable, rTable)
+
+		-- I. Pressed Dispatching
+		--
+		if pCnt > 0 then
+			for i = 1, pCnt do
+				local x, y, idx = UnpackInput( pTable[i] )
+				local touchVec = TouchTable[idx]
+				touchVec.x = 900 + (x - CenterX) * PosDnm
+				touchVec.y = 540 + (CenterY - y) * PosDnm   -- Android uses (0,0)-at-upper-left coordinate system
+				touchVec.z = 1
+			end
+
+			if  guiPressed  then  GuiTouchIdx = guiPressed  end
+			ProcessInput()
+		end
+
+		-- II. OnScreen Dispatching
+		--
+		TouchCnt = TouchCnt + pCnt
+		if TouchCnt > 0 then
+			for i = 1, 32 do
+				local touchVec = TouchTable[i]
+				if  touchVec.z == 1  then  touchVec.z = 2  end
+
+				local x = mTable[i]
+				if x then
+					local y ; x, y = UnpackInput(x)
+					touchVec.x = 900 + (x - CenterX) * PosDnm
+					touchVec.y = 540 + (CenterY - y) * PosDnm
+					mTable[i] = nil   -- Reuse `mTable`
+				end
+			end
+				ProcessInput()
+		end
+
+		-- III. Released Dispatching
+		--
+		if isCancelled then
+			for i = 1, 32 do
+				local touchVec = TouchTable[i]
+				if  touchVec.z > 0  then  touchVec.z = 3  end
+			end
+
+			ProcessInput()
+			for  i = 1, 32  do  TouchTable[i].z = 0  end
+			GuiTouchIdx = false
+			TouchCnt = 0
+
+		elseif rCnt > 0 then
+			local guiReleased = false
+
+			for i = 1, rCnt do
+				local rIdx = rTable[i]
+				if  rIdx == GuiTouchIdx  then  guiReleased = true  end
+				TouchTable[rIdx].z = 3
+			end
+
+			ProcessInput()
+			for  i = 1, rCnt  do  TouchTable[ rTable[i] ].z = 0  end
+			if  guiReleased  then  GuiTouchIdx = false  end
+			TouchCnt = TouchCnt - rCnt
 		end
 	end
 elseif system_name == "iPhone OS" then
@@ -354,11 +310,11 @@ elseif system_name == "iPhone OS" then
 			-- Do GUI Stuff
 			--
 			local GuiTouch = TouchTable[1]
-			if GuiTouch.z > 0 then				
-				GuiTable.x, GuiTable.y, GuiTable.phase = GuiTouch.x, GuiTouch.y, GuiTouch.z
+			if GuiTouch.z > 0 then
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
-						NodeMaxIndex, NodeMaxIndex = i, i
+						NodeMaxIndex, GuiTable.nodeProgress = i, i
+						GuiTable.x, GuiTable.y, GuiTable.phase = GuiTouch.x, GuiTouch.y, GuiTouch.z
 						msg_post(Nodes[i], PG, GuiTable)
 						break
 					end
@@ -414,10 +370,10 @@ else
 
 			-- Do GUI Stuff
 			--
-			GuiTable.x, GuiTable.y, GuiTable.phase = x, y, phase
 			for i = NodeMaxIndex, 1, -1 do
 				if Nodes[i] then
-					NodeMaxIndex, NodeProgress = i, i
+					NodeMaxIndex, GuiTable.nodeProgress = i, i
+					GuiTable.x, GuiTable.y, GuiTable.phase = x, y, phase
 					msg_post(Nodes[i], PG, GuiTable)
 					break
 				end
