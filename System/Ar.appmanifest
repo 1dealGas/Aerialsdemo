@@ -21,13 +21,13 @@ platforms:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
-      libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
+      libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null, hid_null]
   arm64-android:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]
       excludeSymbols: [ScriptBox2DExt, ProfilerExt, DefaultSoundDevice, AudioDecoderWav, AudioDecoderStbVorbis, AudioDecoderTremolo, ScriptImageExt, ScriptTypesExt]
       symbols: []
-      libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null]
+      libs: [physics_null, record_null, profilerext_null, sound_null, liveupdate_null, image_null, hid_null]
   arm64-osx:
     context:
       excludeLibs: [physics, LinearMath, BulletDynamics, BulletCollision, Box2D, script_box2d, record, vpx, profilerext, sound, tremolo, liveupdate, image]

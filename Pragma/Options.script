@@ -546,8 +546,8 @@ local ReleasedFuncs = {
 -- Input Handler
 --
 function on_message(self, message_id, info)
-	local CurrentGuiX, CurrentGuiY = info.x, info.y
-	local CurrentGuiPhase = info.phase
+	local CurrentGuiX, CurrentGuiY = info[1], info[2]
+	local CurrentGuiPhase = info[3]
 	
 	if message_id == PROCESS_GUI then
 		if Phase == 0 then   -- Not Loaded (Empty Branch)

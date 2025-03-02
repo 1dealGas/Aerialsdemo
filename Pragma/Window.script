@@ -2,7 +2,7 @@
 --
 local AR_SHJ = AR_SHJ
 local TOUCH, TOUCH_MULTI = hash("touch"), hash("touch_multi")
-local PG = PROCESS_GUI
+local PG = PROCESS_GUI   -- GuiTable: {x, y, phase, nodeProgress}
 
 local v3 = vmath.vector3
 local JudgeArf = Arf3.JudgeArf
@@ -11,7 +11,7 @@ local PlayUnit, StopUnit = AcAudio.PlayUnit, AcAudio.StopUnit
 local socket_gettime, msg_post = socket.gettime, msg.post
 
 local CenterX, CenterY, PosDnm = 0, 0, 0
-local TouchTable, GuiTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }, {}
+local TouchTable, GuiTable = { v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3(), v3() }, {0, 0, 0, 0}
 local HitSoundUnits, HsWhich, LastHapticTime = {}, 1, 0
 
 
@@ -76,9 +76,9 @@ end
 
 function on_message(self, message_id, info)
 	if message_id == PG then
-		for i = info.nodeProgress-1, 1, -1 do
+		for i = info[4]-1, 1, -1 do
 			if Nodes[i] then
-				info.nodeProgress = i
+				info[4] = i
 				msg_post(Nodes[i], PG, info)
 				break
 			end
@@ -156,9 +156,9 @@ if system_name == "Android" then
 			if GuiTouchIdx then
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
+						NodeMaxIndex, GuiTable[4] = i, i
 						local guiTouchVec = TouchTable[GuiTouchIdx]
-						GuiTable.x, GuiTable.y, GuiTable.phase = guiTouchVec.x, guiTouchVec.y, guiTouchVec.z
-						NodeMaxIndex, GuiTable.nodeProgress = i, i
+						GuiTable[1], GuiTable[2], GuiTable[3] = guiTouchVec.x, guiTouchVec.y, guiTouchVec.z
 						msg_post(Nodes[i], PG, GuiTable)
 						break
 					end
@@ -313,8 +313,8 @@ elseif system_name == "iPhone OS" then
 			if GuiTouch.z > 0 then
 				for i = NodeMaxIndex, 1, -1 do
 					if Nodes[i] then
-						NodeMaxIndex, GuiTable.nodeProgress = i, i
-						GuiTable.x, GuiTable.y, GuiTable.phase = GuiTouch.x, GuiTouch.y, GuiTouch.z
+						NodeMaxIndex, GuiTable[4] = i, i
+						GuiTable[1], GuiTable[2], GuiTable[3] = GuiTouch.x, GuiTouch.y, GuiTouch.z
 						msg_post(Nodes[i], PG, GuiTable)
 						break
 					end
@@ -372,8 +372,8 @@ else
 			--
 			for i = NodeMaxIndex, 1, -1 do
 				if Nodes[i] then
-					NodeMaxIndex, GuiTable.nodeProgress = i, i
-					GuiTable.x, GuiTable.y, GuiTable.phase = x, y, phase
+					NodeMaxIndex, GuiTable[4] = i, i
+					GuiTable[1], GuiTable[2], GuiTable[3] = x, y, phase
 					msg_post(Nodes[i], PG, GuiTable)
 					break
 				end

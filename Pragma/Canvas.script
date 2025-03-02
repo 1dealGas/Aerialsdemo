@@ -268,7 +268,7 @@ local message_callbacks = {
 	end,
 
 	[PROCESS_GUI] = function(self, info)   -- Button Size: 108*36
-		local CurrentGuiX, CurrentGuiY, CurrentGuiPhase = info.x, info.y, info.phase
+		local CurrentGuiX, CurrentGuiY, CurrentGuiPhase = info[1], info[2], info[3]
 		if CurrentGuiPhase == 2 then   -- OnScreen
 			if not ButtonPressed then return end
 			if CurrentGuiX >= 1655 and CurrentGuiX <= 1800 and CurrentGuiY >= 0 and CurrentGuiY <= 73 then

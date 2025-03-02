@@ -38,7 +38,8 @@ union AcInputEvent {
 	uint64_t val;
 };
 
-static int32_t AcInputProduce(AndroidApp*, AInputEvent* event) noexcept {
+static int32_t (*engineInputCallback)(AndroidApp*, AInputEvent*) = nullptr;
+static int32_t AcInputProduce(AndroidApp* app, AInputEvent* event) noexcept {
 	if( AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION ) {
 		uint64_t wIdx = Queue.wIdx;
 		const uint16_t action = AMotionEvent_getAction(event);
@@ -67,9 +68,8 @@ static int32_t AcInputProduce(AndroidApp*, AInputEvent* event) noexcept {
 
 		Queue.wIdx = wIdx;
 	}
-	return 1;
+	return engineInputCallback(app, event);
 }
-
 
 /* Consumer Side */
 static int AcInputConsume(lua_State* L) noexcept {
@@ -125,7 +125,9 @@ static int AcInputActivate(lua_State*) noexcept {
 	 * AcInput.Activate()   -- Ready Then
 	 */
 	const auto app = (AndroidApp*)dmGraphics::GetNativeAndroidApp();
-	return	   app -> onInputEvent = AcInputProduce, 0;
+	engineInputCallback = app->onInputEvent;
+	app->onInputEvent = AcInputProduce;
+	return 0;
 }
 
 
