@@ -1,3 +1,4 @@
+*.fp linguist-language=GLSL
 *.script linguist-language=Lua
 *.render_script linguist-language=Lua
 game.project linguist-language=editor-config
@@ -10,9 +11,9 @@ ext.manifest linguist-language=YAML
 *.font linguist-language=text proto
 *.atlas linguist-language=text proto
 *.render linguist-language=text proto
-*.gamepads linguist-language=text proto
 *.material linguist-language=text proto
 *.collection linguist-language=text proto
+*.gamepads linguist-language=text proto
 *.input_binding linguist-language=text proto
 *.texture_profiles linguist-language=text proto
 
@@ -23,6 +24,3 @@ AcAudio/src/miniaudio.mm linguist-vendored
 AcAudio/src/opusfile/** linguist-vendored
 AcAudio/include/** linguist-vendored
 AcClipboard/** linguist-vendored
-
-System/Ar.render_script linguist-vendored
-Reference/lbase64.lua linguist-vendored

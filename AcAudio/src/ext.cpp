@@ -215,13 +215,13 @@ static int AcAudioSetTime(lua_State* L) {
 	// Acquire Sound Length & Attempt Ms
 	float len = 0;
 	ma_sound_get_length_in_seconds(pSound, &len);		len *= 1000.0f;
-	auto attempt_ms = (int64_t)luaL_checknumber(L, 2);
-		 attempt_ms = (attempt_ms > 0) ? attempt_ms : 0;
-		 attempt_ms = (attempt_ms < len-2.0) ? attempt_ms : (len-2.0) ;
+	auto targetMs = (int64_t)luaL_checknumber(L, 2);
+		 targetMs = (targetMs > 0) ? targetMs : 0;
+		 targetMs = (targetMs < len-2.0) ? targetMs : (len-2.0) ;
 
 	// Return the Result
 	return lua_pushboolean(L, MA_SUCCESS ==
-		ma_sound_seek_to_pcm_frame( pSound, (uint64_t)(attempt_ms * ma_engine_get_sample_rate(&AcAudioEngine) / 1000.0) )
+		ma_sound_seek_to_pcm_frame( pSound, (uint64_t)(targetMs * ma_engine_get_sample_rate(&AcAudioEngine) / 1000.0) )
 	), 1;
 }
 
@@ -247,27 +247,27 @@ constexpr luaL_reg AcAudioAPIs[] = {
 inline dmExtension::Result AcAudioInit(dmExtension::Params* p) {
 	// Init a Pseudo Engine with Default Behaviors & Refer to the Vorbis / Opus Extension
 	ma_engine PseudoEngine;
-	ma_decoding_backend_vtable* vo_binding[] = { &mat_libopus, &mat_libvorbis };
-	if( ma_engine_init(nullptr, &PseudoEngine) != MA_SUCCESS ) {
+	ma_decoding_backend_vtable* Exts[] = { &mat_libopus, &mat_libvorbis };
+	if( ma_engine_init( nullptr, &PseudoEngine ) != MA_SUCCESS ) {
 		dmLogFatal("Failed to Init the miniaudio Engine.");
 		return dmExtension::RESULT_INIT_ERROR;
 	}
 
 	// Init the Player Engine: a custom resource manager
-	const auto device = ma_engine_get_device(&PseudoEngine);   // The default device info
-	auto rm_config			= ma_resource_manager_config_init();
-		 rm_config.decodedFormat					= device -> playback.format;
-		 rm_config.decodedChannels					= device -> playback.channels;
-		 rm_config.decodedSampleRate				= device -> sampleRate;
-		 rm_config.customDecodingBackendCount		= sizeof(vo_binding) / sizeof(vo_binding[0]);
-		 rm_config.ppCustomDecodingBackendVTables	= vo_binding;
-	ma_resource_manager_init(&rm_config, &AcAudioManager);
-	ma_engine_uninit(&PseudoEngine);
+	const auto device = ma_engine_get_device( &PseudoEngine );   // The default device info
+	auto rmConfig			= ma_resource_manager_config_init();
+		 rmConfig.decodedFormat						= device -> playback.format;
+		 rmConfig.decodedChannels					= device -> playback.channels;
+		 rmConfig.decodedSampleRate					= device -> sampleRate;
+		 rmConfig.customDecodingBackendCount		= sizeof(Exts) / sizeof( Exts[0] );
+		 rmConfig.ppCustomDecodingBackendVTables	= Exts;
+	ma_resource_manager_init( &rmConfig, &AcAudioManager );
+	ma_engine_uninit( &PseudoEngine );
 
 	// Init the Player Engine: a custom engine config
-	auto engine_config			= ma_engine_config_init();
-		 engine_config.pResourceManager			= &AcAudioManager;
-	ma_engine_init(&engine_config, &AcAudioEngine);
+	auto engineConfig			= ma_engine_config_init();
+		 engineConfig.pResourceManager			= &AcAudioManager;
+	ma_engine_init( &engineConfig, &AcAudioEngine );
 
 	// Lua: Create API Table & tname Metable for AcAudio Source
 	const auto L = p->m_L ;

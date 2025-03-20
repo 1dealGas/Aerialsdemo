@@ -1,7 +1,7 @@
 name: "sprite"
 tags: "hint"
 vertex_program: "/builtins/materials/sprite.vp"
-fragment_program: "/builtins/materials/sprite.fp"
+fragment_program: "/System/Hint.fp"
 vertex_constants {
   name: "view_proj"
   type: CONSTANT_TYPE_VIEWPROJ
